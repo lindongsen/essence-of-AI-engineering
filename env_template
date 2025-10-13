@@ -1,0 +1,4 @@
+# openai
+OPENAI_MODEL="DeepSeek-V3.1-Terminus"
+OPENAI_API_KEY=""
+OPENAI_API_BASE="https://openapi.coreshub.cn/v1"

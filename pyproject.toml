@@ -1,0 +1,11 @@
+[project]
+name = "essence-of-ai-engineering"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "dotenv>=0.9.9",
+    "openai>=2.2.0",
+    "simplejson>=3.20.2",
+]
