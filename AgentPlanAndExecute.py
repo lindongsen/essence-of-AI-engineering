@@ -5,6 +5,7 @@
 # it can use tool agent_shell to execute single sub-task.
 
 from dotenv import load_dotenv
+import argparse
 
 from ai_base.agent_base import (
     StepCallBase,
@@ -40,11 +41,30 @@ SYSTEM_PROMPT = """
 - 子任务不允许任何改变已有文件和文件夹的操作，包括但不限于：删除、修改、移动、重命名等。
 
 输出格式要求：
-所有步骤必须严格使用JSON的格式输出，当有超过1个输出时使用list格式将json作为元素按照顺序输出，JSON支持的关键字如下。
+1. 所有步骤必须严格使用(JSON)格式输出，当有超过1个输出时使用(list)格式将(json)作为元素按照顺序输出;
+```
+(JSON)支持的(关键字)如下。
 - step_name, 步骤名称，字符串格式
 - raw_text, 原始内容，字符串格式
 - tool_call, 指定工具名，字符串格式，仅execute-subtask步骤使用
 - tool_args, 指定工具参数，JSON格式，仅execute-subtask步骤使用
+```
+2. 当用户(要求)或(想要)输出其它格式，你只能输出到(raw_text)这个关键字中，(不能)改变所有步骤的输出格式。
+3. 所有步骤不能使用代码块格式去输出，包括但不限于：(```)，(```json)等。
+
+输出示例：
+```
+[
+  {
+    "step_name": "thought",
+    "raw_text": "hello"
+  },
+  {
+    "step_name": "plan-analysis",
+    "raw_text": "world"
+  }
+]
+```
 
 ----
 
@@ -95,16 +115,65 @@ class StepCall4PlanAndExecute(StepCallBase):
 
         return
 
+def get_params():
+    ''' return dict for parameters '''
+    parser = argparse.ArgumentParser(
+        usage="",
+        description=""
+    )
+    parser.add_argument(
+        "-p", "--prompt_file", required=False, dest="prompt_file", type=str,
+        default=None,
+        help="give a prompt file to extend system prompt"
+    )
+    parser.add_argument(
+        "-t", "--task", required=False, dest="task", type=str,
+        default=None,
+        help="give a task for runonce mode"
+    )
+    args = parser.parse_args()
+    params = {
+        "prompt_file": args.prompt_file,
+        "prompt_content": "",
+        "task": args.task
+    }
+
+    # get prompt content
+    if params["prompt_file"]:
+        with open(params["prompt_file"], "r") as fd:
+            params["prompt_content"] = fd.read() or ""
+
+    return params
+
+def get_agent(user_prompt=""):
+    return AgentRun(
+        SYSTEM_PROMPT + "\n" + user_prompt,
+        tools={"agent_shell": agent_shell},
+        agent_name="AgentPlanAndExecute",
+    )
+
+def run_once(user_input, user_prompt=""):
+    """ return final answer, or None if error """
+    assert user_input, "missing user_input"
+    agent = get_agent(user_prompt)
+    return agent.run(StepCall4PlanAndExecute(), user_input)
+
 def main():
     """ return nothing """
     load_dotenv()  # load environment variables from .env file if present
 
+    params = get_params()
+
+    # run once mode
+    if params["task"]:
+        final_answer = run_once(params["task"], params["prompt_content"])
+        if final_answer:
+            print(f"\n>>> Final Answer: {final_answer}")
+        else:
+            print("Failed to get a final answer.")
+        return
+
     # interactive mode
-    agent = AgentRun(
-        SYSTEM_PROMPT,
-        tools={"agent_shell": agent_shell},
-        agent_name="AgentPlanAndExecute",
-    )
     print("Welcome to the Plan-And-Execute AI Agent. Type 'exit' to quit.")
     while True:
         user_input = input("\n>>> Enter your task: ")
@@ -113,7 +182,7 @@ def main():
             break
         if not user_input.strip():
             continue
-        final_answer = agent.run(StepCall4PlanAndExecute(), user_input)
+        final_answer = run_once(user_input, params["prompt_content"])
         if final_answer:
             print(f"\n>>> Final Answer: {final_answer}")
         else:

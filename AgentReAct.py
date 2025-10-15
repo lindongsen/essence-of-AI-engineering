@@ -6,8 +6,8 @@
 # it can use tool exec_cmd to execute command line in local system.
 
 import os
-import sys
 from dotenv import load_dotenv
+import argparse
 
 from ai_base.agent_base import (
     StepCallBase,
@@ -37,11 +37,16 @@ SYSTEM_PROMPT = """
 - 当任务目标会生成新文件时：若目标文件已经存在，不可修改目标文件，包括：重命名、删除、覆盖等；如果目标文件已存在，你需要验证文件正确性，若正确则代表该文件可用，若不正确则任务失败，之后都会进入final_answer步骤。
 
 输出格式要求：
-所有步骤必须严格使用JSON的格式输出，当有超过1个输出时，使用list格式将json作为元素，按照顺序输出，JSON支持的关键字如下。
+1. 所有步骤必须严格使用(JSON)格式输出，当有超过1个输出时使用(list)格式将(json)作为元素按照顺序输出;
+```
+(JSON)支持的(关键字)如下。
 - step_name, 步骤名称，字符串格式
 - raw_text, 原始内容，字符串格式
 - tool_call, 指定工具名，字符串格式，仅action步骤使用
 - tool_args, 指定工具参数，JSON格式，仅action步骤使用
+```
+2. 当用户(要求)或(想要)输出其它格式，你只能输出到(raw_text)这个关键字中，(不能)改变所有步骤的输出格式。
+3. 所有步骤不能使用代码块格式去输出，包括但不限于：(```)，(```json)等。
 
 输出示例：
 ```
@@ -64,7 +69,7 @@ SYSTEM_PROMPT = """
 可用工具：
 - exec_cmd(cmd_string)
 
----
+----
 """
 
 # define global variables
@@ -112,14 +117,14 @@ class Step4ReAct(StepCallBase):
 
         return
 
-def get_agent():
+def get_agent(user_prompt=""):
     return AgentRun(
-        SYSTEM_PROMPT,
+        SYSTEM_PROMPT + "\n" + user_prompt,
         tools={"exec_cmd": exec_cmd},
         agent_name="AgentReAct",
     )
 
-def run_once(user_input, to_print_step=None):
+def run_once(user_input, to_print_step=None, user_prompt=""):
     """ return final answer, or None if error """
     assert user_input, "user_input is required"
     if to_print_step:
@@ -132,17 +137,53 @@ def run_once(user_input, to_print_step=None):
     if os.getenv("INTERACTIVE") == "1":
         g_flag_interactive = True
 
-    agent = get_agent()
+    agent = get_agent(user_prompt)
     final_answer = agent.run(Step4ReAct(), user_input)
     return final_answer
+
+def get_params():
+    ''' return dict for parameters '''
+    parser = argparse.ArgumentParser(
+        usage="",
+        description=""
+    )
+    parser.add_argument(
+        "-p", "--prompt_file", required=False, dest="prompt_file", type=str,
+        default=None,
+        help="give a prompt file to extend system prompt"
+    )
+    parser.add_argument(
+        "-t", "--task", required=False, dest="task", type=str,
+        default=None,
+        help="give a task for runonce mode"
+    )
+    args = parser.parse_args()
+    params = {
+        "prompt_file": args.prompt_file,
+        "prompt_content": "",
+        "task": args.task
+    }
+
+    # get prompt content
+    if params["prompt_file"]:
+        with open(params["prompt_file"], "r") as fd:
+            params["prompt_content"] = fd.read() or ""
+
+    return params
+
 
 def main():
     """ return nothing """
     load_dotenv()  # load environment variables from .env file if present
 
+    params = get_params()
+
     # run once mode
-    if sys.argv[1:]:
-        final_answer = run_once(" ".join(sys.argv[1:]))
+    if params["task"]:
+        final_answer = run_once(
+            user_input=params["task"],
+            user_prompt=params["prompt_content"]
+        )
         if final_answer:
             print(f"\n>>> Final Answer:\n{final_answer}")
         else:
@@ -150,7 +191,7 @@ def main():
         return
 
     # interactive mode
-    agent = get_agent()
+    agent = get_agent(params["prompt_content"])
     print("Welcome to the AI Agent Shell. Type 'exit' to quit.")
     while True:
         user_input = input("\n>>> Enter your task: ")
