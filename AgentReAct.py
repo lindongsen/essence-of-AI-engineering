@@ -57,19 +57,12 @@ SYSTEM_PROMPT = """
   },
   {
     "step_name": "action",
-    "tool_call": "exec_cmd",
+    "tool_call": "cmd_tool.exec_cmd",
     "tool_args": {"cmd_string": "uname -a" },
     "raw_text": "我将使用exec_cmd工具来获取操作系统的版本信息。"
   }
 ]
 ```
-
-----
-
-可用工具：
-- exec_cmd(cmd_string)
-
-----
 """
 
 # define global variables
@@ -120,7 +113,7 @@ class Step4ReAct(StepCallBase):
 def get_agent(user_prompt=""):
     return AgentRun(
         SYSTEM_PROMPT + "\n" + user_prompt,
-        tools={"exec_cmd": exec_cmd},
+        tools=None,
         agent_name="AgentReAct",
     )
 

@@ -1,14 +1,15 @@
 from utils.print_tool import (
-    print_step,
     print_error,
 )
 
+from ai_base.prompt_base import (
+    PromptBase,
+)
 from ai_base.llm_base import (
     LLMModel,
-    ROLE_USER, ROLE_ASSISTANT, ROLE_SYSTEM, ROLE_TOOL,
-    _format_content,
 )
 from utils.thread_local_tool import ctxm_give_agent_name
+from tools import get_tool_prompt, TOOLS as INTERNAL_TOOLS
 
 
 class StepCallBase(object):
@@ -37,44 +38,53 @@ class StepCallBase(object):
         """ override this method """
         raise NotImplementedError("Subclasses must implement this method")
 
-class AgentBase(object):
-    def __init__(self, system_prompt:str, tools:dict, agent_name:str):
+class AgentBase(PromptBase):
+    """ AI-Agent base class """
+    def __init__(
+            self,
+            system_prompt:str,
+            tools:dict,
+            agent_name:str,
+            tool_prompt:str="",
+            tool_kits:list=None,
+        ):
+        """
+        :tools: dict, the specific tools, key is tool_name, value is function;
+        :tool_kits: list, the internal tools list, [name1, name2];
+        """
         self.system_prompt = system_prompt
         self.tools = tools
         self.agent_name = agent_name
         assert self.system_prompt, "system_prompt is required"
-        assert isinstance(self.tools, dict) and self.tools, "tools must be a non-empty dictionary"
+
+        if self.tools:
+            if not tool_prompt:
+                tool_prompt = get_tool_prompt(None, self.tools)
 
         self.llm_model = LLMModel()
-        self.messages = []
-        self.reset_messages()
 
-    def reset_messages(self):
-        self.messages = []
-        self.messages.append({"role": ROLE_SYSTEM, "content": self.system_prompt})
+        if not self.tools and not tool_kits:
+            # using all of internal tools.
+            tool_kits = list(INTERNAL_TOOLS.keys())
 
-    def add_user_message(self, content):
-        if content is None:
-            return
-        content = _format_content(content)
-        print_step(content)
-        self.messages.append({"role": ROLE_USER, "content": content})
+        super(AgentBase, self).__init__(self.system_prompt, tool_prompt, tool_kits)
+        return
 
-    def add_assistant_message(self, content):
-        if content is None:
-            return
-        content = _format_content(content)
-        print_step(content)
-        self.messages.append({"role": ROLE_ASSISTANT, "content": content})
+    @property
+    def all_tools(self):
+        """ return all of available tools. include of internal tools. """
+        all_tools = {}
+        # first, internal tools
+        all_tools.update(INTERNAL_TOOLS)
 
-    def add_tool_message(self, content):
-        if content is None:
-            return
-        content = _format_content(content)
-        print_step(content)
-        self.messages.append({"role": ROLE_TOOL, "content": content})
+        # second, specific tools for this agent.
+        if self.tools:
+            all_tools.update(self.tools)
+
+        return all_tools
 
     def run(self, step_call:StepCallBase, user_input:str):
+        """ run this agent """
         with ctxm_give_agent_name(self.agent_name):
             return self._run(step_call, user_input)
 
@@ -82,10 +92,11 @@ class AgentBase(object):
         raise NotImplementedError("Subclasses must implement this method")
 
 class AgentRun(AgentBase):
+    """ a common of running steps """
     def _run(self, step_call:StepCallBase, user_input:str):
         """ return final answer, or None if error """
-        self.reset_messages()
-        self.add_user_message({"step_name":"task","raw_text":user_input})
+        self.new_session({"step_name":"task","raw_text":user_input})
+        all_tools = self.all_tools
 
         while True:
             response = self.llm_model.chat(self.messages)
@@ -97,7 +108,7 @@ class AgentRun(AgentBase):
             ctx_count = len(self.messages)
 
             for i, step in enumerate(response):
-                ret = step_call(step, tools=self.tools, response=response, index=i)
+                ret = step_call(step, tools=all_tools, response=response, index=i)
                 assert isinstance(ret, StepCallBase), "step_call must return StepCallBase instance"
                 if ret.code == ret.CODE_TASK_FINAL:
                     return ret.result

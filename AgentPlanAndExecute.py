@@ -65,18 +65,16 @@ SYSTEM_PROMPT = """
   }
 ]
 ```
-
-----
-
-AgentShell的调用方式：
-- agent_shell(message)，返回JSON，如{"step_name":"subtask_result","raw_text":"ok"}。
-
-----
-
 """
 
 def agent_shell(message):
-    """ return dict """
+    """
+    # parameters
+    :message: string
+
+    # return
+    json like {"step_name":"subtask_result","raw_text":"ok"}
+    """
     final_answer = AgentReAct.run_once(message)
     return {"step_name":"subtask_result","raw_text":final_answer}
 
