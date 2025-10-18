@@ -37,6 +37,22 @@ def read_file(file_path:str):
     except Exception as _:
         return None
 
+def append_file(file_path: str, content: str) -> bool:
+    """
+    # parameters
+    :file_path: string, the file path;
+    :content: string
+
+    # return, bool
+    True for ok, False for error.
+    """
+    try:
+        with open(file_path, "a+") as fd:
+            fd.write(content)
+    except Exception as _:
+        return False
+    return True
+
 def exists_file(file_path:str):
     """
     # parameters
@@ -52,4 +68,5 @@ TOOLS = dict(
     write_file=write_file,
     read_file=read_file,
     exists_file=exists_file,
+    append_file=append_file,
 )

@@ -37,10 +37,10 @@ def _format_response(response):
         print_error(f"parsing response: {e}\n>>>\n{response}\n<<<")
     # default to return raw value
     return response
-    
+
 
 class LLMModel(object):
-    def __init__(self, max_tokens=15000):
+    def __init__(self, max_tokens=80000):
         self.max_tokens = max_tokens
         self.openai_model_name = os.getenv("OPENAI_MODEL", "DeepSeek-V3.1-Terminus")
         self.model = self.get_llm_model()
@@ -51,7 +51,7 @@ class LLMModel(object):
             api_key=os.getenv("OPENAI_API_KEY", ""),
             base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
         ).chat.completions
-    
+
     def call_llm_model(self, messages):
         response = self.model.create(
             model=self.openai_model_name,
