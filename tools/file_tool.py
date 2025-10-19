@@ -57,7 +57,7 @@ def append_file(file_path: str, content: str) -> bool:
     return True
 
 def exists_file(file_path:str):
-    """ check the file if exists.
+    """ check the file or folder if exists.
 
     # parameters
     :file_path: string
