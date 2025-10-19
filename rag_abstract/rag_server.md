@@ -1,7 +1,7 @@
 # 任务目标
 编写一个http服务(rag_server)完成RAG相关能力。
 
-判断(DONE文件)`/林生的奇思妙想/rag/tasks/DONE`是否存在：
+判断(DONE文件)`/林生的奇思妙想/rag/tasks/rag_server.DONE`是否存在：
 - 当(DONE文件)存在，则表达任务目标已经完成，读取(DONE文件)内容作为最终回答。
 - 当(DONE文件)不存在，要去完成任务目标，在任务目标完成后，将最终回答写入(DONE文件)。
 
