@@ -67,6 +67,7 @@ SYSTEM_PROMPT = """
 
 # define global variables
 g_flag_interactive = True
+g_flag_dump_messages = False
 
 
 class Step4ReAct(StepCallBase):
@@ -110,12 +111,19 @@ class Step4ReAct(StepCallBase):
 
         return
 
-def get_agent(user_prompt=""):
-    return AgentRun(
+def get_agent(user_prompt="", to_dump_messages=False):
+    """ return a agent object. """
+    agent = AgentRun(
         SYSTEM_PROMPT + "\n====\n" + user_prompt,
         tools=None,
         agent_name="AgentReAct",
     )
+
+    # set flags
+    if to_dump_messages or g_flag_dump_messages:
+        agent.flag_dump_messages = True
+
+    return agent
 
 def run_once(user_input, to_print_step=None, user_prompt=""):
     """ return final answer, or None if error """
@@ -134,6 +142,13 @@ def run_once(user_input, to_print_step=None, user_prompt=""):
     final_answer = agent.run(Step4ReAct(), user_input)
     return final_answer
 
+def continue_task(msg_file):
+    """ continue a task """
+    agent = get_agent()
+    agent.load_messages(msg_file)
+    final_answer = agent.run(Step4ReAct(), "")
+    return final_answer
+
 def get_params():
     ''' return dict for parameters '''
     parser = argparse.ArgumentParser(
@@ -150,17 +165,34 @@ def get_params():
         default=None,
         help="give a task for runonce mode"
     )
+    parser.add_argument(
+        "--dump_msg", action="store_true", required=False, dest="flag_dump_messages",
+        default=False,
+        help="dump all of messages to a file"
+    )
+    parser.add_argument(
+        "--msg_file", required=False, dest="msg_file", type=str,
+        default=None,
+        help="use the msg_file to continue a task"
+    )
     args = parser.parse_args()
     params = {
         "prompt_file": args.prompt_file,
         "prompt_content": "",
-        "task": args.task
+        "task": args.task,
+        "flag_dump_messages": args.flag_dump_messages,
+        "msg_file": args.msg_file,
     }
 
     # get prompt content
     if params["prompt_file"]:
         with open(params["prompt_file"], "r") as fd:
             params["prompt_content"] = fd.read() or ""
+
+    # set flags
+    if params["flag_dump_messages"]:
+        global g_flag_dump_messages
+        g_flag_dump_messages = True
 
     return params
 
@@ -170,6 +202,15 @@ def main():
     load_dotenv()  # load environment variables from .env file if present
 
     params = get_params()
+
+    # continue a task
+    if params["msg_file"]:
+        final_answer = continue_task(params["msg_file"])
+        if final_answer:
+            print(f"\n>>> Final Answer:\n{final_answer}")
+        else:
+            print("Failed to get a final answer.")
+        return
 
     # run once mode
     if params["task"]:

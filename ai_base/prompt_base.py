@@ -11,13 +11,23 @@ from ai_base.constants import (
 )
 from utils.print_tool import (
     print_step,
+    print_error,
 )
 from utils.json_tool import (
     to_json_str,
+    json_load,
+)
+from utils import time_tool
+from utils.thread_local_tool import (
+    get_agent_name,
 )
 
 class PromptBase(object):
     """ prompt base manager """
+
+    # define flags
+    flag_dump_messages = False
+
     def __init__(self, system_prompt:str, tool_prompt:str="", tools_name:list=None):
         assert system_prompt, "missing system_prompt"
         self.system_prompt = system_prompt
@@ -76,3 +86,28 @@ class PromptBase(object):
         content = self.hook_format_content(content)
         print_step(content)
         self.messages.append({"role": ROLE_TOOL, "content": content})
+
+    def dump_messages(self):
+        """ dump messages to a file.
+
+        return file path. None for failed.
+        """
+        try:
+            now_date = time_tool.get_current_date(True)
+            file_name = f"{get_agent_name()}.{now_date}.msg"
+            file_path = file_name
+            with open(file_path, 'w', encoding='utf-8') as fd:
+                fd.write(to_json_str(self.messages))
+            print_step(f"dump messages: [{file_path}]")
+            return file_path
+        except Exception as e:
+            print_error(f"dump messages failed: {e}")
+        return None
+
+    def load_messages(self, file_path:str):
+        """ read file content as messages """
+        with open(file_path, encoding='utf-8') as fd:
+            content = fd.read()
+            self.messages = json_load(content)
+            assert isinstance(self.messages, list)
+        return

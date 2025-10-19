@@ -60,3 +60,9 @@ def to_json_str(content):
     except Exception as e:
         print_error(f"format_content error: {e}, content: {content}")
         return str(content)
+
+def load_json(content):
+    """ load json str to a object """
+    if not isinstance(content, str):
+        return content
+    return simplejson.loads(content)

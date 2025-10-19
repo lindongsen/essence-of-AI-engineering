@@ -37,3 +37,7 @@ def ctxm_give_agent_name(agent_name):
         else:
             unset_thread_var(KEY_AGENT_NAME)
     return
+
+def get_agent_name():
+    """ return str for agent name """
+    return get_thread_var(KEY_AGENT_NAME)

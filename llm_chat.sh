@@ -1,0 +1,24 @@
+#!/bin/bash
+# Author: DawsonLin
+# Email: developer@yunify.com
+# Created: 2025-10-19
+# Purpose:
+
+WORK_DIR=""
+
+function error_quit() {
+    echo "ERROR: $*"
+    echo ""
+    exit 1
+}
+
+# get work_dir
+for _dir in "/root/ai/essence-of-AI-engineering" "/test/essence-of-AI-engineering"; do
+  [ -e "${_dir}" ] && WORK_DIR=${_dir} && break
+done
+
+[ -n "${WORK_DIR}" ] || error_quit “no found work_dir”
+
+cd "${WORK_DIR}" || error_quit "enter work_dir failed: ${WORK_DIR}"
+
+uv run python llm_chat.py "$*"

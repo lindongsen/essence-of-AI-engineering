@@ -92,7 +92,11 @@ class AgentBase(PromptBase):
     def run(self, step_call:StepCallBase, user_input:str):
         """ run this agent """
         with ctxm_give_agent_name(self.agent_name):
-            return self._run(step_call, user_input)
+            try:
+                return self._run(step_call, user_input)
+            finally:
+                if self.flag_dump_messages:
+                    self.dump_messages()
 
     def _run(self, step_call:StepCallBase, user_input:str):
         raise NotImplementedError("Subclasses must implement this method")
@@ -101,7 +105,9 @@ class AgentRun(AgentBase):
     """ a common of running steps """
     def _run(self, step_call:StepCallBase, user_input:str):
         """ return final answer, or None if error """
-        self.new_session({"step_name":"task","raw_text":user_input})
+        if user_input:
+            self.new_session({"step_name":"task","raw_text":user_input})
+
         all_tools = self.all_tools
 
         while True:
