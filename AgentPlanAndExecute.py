@@ -38,7 +38,8 @@ SYSTEM_PROMPT = """
 特别注意：
 - 在plan-list和replan-list这两个步骤中，当你遇到模糊的问题，例如：不清楚操作系统版本、相关工具是否存在等情况，应该将这类模糊事件规划成子任务去做确定。
 - 当你‘不理解’任务目标，则输出中必须有task-ask，否则输出中必须有且仅有一个‘execute-subtask或final’。
-- 子任务不允许任何改变已有文件和文件夹的操作，包括但不限于：删除、修改、移动、重命名等。
+- 当用户没有声明‘工作空间’，那么’子任务‘（不允许）任何改变已有文件和文件夹的操作，包括但不限于：删除、修改、移动、重命名等。
+- 当用户明确声明了‘工作空间’，并且对‘工作空间’的文件操作权限做出要求，则以用户为准。
 
 输出格式要求：
 1. 所有步骤必须严格使用(JSON)格式输出，当有超过1个输出时使用(list)格式将(json)作为元素按照顺序输出;
@@ -50,7 +51,7 @@ SYSTEM_PROMPT = """
 - tool_args, 指定工具参数，JSON格式，仅execute-subtask步骤使用
 ```
 2. 当用户(要求)或(想要)输出其它格式，你只能输出到(raw_text)这个关键字中，(不能)改变所有步骤的输出格式。
-3. 所有步骤不能使用代码块格式去输出，包括但不限于：(```)，(```json)等。
+3. 所有步骤(不能)使用(代码块)格式去输出，包括但不限于：(```)，(```json)等。
 
 输出示例：
 ```
@@ -145,7 +146,7 @@ def get_params():
 
 def get_agent(user_prompt=""):
     return AgentRun(
-        SYSTEM_PROMPT + "\n" + user_prompt,
+        SYSTEM_PROMPT + "\n====\n" + user_prompt,
         tools={"agent_shell": agent_shell},
         agent_name="AgentPlanAndExecute",
     )

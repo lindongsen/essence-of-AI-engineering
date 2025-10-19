@@ -1,4 +1,5 @@
 import os
+import time
 import simplejson
 import openai
 
@@ -32,6 +33,7 @@ def _format_response(response):
     if isinstance(response, (list, dict)):
         return _to_list(response)
     try:
+        response = to_json_str(response)
         return _to_list(simplejson.loads(response))
     except Exception as e:
         print_error(f"parsing response: {e}\n>>>\n{response}\n<<<")
@@ -63,7 +65,26 @@ class LLMModel(object):
         )
         return response.choices[0].message.content.strip()
 
-    def chat(self, messages):
+    def chat(self, messages, for_raw=False):
         """ return list_dict """
-        rsp = self.call_llm_model(messages)
-        return _format_response(rsp)
+        for i in range(10):
+            if i > 0:
+                sec = i*5
+                print_error(f"[{i}] blocking chat {sec}s ...")
+                time.sleep(sec)
+
+            try:
+                rsp = self.call_llm_model(messages)
+                if for_raw:
+                    return rsp
+                return _format_response(rsp)
+            except openai.RateLimitError as e:
+                print_error(f"!!! [{i}] RateLimitError, {e}")
+                continue
+            except TypeError as e:
+                print_error(f"!!! [{i}] TypeError, {e}")
+                continue
+            except openai.InternalServerError as e:
+                continue
+
+        raise Exception("chat to LLM is failed")

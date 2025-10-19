@@ -46,7 +46,7 @@ SYSTEM_PROMPT = """
 - tool_args, 指定工具参数，JSON格式，仅action步骤使用
 ```
 2. 当用户(要求)或(想要)输出其它格式，你只能输出到(raw_text)这个关键字中，(不能)改变所有步骤的输出格式。
-3. 所有步骤不能使用代码块格式去输出，包括但不限于：(```)，(```json)等。
+3. 所有步骤（不能）使用（代码块）格式去输出，包括但不限于：(```)，(```json)等。
 
 输出示例：
 ```
@@ -112,7 +112,7 @@ class Step4ReAct(StepCallBase):
 
 def get_agent(user_prompt=""):
     return AgentRun(
-        SYSTEM_PROMPT + "\n" + user_prompt,
+        SYSTEM_PROMPT + "\n====\n" + user_prompt,
         tools=None,
         agent_name="AgentReAct",
     )

@@ -26,7 +26,8 @@ class PromptBase(object):
             self.tool_prompt += get_tool_prompt(tools_name)
 
         # debug
-        print_step(f"[tool_prompt]:\n{self.tool_prompt}\n")
+        if self.tool_prompt:
+            print_step(f"[tool_prompt]:\n{self.tool_prompt}\n")
 
         # context messages
         self.messages = []

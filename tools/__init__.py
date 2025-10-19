@@ -21,7 +21,7 @@ TOOL_PROMPT = """
 # tools
 The tool information is described in JSON below, key is tool name, value is tool document.
 Attention: You MUST use the tool name (completely), e.g. whole name is 'cmd_tool.exec_cmd', you cannot use 'exec_cmd'.
-```json
+```
 {__TOOLS__}
 ```
 

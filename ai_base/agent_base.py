@@ -47,6 +47,7 @@ class AgentBase(PromptBase):
             agent_name:str,
             tool_prompt:str="",
             tool_kits:list=None,
+            excluded_tool_kits:list=None,
         ):
         """
         :tools: dict, the specific tools, key is tool_name, value is function;
@@ -66,6 +67,11 @@ class AgentBase(PromptBase):
         if not self.tools and not tool_kits:
             # using all of internal tools.
             tool_kits = list(INTERNAL_TOOLS.keys())
+
+        if tool_kits and excluded_tool_kits:
+            for tool_name in excluded_tool_kits:
+                if tool_name in tool_kits:
+                    tool_kits.remove(tool_name)
 
         super(AgentBase, self).__init__(self.system_prompt, tool_prompt, tool_kits)
         return

@@ -8,7 +8,8 @@
 import os
 
 def write_file(file_path:str, content:str):
-    """
+    """ write content to file.
+
     # parameters
     :file_path: string, the file path;
     :content: string
@@ -24,7 +25,8 @@ def write_file(file_path:str, content:str):
     return True
 
 def read_file(file_path:str):
-    """
+    """ read a file and output file content.
+
     # parameters
     :file_path: string, the file path;
 
@@ -38,7 +40,8 @@ def read_file(file_path:str):
         return None
 
 def append_file(file_path: str, content: str) -> bool:
-    """
+    """ append content to file.
+
     # parameters
     :file_path: string, the file path;
     :content: string
@@ -54,7 +57,8 @@ def append_file(file_path: str, content: str) -> bool:
     return True
 
 def exists_file(file_path:str):
-    """
+    """ check the file if exists.
+
     # parameters
     :file_path: string
 
