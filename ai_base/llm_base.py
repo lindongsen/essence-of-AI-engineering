@@ -14,6 +14,12 @@ ROLE_ASSISTANT = "assistant"
 ROLE_SYSTEM = "system"
 ROLE_TOOL = "tool"
 
+
+class JsonError(Exception):
+    """ invalid json string """
+    pass
+
+
 def _to_list(obj):
     """ convert obj to list if it is not list """
     if isinstance(obj, list):
@@ -37,8 +43,8 @@ def _format_response(response):
         return _to_list(simplejson.loads(response))
     except Exception as e:
         print_error(f"parsing response: {e}\n>>>\n{response}\n<<<")
-    # default to return raw value
-    return response
+
+    raise JsonError("invalid json string")
 
 
 class LLMModel(object):
@@ -78,6 +84,9 @@ class LLMModel(object):
                 if for_raw:
                     return rsp
                 return _format_response(rsp)
+            except JsonError as e:
+                print_error(f"!!! [{i}] JsonError, {e}")
+                continue
             except openai.RateLimitError as e:
                 print_error(f"!!! [{i}] RateLimitError, {e}")
                 continue
@@ -85,6 +94,13 @@ class LLMModel(object):
                 print_error(f"!!! [{i}] TypeError, {e}")
                 continue
             except openai.InternalServerError as e:
+                print_error(f"!!! [{i}] InternalServerError, {e}")
+                continue
+            except openai.APIConnectionError as e:
+                print_error(f"!!! [{i}] APIConnectionError, {e}")
+                continue
+            except openai.APITimeoutError as e:
+                print_error(f"!!! [{i}] APITimeoutError, {e}")
                 continue
 
         raise Exception("chat to LLM is failed")

@@ -13,6 +13,7 @@ from ai_base.agent_base import (
     StepCallBase,
     AgentRun,
 )
+from ai_base.prompt_base import PromptBase
 from utils.print_tool import (
     enable_flag_print_step,
     disable_flag_print_step,
@@ -27,7 +28,7 @@ SYSTEM_PROMPT = """
 你需要穿插"thought,action,observation,final_answer"这些步骤去解决任务：
 1. thought用于推理当前形势，若最终答案可以确定，则进入final_answer步骤，否则进入action步骤；
 2. action用于主动向用户发起请求，你会决定出工具，用户会调用工具；
-3. observation是来自用户的答复，你需要观察和分析这个答复，并进入thought步骤。
+3. observation是来自用户的答复，你需要观察和分析这个答复，并进入thought步骤。你不能生成“observation”的输出，它只来自用户的输入。
 4. final_answer是最终答案，到达这个步骤则问题已经解决。
 
 注意：
@@ -67,7 +68,6 @@ SYSTEM_PROMPT = """
 
 # define global variables
 g_flag_interactive = True
-g_flag_dump_messages = False
 
 
 class Step4ReAct(StepCallBase):
@@ -120,7 +120,7 @@ def get_agent(user_prompt="", to_dump_messages=False):
     )
 
     # set flags
-    if to_dump_messages or g_flag_dump_messages:
+    if to_dump_messages:
         agent.flag_dump_messages = True
 
     return agent
@@ -191,8 +191,7 @@ def get_params():
 
     # set flags
     if params["flag_dump_messages"]:
-        global g_flag_dump_messages
-        g_flag_dump_messages = True
+        PromptBase.flag_dump_messages = True
 
     return params
 

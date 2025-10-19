@@ -37,15 +37,17 @@ def fix_llm_mistakes_on_json(content):
 
     # LLM can make mistakes
     if content[0] == '[' and content[-1] != ']':
-        print_error("!!! LLM makes a mistake, trying to fix it")
-        try:
-            return simplejson.dumps(content+']', indent=2, ensure_ascii=False)
-        except Exception as _:
-            pass
+        print_error("!!! LLM makes a mistake, trying to fix it: no found ']'")
+        return content + "]"
+    elif content[0] == '[' and "]\n" in content:
+        print_error("!!! LLM makes a mistake, trying to fix it: found ']\\n'")
+        i = content.find("\n]")
+        if i > 0:
+            return content[:i+2]
     else:
         _new_content = convert_code_block_to_json_str(content)
         if _new_content:
-            print_error("!!! LLM makes a mistake, fix it")
+            print_error("!!! LLM makes a mistake, fix it: found code block")
             content = _new_content
 
     return content
@@ -61,7 +63,7 @@ def to_json_str(content):
         print_error(f"format_content error: {e}, content: {content}")
         return str(content)
 
-def load_json(content):
+def json_load(content):
     """ load json str to a object """
     if not isinstance(content, str):
         return content
