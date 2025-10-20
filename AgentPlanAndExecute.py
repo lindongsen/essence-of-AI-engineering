@@ -13,7 +13,7 @@ from ai_base.agent_base import (
     AgentRun,
 )
 
-import AgentReAct
+from tools import agent_tool
 
 # define roles
 ROLE_USER = "user"
@@ -60,7 +60,7 @@ def agent_shell(message):
     # return
     json like {"step_name":"subtask_result","raw_text":"ok"}
     """
-    final_answer = AgentReAct.run_once(message)
+    final_answer = agent_tool.agent_programmer(message)
     return {"step_name":"subtask_result","raw_text":final_answer}
 
 class StepCall4PlanAndExecute(StepCallBase):
@@ -133,6 +133,7 @@ def get_agent(user_prompt=""):
         SYSTEM_PROMPT + "\n====\n" + user_prompt,
         tools={"agent_shell": agent_shell},
         agent_name="AgentPlanAndExecute",
+        excluded_tool_kits=agent_tool.get_all_agent_tools().keys()
     )
 
 def run_once(user_input, user_prompt=""):
