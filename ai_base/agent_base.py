@@ -1,3 +1,4 @@
+from logger.log_chat import logger
 from utils.print_tool import (
     print_error,
 )
@@ -123,6 +124,7 @@ class AgentRun(AgentBase):
                 ret = step_call(step, tools=all_tools, response=response, index=i)
                 assert isinstance(ret, StepCallBase), "step_call must return StepCallBase instance"
                 if ret.code == ret.CODE_TASK_FINAL:
+                    logger.info(f"final: {ret.result}")
                     return ret.result
                 elif ret.code == ret.CODE_TASK_FAILED:
                     print_error(f"Task failed: {ret.result}")

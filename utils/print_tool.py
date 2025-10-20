@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 from utils import thread_local_tool
+from logger.log_chat import logger
 
 g_flag_print_step = None
 
@@ -29,5 +30,6 @@ def print_step(msg):
     return
 
 def print_error(msg):
+    logger.error(msg)
     print_with_time(f"Error: {msg}")
     return

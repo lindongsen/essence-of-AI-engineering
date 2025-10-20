@@ -4,7 +4,7 @@
   Created: 2025-10-18
   Purpose:
 '''
-
+from logger.log_chat import logger
 from tools import get_tool_prompt
 from ai_base.constants import (
     ROLE_USER, ROLE_ASSISTANT, ROLE_SYSTEM, ROLE_TOOL,
@@ -41,7 +41,13 @@ class PromptBase(object):
 
         # context messages
         self.messages = []
-        self.reset_messages()
+        self.reset_messages(to_suppress_log=True)
+
+    def append_message(self, msg:dict, to_suppress_log=False):
+        """ append a message to context """
+        if not to_suppress_log:
+            logger.info(msg)
+        self.messages.append(msg)
 
     def init_prompt(self):
         """ init sth. """
@@ -56,12 +62,12 @@ class PromptBase(object):
         """ set a hook to format content to text for LLM can to read """
         return to_json_str(content)
 
-    def reset_messages(self):
+    def reset_messages(self, to_suppress_log=False):
         """ reset context message. clear all of messages. """
         self.messages = []
-        self.messages.append({"role": ROLE_SYSTEM, "content": self.system_prompt})
+        self.append_message({"role": ROLE_SYSTEM, "content": self.system_prompt}, to_suppress_log)
         if self.tool_prompt:
-            self.messages.append({"role": ROLE_SYSTEM, "content": self.tool_prompt})
+            self.append_message({"role": ROLE_SYSTEM, "content": self.tool_prompt}, to_suppress_log)
 
     def add_user_message(self, content):
         """ the message from human """
@@ -69,7 +75,7 @@ class PromptBase(object):
             return
         content = self.hook_format_content(content)
         print_step(content)
-        self.messages.append({"role": ROLE_USER, "content": content})
+        self.append_message({"role": ROLE_USER, "content": content})
 
     def add_assistant_message(self, content):
         """ the message from LLM """
@@ -77,7 +83,7 @@ class PromptBase(object):
             return
         content = self.hook_format_content(content)
         print_step(content)
-        self.messages.append({"role": ROLE_ASSISTANT, "content": content})
+        self.append_message({"role": ROLE_ASSISTANT, "content": content})
 
     def add_tool_message(self, content):
         """ the message from tool call """
@@ -85,7 +91,7 @@ class PromptBase(object):
             return
         content = self.hook_format_content(content)
         print_step(content)
-        self.messages.append({"role": ROLE_TOOL, "content": content})
+        self.append_message({"role": ROLE_TOOL, "content": content})
 
     def dump_messages(self):
         """ dump messages to a file.

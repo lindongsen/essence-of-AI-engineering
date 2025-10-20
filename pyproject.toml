@@ -7,6 +7,7 @@ requires-python = ">=3.8"
 dependencies = [
     "chardet>=5.2.0",
     "dotenv>=0.9.9",
+    "logging>=0.4.9.6",
     "openai>=2.2.0",
     "simplejson>=3.20.2",
 ]

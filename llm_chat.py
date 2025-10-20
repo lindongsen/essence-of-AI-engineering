@@ -43,6 +43,7 @@ def main():
 
     print(f">>> message:\n{message}")
     answer = llm_model.chat(prompt_ctl.messages, for_raw=True)
+    prompt_ctl.add_assistant_message(answer)
     print(f">>> answer:\n{answer}")
 
 if __name__ == "__main__":
