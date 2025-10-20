@@ -36,19 +36,24 @@ def fix_llm_mistakes_on_json(content):
     content = content.strip()
 
     # LLM can make mistakes
-    if content[0] == '[' and content[-1] != ']':
+
+    # case1
+    if content[0] == '[' and content[-1] != ']' and "]\n" not in content:
         print_error("!!! LLM makes a mistake, trying to fix it: no found ']'")
         return content + "]"
-    elif content[0] == '[' and "]\n" in content:
+
+    # case2
+    if content[0] == '[' and "]\n" in content:
         print_error("!!! LLM makes a mistake, trying to fix it: found ']\\n'")
         i = content.find("\n]")
         if i > 0:
             return content[:i+2]
-    else:
-        _new_content = convert_code_block_to_json_str(content)
-        if _new_content:
-            print_error("!!! LLM makes a mistake, fix it: found code block")
-            content = _new_content
+
+    # case3
+    _new_content = convert_code_block_to_json_str(content)
+    if _new_content:
+        print_error("!!! LLM makes a mistake, fix it: found code block")
+        content = _new_content
 
     return content
 
