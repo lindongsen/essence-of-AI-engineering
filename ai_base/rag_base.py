@@ -9,11 +9,16 @@ from sentence_transformers import (
     SentenceTransformer,
     CrossEncoder,
 )
+from transformers import (
+    PegasusForConditionalGeneration,
+    PegasusTokenizer,
+)
+
 
 # define global variables
 g_embedding_model_map = {}
 g_cross_encoder_model_map = {}
-
+g_abstract_model_map = {}
 
 def get_embedding_model(model_name="sentence-transformers/all-MiniLM-L6-v2"):
     """ return a instance of SentenceTransformer.
@@ -38,6 +43,18 @@ def get_cross_encoder(model_name="cross-encoder/ms-marco-MiniLM-L6-v2"):
     cross_encoder = CrossEncoder(model_name)
     g_cross_encoder_model_map[model_name] = cross_encoder
     return cross_encoder
+
+def get_abstract_model(model_name="google/pegasus-large"):
+    """ return 2 instances, (model, tokenizer) """
+    if model_name in g_abstract_model_map:
+        return g_abstract_model_map[model_name]
+
+    print(f"model name: [{model_name}]")
+
+    pegasus_tokenizer = PegasusTokenizer.from_pretrained(model_name)
+    pegasus_model = PegasusForConditionalGeneration.from_pretrained(model_name)
+    g_abstract_model_map[model_name] = (pegasus_model, pegasus_tokenizer)
+    return g_abstract_model_map[model_name]
 
 
 class IterChunks(object):
@@ -121,3 +138,10 @@ class RAGCtler(object):
             if count >= top_k:
                 break
         return new_chunks
+
+    def generate_abstract(self, text:str, model_name:str="google/pegasus-large") -> str:
+        """Generate abstract using Pegasus model"""
+        pegasus_model, pegasus_tokenizer = get_abstract_model(model_name)
+        inputs = pegasus_tokenizer(text, return_tensors="pt", max_length=1024)
+        summary_ids = pegasus_model.generate(inputs["input_ids"])
+        return pegasus_tokenizer.batch_decode(summary_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
