@@ -6,8 +6,8 @@
 # it can use tool exec_cmd to execute command line in local system.
 
 import os
-from dotenv import load_dotenv
 import argparse
+from dotenv import load_dotenv
 
 from prompt_hub import prompt_tool
 from ai_base.agent_base import (
@@ -19,15 +19,13 @@ from utils.print_tool import (
     enable_flag_print_step,
     disable_flag_print_step,
 )
-from tools.cmd_tool import (
-    exec_cmd,
-)
 
 
 # define prompt of ReAct framework
 SYSTEM_PROMPT = \
     prompt_tool.read_prompt("work_mode/ReAct.md") + \
     prompt_tool.read_prompt("security/file.md") + \
+    prompt_tool.read_prompt("context/file.md") + \
     prompt_tool.read_prompt("format/json.md") + \
 """
 # Additional notes in JSON
