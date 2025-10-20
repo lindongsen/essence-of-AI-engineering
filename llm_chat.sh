@@ -13,7 +13,7 @@ function error_quit() {
 }
 
 # get work_dir
-for _dir in "/root/ai/essence-of-AI-engineering" "/test/essence-of-AI-engineering"; do
+for _dir in "/root/ai/essence-of-AI-engineering" "/林生的奇思妙想/essence-of-AI-engineering"; do
   [ -e "${_dir}" ] && WORK_DIR=${_dir} && break
 done
 

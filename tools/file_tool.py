@@ -7,6 +7,9 @@
 
 import os
 
+from context import ctx_safe
+
+
 def write_file(file_path:str, content:str):
     """ write content to file.
 
@@ -33,9 +36,20 @@ def read_file(file_path:str):
     # return
     string for ok, None for failed.
     """
+    file_path_lower = file_path.lower()
+    file_ext = file_path_lower.rsplit('.', 1)[-1]
+
     try:
         with open(file_path, "r") as fd:
-            return fd.read()
+            content = fd.read()
+
+            # context limit
+            if file_ext in ["md", "py", "go", "c", "c++", "sh", "cmd", "manifest", "whole"]:
+                pass
+            else:
+                content = ctx_safe.truncate_message(content)
+
+            return content
     except Exception as _:
         return None
 

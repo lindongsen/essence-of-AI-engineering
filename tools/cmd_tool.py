@@ -2,7 +2,13 @@ import os
 import subprocess
 
 from utils.text_tool import safe_decode
+from context import ctx_safe
 
+def format_text(s:str):
+    """ decode, truncate """
+    s = safe_decode(s).strip()
+    s = ctx_safe.truncate_message(s).strip()
+    return s
 
 def build_env(d:dict=None):
     """ build environs, return dict. """
@@ -27,9 +33,9 @@ def exec_cmd(cmd_string):
     try:
         result = subprocess.run(cmd_string, env=env, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False)
         # return tuple(returncode, stdout, stderr)
-        return (result.returncode, safe_decode(result.stdout).strip(), safe_decode(result.stderr).strip())
+        return (result.returncode, format_text(result.stdout), format_text(result.stderr))
     except subprocess.CalledProcessError as e:
-        return (e.returncode, "", safe_decode(e.stderr).strip())
+        return (e.returncode, "", format_text(e.stderr))
 
 # name: func
 TOOLS = dict(

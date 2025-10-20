@@ -16,5 +16,13 @@ def read_prompt(relative_path):
         os.path.dirname(__file__), relative_path
     )
     with open(file_path) as fd:
-        return fd.read()
+        content = fd.read().strip()
+        if content:
+            # add split line to tail
+            if content.endswith("====") or content.endswith("----"):
+                content += "\n"
+            else:
+                content += "\n----\n\n"
+            return content
+
     return ""
