@@ -7,7 +7,7 @@
 
 from utils import print_tool
 
-MAX_MSG_SIZE = 1000
+MAX_MSG_SIZE = 3000
 
 def truncate_message(msg:str):
     """
