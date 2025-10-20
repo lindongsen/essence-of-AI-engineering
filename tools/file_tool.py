@@ -27,11 +27,13 @@ def write_file(file_path:str, content:str):
         return False
     return True
 
-def read_file(file_path:str):
+def read_file(file_path:str, seek:int=0, size:int=-1):
     """ read a file and output file content.
 
     # parameters
     :file_path: string, the file path;
+    :seek: int, read from this offset, default is 0;
+    :size: int, -1 for all, default is -1;
 
     # return
     string for ok, None for failed.
@@ -41,7 +43,8 @@ def read_file(file_path:str):
 
     try:
         with open(file_path, "r") as fd:
-            content = fd.read()
+            fd.seek(seek)
+            content = fd.read(size)
 
             # context limit
             if file_ext in ["md", "py", "go", "c", "c++", "sh", "cmd", "manifest", "whole"]:

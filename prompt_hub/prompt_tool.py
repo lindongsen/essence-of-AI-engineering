@@ -26,3 +26,26 @@ def read_prompt(relative_path):
             return content
 
     return ""
+
+
+class PromptHubExtractor(object):
+    """ a extractor to get prompt """
+
+    # basic
+    prompt_common = \
+        read_prompt("security/file.md") + \
+        read_prompt("context/file.md") + \
+        read_prompt("search/text.md")
+
+    # interactive, json
+    prompt_interactive_json = read_prompt("format/json.md")
+
+    # work-mode ReAct
+    prompt_mode_ReAct = \
+        read_prompt("work_mode/ReAct.md") + prompt_common + prompt_interactive_json + \
+        read_prompt("format/json_ReAct.md")
+
+    # work-mode PlanAndExecute
+    prompt_mode_PlanAndExecute = \
+        read_prompt("work_mode/PlanAndExecute.md") + prompt_common + prompt_interactive_json + \
+        read_prompt("format/json_PlanAndExecute.md")

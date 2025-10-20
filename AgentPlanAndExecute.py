@@ -7,7 +7,7 @@
 from dotenv import load_dotenv
 import argparse
 
-from prompt_hub import prompt_tool
+from prompt_hub.prompt_tool import PromptHubExtractor
 from ai_base.agent_base import (
     StepCallBase,
     AgentRun,
@@ -22,34 +22,7 @@ ROLE_SYSTEM = "system"
 ROLE_TOOL = "tool"
 
 # define prompt of Plan-And-Execute framework
-SYSTEM_PROMPT = \
-    prompt_tool.read_prompt("work_mode/PlanAndExecute.md") + \
-    prompt_tool.read_prompt("security/file.md") + \
-    prompt_tool.read_prompt("format/json.md") + \
-"""
-# Additional notes in JSON
-The all of (keywords) supported in (JSON) are as follows:
-- step_name, string format
-- raw_text, string format
-- tool_call, specifies the tool name, string format, used only in the execute-subtask step
-- tool_args, specifies tool parameters, JSON format, used only in the execute-subtask step
-
-Output example:
-```
-[
-  {
-    "step_name": "thought",
-    "raw_text": "hello"
-  },
-  {
-    "step_name": "plan-analysis",
-    "raw_text": "world"
-  }
-]
-```
-
-----
-"""
+SYSTEM_PROMPT = PromptHubExtractor.prompt_mode_PlanAndExecute
 
 
 def agent_shell(message):

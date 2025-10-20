@@ -9,7 +9,7 @@ import os
 import argparse
 from dotenv import load_dotenv
 
-from prompt_hub import prompt_tool
+from prompt_hub.prompt_tool import PromptHubExtractor
 from ai_base.agent_base import (
     StepCallBase,
     AgentRun,
@@ -22,36 +22,7 @@ from utils.print_tool import (
 
 
 # define prompt of ReAct framework
-SYSTEM_PROMPT = \
-    prompt_tool.read_prompt("work_mode/ReAct.md") + \
-    prompt_tool.read_prompt("security/file.md") + \
-    prompt_tool.read_prompt("context/file.md") + \
-    prompt_tool.read_prompt("format/json.md") + \
-"""
-# Additional notes in JSON
-The all of (keywords) supported in (JSON) are as follows.
-- step_name, string format
-- raw_text, string format
-- tool_call, specifies the tool name, string format, used only in the action step
-- tool_args, specifies tool parameters, JSON format, used only in the action step
-
-Output example:
-```
-[
-  {
-    "step_name": "thought",
-    "raw_text": "I need to know the OS version"
-  },
-  {
-    "step_name": "action",
-    "tool_args": {"cmd_string": "uname -a" },
-    "tool_call": "cmd_tool.exec_cmd",
-  }
-]
-```
-
-----
-"""
+SYSTEM_PROMPT = PromptHubExtractor.prompt_mode_ReAct
 
 # define global variables
 g_flag_interactive = True
