@@ -37,6 +37,9 @@ def read_file(file_path:str, seek:int=0, size:int=-1):
 
     # return
     string for ok, None for failed.
+
+    # attention
+    - When it is explicitly required to read the complete file, these parameters are not needed: seek, size.
     """
     file_path_lower = file_path.lower()
     file_ext = file_path_lower.rsplit('.', 1)[-1]

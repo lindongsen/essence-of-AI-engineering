@@ -3,6 +3,7 @@ import time
 import simplejson
 import openai
 
+from logger.log_chat import logger
 from utils.print_tool import (
     print_error,
 )
@@ -52,6 +53,8 @@ class LLMModel(object):
         self.max_tokens = max_tokens
         self.openai_model_name = os.getenv("OPENAI_MODEL", "DeepSeek-V3.1-Terminus")
         self.model = self.get_llm_model()
+
+        logger.info(f"model={self.openai_model_name}, max_tokens={max_tokens}")
 
     # get a object abount llm model by openai api
     def get_llm_model(self):

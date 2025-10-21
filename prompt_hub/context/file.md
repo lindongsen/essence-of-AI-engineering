@@ -9,12 +9,13 @@ Core Principle: When calling tools or executing commands, efforts should be made
 ### File Content Inspection
 
 - When the user hasn't explicitly requested a full-content inspection, only read partial content during file checks.
-- Example: For text material inspection, only read the first 100 bytes. Applicable commands: `head -c 100 file`, `tail -c 100 file`.
+  - Example: For text material inspection, only read the first 100 bytes. Applicable commands: `head -c 100 file`, `tail -c 100 file`.
 
 ### Command Output Control
 
-- Ignore stderr content when using curl: `2>/dev/null`
-- Example: `curl https://example.com 2>/dev/null`
+- Ignore stderr content when using:
+  - curl, Example `curl https://example.com 2>/dev/null`;
+  - `uv add`, Example `uv add pip 2>/dev/null`;
 
 ### Temporary File Utilization
 
