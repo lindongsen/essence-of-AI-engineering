@@ -66,7 +66,7 @@ def exec_cmd(cmd_string, no_need_stderr=False):
     except subprocess.CalledProcessError as e:
         t = (
             e.returncode,
-            str(e),
+            e.stdout,
             "" if no_need_stderr else e.stderr
         )
 
