@@ -4,8 +4,11 @@ import subprocess
 from utils.text_tool import safe_decode
 from context import ctx_safe
 
-def format_text(s:str):
-    """ decode, truncate """
+def format_text(s):
+    """ decode and truncate
+
+    :s: str/bytes
+    """
     s = safe_decode(s).strip()
     s = ctx_safe.truncate_message(s).strip()
     return s

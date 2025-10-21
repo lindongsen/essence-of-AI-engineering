@@ -4,6 +4,8 @@ Core Principle: When calling tools or executing commands, efforts should be made
 
 ## Specific Optimization Strategies
 
+- [Attention] When the output content is too long, it will be forcibly truncated, and the flag information is "(force to truncate)". At this time, you should consider other ways for the data.
+
 ### File Content Inspection
 
 - When the user hasn't explicitly requested a full-content inspection, only read partial content during file checks.

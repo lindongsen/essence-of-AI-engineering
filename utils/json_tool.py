@@ -54,6 +54,16 @@ def fix_llm_mistakes_on_json(content):
     if _new_content:
         print_error("!!! LLM makes a mistake, fix it: found code block")
         content = _new_content
+        return content
+
+    # case4, \n]}]
+    if content[0] == '[':
+        i = content.find("\n]")
+        if i > 0:
+            content_tail = content[i+2:].strip()
+            if content_tail and len(content_tail) < 11:
+                print_error(f"!!! LLM makes a mistake, fix it: found error on tail '{content_tail}'")
+                return content[:i+2]
 
     return content
 
