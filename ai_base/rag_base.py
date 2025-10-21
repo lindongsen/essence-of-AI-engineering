@@ -65,7 +65,7 @@ def get_abstract_model(model_name="google/pegasus-large"):
     if model_name in g_abstract_model_map:
         return g_abstract_model_map[model_name]
 
-    print(f"model name: [{model_name}]")
+    print(f"loading model: [{model_name}]")
 
     pegasus_tokenizer = PegasusTokenizer.from_pretrained(model_name)
     pegasus_model = PegasusForConditionalGeneration.from_pretrained(model_name)
@@ -179,7 +179,7 @@ class Summarizer(object):
         sentences = self.preprocess_text(text)
 
         # debug
-        print(f"sentences={sentences}, len={len(sentences)}, top_k={top_k}")
+        #print(f"sentences={sentences}, len={len(sentences)}, top_k={top_k}")
 
         if len(sentences) <= 3:
             return text  # 如果句子数很少，返回原文
@@ -195,7 +195,7 @@ class Summarizer(object):
         top_sentences = [s for s, _ in ranked[:target_count]]
 
         # debug
-        print(f"ranked={ranked}, scores={scores}, count={target_count}")
+        #print(f"ranked={ranked}, scores={scores}, count={target_count}")
 
         # 按原文顺序重新排列
         final_summary = []
@@ -268,7 +268,6 @@ class RAGCtler(object):
         if 'bertsum' in model_name:
             flag_use_summarizer = True
 
-        print("XXXX: %s" % flag_use_summarizer )
         if flag_use_summarizer:
             return Summarizer(model_name, top_k).summarize(text)
 
