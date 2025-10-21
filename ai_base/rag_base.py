@@ -5,6 +5,14 @@
   Purpose:
 '''
 
+import re
+
+#import nltk
+#nltk.download('punkt')
+#nltk.download('punkt_tab')
+#from nltk.tokenize import sent_tokenize
+
+import torch
 from sentence_transformers import (
     SentenceTransformer,
     CrossEncoder,
@@ -12,6 +20,8 @@ from sentence_transformers import (
 from transformers import (
     PegasusForConditionalGeneration,
     PegasusTokenizer,
+    AutoTokenizer,
+    AutoModelForSequenceClassification,
 )
 
 
@@ -19,6 +29,12 @@ from transformers import (
 g_embedding_model_map = {}
 g_cross_encoder_model_map = {}
 g_abstract_model_map = {}
+
+def split_sentence(text:str):
+    """ return sentences """
+    #sentences = sent_tokenize(text)
+    sentences = re.split(r'(?<=[。！？.!?])', text)
+    return sentences
 
 def get_embedding_model(model_name="sentence-transformers/all-MiniLM-L6-v2"):
     """ return a instance of SentenceTransformer.
@@ -100,6 +116,113 @@ def embed_chunk(chunk: str) -> list[float]:
     return embeddings
 
 
+class Summarizer(object):
+    """ abstract class """
+    def __init__(self, model_name="eboafour1/bertsum", top_k=5):
+        """初始化模型和tokenizer"""
+        model = None
+        tokenizer = None
+        if model_name in g_abstract_model_map:
+            model, tokenizer = g_abstract_model_map[model_name]
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            model = AutoModelForSequenceClassification.from_pretrained(model_name)
+            g_abstract_model_map[model_name] = (model, tokenizer)
+
+        self.tokenizer = tokenizer
+        self.model = model
+        self.model.eval()
+
+        self.top_k = top_k or 5
+
+    def preprocess_text(self, text):
+        """预处理文本，使用更精确的句子分割"""
+        return split_sentence(text)
+
+    def score_sentences(self, sentences):
+        """对句子进行评分"""
+        scores = []
+
+        for sentence in sentences:
+            sentence = sentence.strip()
+            if len(sentence) < 5:  # 跳过过短的句子
+                scores.append(0)
+                continue
+
+            try:
+                inputs = self.tokenizer(
+                    sentence,
+                    return_tensors="pt",
+                    max_length=512,
+                    truncation=True,
+                    padding=True
+                )
+
+                with torch.no_grad():
+                    outputs = self.model(**inputs)
+                    # 使用模型输出的置信度作为评分
+                    score = torch.softmax(outputs.logits, dim=-1).max().item()
+                    scores.append(score)
+            except Exception as e:
+                print(f"处理句子时出错: {e}")
+                scores.append(0)
+
+        return scores
+
+    def extractive_summarize(self, text, ratio=0.3, top_k=5):
+        """ 抽取式摘要
+
+        Args:
+            text: 输入文本
+            ratio: 摘要长度占原文的比例
+        """
+        sentences = self.preprocess_text(text)
+
+        # debug
+        print(f"sentences={sentences}, len={len(sentences)}, top_k={top_k}")
+
+        if len(sentences) <= 3:
+            return text  # 如果句子数很少，返回原文
+
+        # 对句子评分
+        scores = self.score_sentences(sentences)
+
+        # 计算要选择的句子数
+        target_count = max(2, min(top_k, int(len(sentences) * ratio)))
+
+        # 选择评分最高的句子
+        ranked = sorted(zip(sentences, scores), key=lambda x: x[1], reverse=True)
+        top_sentences = [s for s, _ in ranked[:target_count]]
+
+        # debug
+        print(f"ranked={ranked}, scores={scores}, count={target_count}")
+
+        # 按原文顺序重新排列
+        final_summary = []
+        for sentence in sentences:
+            if sentence in top_sentences:
+                final_summary.append(sentence)
+
+        return "。".join(final_summary) + "。"
+
+    def summarize(self, text, method="extractive", ratio=0.3):
+        """
+        文本摘要主函数
+
+        Args:
+            text: 输入文本
+            method: 摘要方法
+            ratio: 摘要比例
+
+        Returns:
+            str: 摘要文本
+        """
+        if method == "extractive":
+            return self.extractive_summarize(text, ratio, self.top_k)
+        else:
+            raise ValueError("目前只支持extractive方法")
+
+
 class RAGCtler(object):
     """ controller for RAG """
     def __init__(self, db):
@@ -139,8 +262,16 @@ class RAGCtler(object):
                 break
         return new_chunks
 
-    def generate_abstract(self, text:str, model_name:str="google/pegasus-large") -> str:
+    def generate_abstract(self, text:str, model_name:str="google/pegasus-large", top_k=5) -> str:
         """Generate abstract using Pegasus model"""
+        flag_use_summarizer = False
+        if 'bertsum' in model_name:
+            flag_use_summarizer = True
+
+        print("XXXX: %s" % flag_use_summarizer )
+        if flag_use_summarizer:
+            return Summarizer(model_name, top_k).summarize(text)
+
         pegasus_model, pegasus_tokenizer = get_abstract_model(model_name)
         inputs = pegasus_tokenizer(text, return_tensors="pt", max_length=1024)
         summary_ids = pegasus_model.generate(inputs["input_ids"])

@@ -34,10 +34,16 @@ def get_params():
         default="google/pegasus-large",
         help=""
     )
+    parser.add_argument(
+        "--top_k", required=False, dest="top_k", type=int,
+        default=5,
+        help=""
+    )
     args = parser.parse_args()
     params = {
         "text": args.text,
         "model": args.model,
+        "top_k": args.top_k,
     }
     return params
 
@@ -59,7 +65,7 @@ def main():
         if input_str.lower() in ["exit", "quit"]:
             break
         start_ts = time.time()
-        summary = rag_ctler.generate_abstract(input_str, params["model"])
+        summary = rag_ctler.generate_abstract(input_str, params["model"], params["top_k"])
         print(">>>\n"+summary+"\n<<<")
         end_ts = time.time()
         print_with_time(f"[ElapsedTime] {end_ts-start_ts}")
