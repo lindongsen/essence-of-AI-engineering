@@ -8,6 +8,7 @@
 import os
 
 from context import ctx_safe
+from utils import text_tool
 
 # lower of letter
 WHITE_LIST_NO_TRUNCATE_EXT = [
@@ -54,9 +55,13 @@ def read_file(file_path:str, seek:int=0, size:int=-1):
     file_ext = file_path_lower.rsplit('.', 1)[-1]
 
     try:
-        with open(file_path, "r") as fd:
-            fd.seek(seek)
+        with open(file_path, "rb") as fd:
+            if seek < 0:
+                fd.seek(seek, 2)
+            else:
+                fd.seek(seek)
             content = fd.read(size)
+            content = text_tool.safe_decode(content)
 
             # context limit
             if file_ext in WHITE_LIST_NO_TRUNCATE_EXT:
