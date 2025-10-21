@@ -9,6 +9,15 @@ import os
 
 from context import ctx_safe
 
+# lower of letter
+WHITE_LIST_NO_TRUNCATE_EXT = [
+    # flags
+    "done", "whole",
+    # settings
+    "md", "manifest", "conf", "yaml", "config", "cfg", "rc", "cnf", "xml", "pem",
+    # devlang
+    "py", "go", "c", "c++", "sh", "cmd",
+]
 
 def write_file(file_path:str, content:str):
     """ write content to file.
@@ -50,7 +59,7 @@ def read_file(file_path:str, seek:int=0, size:int=-1):
             content = fd.read(size)
 
             # context limit
-            if file_ext in ["md", "py", "go", "c", "c++", "sh", "cmd", "manifest", "whole"]:
+            if file_ext in WHITE_LIST_NO_TRUNCATE_EXT:
                 pass
             else:
                 content = ctx_safe.truncate_message(content)
