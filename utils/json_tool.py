@@ -40,6 +40,15 @@ def fix_llm_mistakes_on_json(content):
     # case1
     if content[0] == '[' and content[-1] != ']' and "]\n" not in content:
         print_error("!!! LLM makes a mistake, trying to fix it: no found ']'")
+
+        # case: missing one '}' too.
+        if content.endswith("\n}"):
+            try:
+                simplejson.loads(content + "}]")
+                return content + "}]"
+            except Exception:
+                pass
+
         return content + "]"
 
     # case2
