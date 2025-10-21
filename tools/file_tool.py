@@ -14,7 +14,7 @@ WHITE_LIST_NO_TRUNCATE_EXT = [
     # flags
     "done", "whole",
     # settings
-    "md", "manifest", "conf", "yaml", "config", "cfg", "rc", "cnf", "xml", "pem",
+    "md", "manifest", "conf", "yaml", "config", "cfg", "rc", "cnf", "xml", "pem", "json",
     # devlang
     "py", "go", "c", "c++", "sh", "cmd",
 ]
