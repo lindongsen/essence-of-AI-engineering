@@ -60,6 +60,9 @@ class LLMModel(object):
 
         self.tokenStat = TokenStat(id(self))
 
+    def __del__(self):
+        self.tokenStat.flag_running = False
+
     # get a object abount llm model by openai api
     def get_llm_model(self):
         return openai.OpenAI(

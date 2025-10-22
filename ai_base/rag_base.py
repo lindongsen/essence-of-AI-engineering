@@ -33,6 +33,9 @@ g_embedding_model_map = {}
 g_cross_encoder_model_map = {}
 g_abstract_model_map = {}
 
+SENTENCE_SPLIT_CHARS = list("。！？.!?")
+BRACKET_STRINGS = "([{<（【《"
+
 def split_sentence(text:str):
     """ return sentences """
     #sentences = sent_tokenize(text)
@@ -114,7 +117,7 @@ class IterChunks(object):
         return self
 
     def __next__(self):
-        content = self.get_chunk()
+        content = self.get_chunk().strip()
         content_size = len(content)
         self.stat_chunk_count += 1
         self.stat_current_seek += content_size
@@ -131,7 +134,10 @@ class IterChunks(object):
             raise StopIteration
 
         if len(s) > self.chunk_size:
-            return s
+            if not s.strip():
+                s = "\n"
+            else:
+                return s
 
         count = 0
         while True:
@@ -140,8 +146,27 @@ class IterChunks(object):
             if not line:
                 break
 
-            s += line
             line_strip = line.strip()
+
+            if not line_strip:
+                if s[-1] in SENTENCE_SPLIT_CHARS:
+                    s += line
+                continue
+            elif len(line_strip) <= 7:
+                # case: (...)
+                if line_strip[0] in BRACKET_STRINGS:
+                    pass
+                elif line_strip[0] in ["'", '"', '`', '-', '+', '=', '_', '#', '@', '*', '/', '\\']:
+                    pass
+                else:
+                    s += line_strip + ";"
+            elif line_strip[-1] not in SENTENCE_SPLIT_CHARS:
+                if s.endswith(line_strip):
+                    s += "," + line_strip
+                else:
+                    s += line_strip
+            else:
+                s += line
 
             if self.separators and line_strip:
                 _flag_found = False
@@ -163,9 +188,17 @@ class IterChunks(object):
                         break
 
                 if _flag_found:
+                    if not s.strip():
+                        s = "\n"
+                        continue
+                    if len(s) < 100:
+                        continue
                     break
 
             if len(s) > self.chunk_size:
+                if not s.strip():
+                    s = "\n"
+                    continue
                 if line_strip == "":
                     break
                 elif count == 1:

@@ -63,8 +63,17 @@ def count_tokens_for_model(text, model_name="gpt-4"):
 
 class TokenStat(threading.Thread):
     """ tracking token stat """
-    def __init__(self, llm_id:str):
-        """ define keys """
+    def __init__(self, llm_id:str, lifetime:int=86400):
+        """ define keys.
+
+        :lifetime: seconds, it <= 0 for forever.
+        """
+        self._start_time = int(time.time())
+        self._end_time = 0
+        if lifetime > 0:
+            self._end_time = self._start_time + lifetime + 60
+        self._last_msg_time = 0
+
         super(TokenStat, self).__init__(name=f"TokenStat:{llm_id}", daemon=1)
         self.total_count = 0
         self.current_count = 0
@@ -75,6 +84,7 @@ class TokenStat(threading.Thread):
         self.buffer = None
         self.rlock = threading.RLock()
 
+        self.flag_running = True
         self.start()
 
 
@@ -100,8 +110,45 @@ class TokenStat(threading.Thread):
             self.current_count = 0
             self.current_text_len = 0
 
+            self._last_msg_time = int(time.time())
+
     def run(self):
-        while True:
+        self.flag_running = True
+
+        # control frequence
+        count_freq = 0
+        need_freq = False
+        if self._end_time:
+            need_freq = True
+
+        # idle time
+        max_idle_time = 600
+
+        def check():
+            """ return bool """
+
+            # check lifetime
+            if self._end_time:
+                now_ts = int(time.time())
+                if self._end_time < now_ts:
+                    # end life
+                    if now_ts - self._last_msg_time > max_idle_time:
+                        logger.info("quit due to lifetime is reached")
+                        return False
+                    # LLM may be using by some tools.
+
+            return True
+
+        while self.flag_running:
+
+            if need_freq:
+                count_freq += 1
+                # interval is 10 second.
+                if count_freq > 1000:
+                    count_freq = 0
+                    if not check():
+                        break
+
             time.sleep(0.01)
             buffer = self.buffer
             if not buffer:
@@ -117,3 +164,5 @@ class TokenStat(threading.Thread):
                 self.current_count = count_tokens(buffer)
                 self.total_count += self.current_count
                 self.total_text_len += self.current_text_len
+
+        logger.info(f"TokenStat is exited: {self.name}")
