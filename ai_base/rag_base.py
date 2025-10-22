@@ -73,17 +73,35 @@ def get_abstract_model(model_name="google/pegasus-large"):
     return g_abstract_model_map[model_name]
 
 
+def format_separators(separators:list):
+    """
+    # args
+    :separators: list_str
+    """
+    if not separators:
+        return None
+    new_separators = []
+    for s in separators:
+        s = s.replace("\\n", "\n").replace("\\t", "\t")
+        new_separators.append(s)
+    return new_separators
+
+
 class IterChunks(object):
-    """ iter string for chunk """
-    def __init__(self, file_path):
+    """ iter string for chunk by stream to read file. """
+    def __init__(self, file_path, chunk_size=1000, separators:list=None):
         self.file_path = file_path
+        self.chunk_size = chunk_size
+        self.max_chunk_size = chunk_size + 1000
+        self.separators = format_separators(separators)
+
         self.fd = open(file_path)
         return
 
     def __del__(self):
         try:
             self.fd.close()
-        except Exception as _:
+        except Exception:
             pass
 
     def __iter__(self):
@@ -99,14 +117,51 @@ class IterChunks(object):
             self.fd.close()
             raise StopIteration
 
+        if len(s) > self.chunk_size:
+            return s
+
+        count = 0
         while True:
+            count += 1
             line = self.fd.readline()
             if not line:
                 break
 
             s += line
-            if line.strip() == "":
+            line_strip = line.strip()
+
+            if self.separators and line_strip:
+                _flag_found = False
+                for separator_str in self.separators:
+                    if not separator_str:
+                        continue
+                    if line.endswith(separator_str):
+                        _flag_found = True
+                        break
+
+                    separator_str_strip = separator_str.strip()
+
+                    # case: ")   \n", [first char, space, space, space, \n]
+                    if len(separator_str_strip) == 1 \
+                        and separator_str_strip == separator_str[0] \
+                        and line_strip[-1] == separator_str_strip \
+                        and line[-1] == separator_str[-1]:
+                        _flag_found = True
+                        break
+
+                if _flag_found:
+                    break
+
+            if len(s) > self.chunk_size:
+                if line_strip == "":
+                    break
+                elif count == 1:
+                    break
+
+            # force to truncate
+            if len(s) > self.max_chunk_size:
                 break
+
         return s
 
 def embed_chunk(chunk: str) -> list[float]:

@@ -21,4 +21,7 @@ done
 
 cd "${WORK_DIR}" || error_quit "enter work_dir failed: ${WORK_DIR}"
 
-uv run python llm_chat.py "$*"
+# debug, default is 0
+[ "${DEBUG}" == "" ] && DEBUG=0
+
+DEBUG=${DEBUG} uv run python llm_chat.py "$*"
