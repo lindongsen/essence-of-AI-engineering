@@ -25,6 +25,9 @@ from transformers import (
 )
 
 
+from logger.log_rag import logger
+
+
 # define global variables
 g_embedding_model_map = {}
 g_cross_encoder_model_map = {}
@@ -96,6 +99,9 @@ class IterChunks(object):
         self.separators = format_separators(separators)
 
         self.fd = open(file_path)
+
+        self.stat_chunk_count = 0
+        self.stat_current_seek = 0
         return
 
     def __del__(self):
@@ -108,7 +114,13 @@ class IterChunks(object):
         return self
 
     def __next__(self):
-        return self.get_chunk()
+        content = self.get_chunk()
+        self.stat_chunk_count += 1
+        self.stat_current_seek += len(content)
+        logger.info(
+            f"iter chunk progress: file={self.file_path}, chunk_count={self.stat_chunk_count}, current_seek={self.stat_current_seek}"
+        )
+        return content
 
     def get_chunk(self):
         """ return string for chunk """

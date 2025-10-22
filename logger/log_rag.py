@@ -1,7 +1,7 @@
 '''
   Author: DawsonLin
   Email: lin_dongsen@126.com
-  Created: 2025-10-20
+  Created: 2025-10-22
   Purpose:
 '''
 
@@ -9,7 +9,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-LOGGER_NAME = "chat"
+LOGGER_NAME = "rag"
 
 
 class AgentFormatter(logging.Formatter):
