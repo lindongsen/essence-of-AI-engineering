@@ -34,11 +34,26 @@ class Step4ReAct(StepCallBase):
         """ acting steps """
         step_name = step["step_name"]
         if step_name == 'action':
+
+            if 'tool_call' not in step:
+                # LLM mistake, missing argv
+                obs_json = {
+                    "step_name": "observation",
+                    "raw_text": "missing tool_call"
+                }
+                self.tool_msg = obs_json
+                self.code = self.CODE_STEP_FINAL
+                return
+
             tool = step['tool_call']
-            args = step['tool_args']
+            args = step.get('tool_args') or {}
             tool_func = tools.get(tool)
+
             if tool_func is not None:
-                obs = tool_func(**args)
+                try:
+                    obs = tool_func(**args)
+                except Exception as e:
+                    obs = str(e)
                 obs_json = {
                     "step_name": "observation",
                     "raw_text": obs
@@ -47,8 +62,13 @@ class Step4ReAct(StepCallBase):
                 self.code = self.CODE_STEP_FINAL
                 return
             else:
-                self.result = (f"unknown tool {tool}, exiting.")
-                self.code = self.CODE_TASK_FAILED
+                # LLM mistake, no found this tool
+                obs_json = {
+                    "step_name": "observation",
+                    "raw_text": f"no found such as tool: {tool}"
+                }
+                self.tool_msg = obs_json
+                self.code = self.CODE_STEP_FINAL
                 return
         elif step_name == "thought":
             if len(response) == 1:

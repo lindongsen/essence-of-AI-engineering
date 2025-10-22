@@ -38,6 +38,17 @@ g_abstract_model_map = {}
 
 SENTENCE_SPLIT_CHARS = list("。！？.!?")
 BRACKET_STRINGS = "([{<（【《"
+BRACKET_STRINGS_2 = ")]}>）】》"
+BRACKET_STRINGS_2_SEPARATORS = [f"{k}\n" for k in BRACKET_STRINGS_2]
+
+
+def recognize_separators(text:str):
+    """ recognize separators to truncate text """
+    separators = []
+    for k in BRACKET_STRINGS_2_SEPARATORS:
+        if k in text:
+            separators.append(k)
+    return separators
 
 def split_sentence(text:str):
     """ return sentences """
@@ -95,6 +106,31 @@ def format_separators(separators:list):
         new_separators.append(s)
     return new_separators
 
+def match_separators(line:str, separators:list):
+    """ return True for matched """
+    if not line or not separators:
+        return False
+
+    line_strip = line.strip()
+    if not line_strip:
+        return False
+
+    for separator_str in separators:
+        if not separator_str:
+            continue
+        if line.endswith(separator_str):
+            return True
+
+        separator_str_strip = separator_str.strip()
+
+        # case: ")   \n", [first char, space, space, space, \n]
+        if len(separator_str_strip) == 1 \
+            and separator_str_strip == separator_str[0] \
+            and line_strip[-1] == separator_str_strip \
+            and line[-1] == separator_str[-1]:
+            return True
+    # end for
+    return False
 
 class IterChunks(object):
     """ iter string for chunk by stream to read file. """
@@ -151,6 +187,7 @@ class IterChunks(object):
 
             line_strip = line.strip()
 
+            # misc
             if not line_strip:
                 if s[-1] in SENTENCE_SPLIT_CHARS:
                     s += line
@@ -171,46 +208,34 @@ class IterChunks(object):
             else:
                 s += line
 
-            if self.separators and line_strip:
-                _flag_found = False
-                for separator_str in self.separators:
-                    if not separator_str:
-                        continue
-                    if line.endswith(separator_str):
-                        _flag_found = True
-                        break
+            # too small size
+            if not s.strip():
+                s = "\n"
+                continue
+            if len(s) < 100:
+                continue
 
-                    separator_str_strip = separator_str.strip()
+            # separators1
+            if match_separators(line, self.separators):
+                break
+            # separators2
+            if match_separators(line, BRACKET_STRINGS_2_SEPARATORS):
+                break
 
-                    # case: ")   \n", [first char, space, space, space, \n]
-                    if len(separator_str_strip) == 1 \
-                        and separator_str_strip == separator_str[0] \
-                        and line_strip[-1] == separator_str_strip \
-                        and line[-1] == separator_str[-1]:
-                        _flag_found = True
-                        break
+            # too large size
 
-                if _flag_found:
-                    if not s.strip():
-                        s = "\n"
-                        continue
-                    if len(s) < 100:
-                        continue
-                    break
-
+            ## normal size
             if len(s) > self.chunk_size:
-                if not s.strip():
-                    s = "\n"
-                    continue
                 if line_strip == "":
                     break
                 elif count == 1:
                     break
 
-            # force to truncate
+            ## force to truncate
             if len(s) > self.max_chunk_size:
                 break
 
+        # end while
         return s
 
 def embed_chunk(chunk: str) -> list[float]:
