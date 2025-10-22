@@ -115,10 +115,11 @@ class IterChunks(object):
 
     def __next__(self):
         content = self.get_chunk()
+        content_size = len(content)
         self.stat_chunk_count += 1
-        self.stat_current_seek += len(content)
+        self.stat_current_seek += content_size
         logger.info(
-            f"iter chunk progress: file={self.file_path}, chunk_count={self.stat_chunk_count}, current_seek={self.stat_current_seek}"
+            f"iter chunk progress: file={self.file_path}, chunk_count={self.stat_chunk_count}, current_seek={self.stat_current_seek}, content_size={content_size}"
         )
         return content
 
