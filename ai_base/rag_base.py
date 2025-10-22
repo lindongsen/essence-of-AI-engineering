@@ -24,8 +24,11 @@ from transformers import (
     AutoModelForSequenceClassification,
 )
 
-
-from logger.log_rag import logger
+try:
+    from logger.log_rag import logger
+except ImportError:
+    import logging
+    logger = logging.getLogger()
 
 
 # define global variables
