@@ -13,7 +13,7 @@
 ## 工作事项
 
 - 读取`{工作空间}/tasks/rag_server.DONE`获得rag_server的api接口信息。
-- 读取`{工作空间}/tasks/txt.DONE`获得素材文件相关信息。
+- 读取`{工作空间}/tasks/txt.DONE`获得素材文件相关信息，(注意)素材的元数据信息，(注意)段落分隔字符串。
 - 用curl访问api接口，让rag_server对素材文件进行处理，完成数据准备。
 
 注意：
