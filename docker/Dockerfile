@@ -21,6 +21,9 @@ ENV PATH="/林生的奇思妙想/essence-of-AI-engineering/.venv/bin:/林生的�
 
 ENV LANG=C.UTF-8
 
-# 8. Set the default command to start the example application
-CMD ["sleep", "999999999d"]
+# 8. Copy pause for pid 1
+COPY pause /pause
+
+# 9. Set the default command to start the example application
+CMD ["/pause"]
 
