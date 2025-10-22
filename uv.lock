@@ -483,6 +483,7 @@ dependencies = [
     { name = "openai" },
     { name = "pip" },
     { name = "simplejson" },
+    { name = "tiktoken" },
 ]
 
 [package.metadata]
@@ -492,6 +493,7 @@ requires-dist = [
     { name = "openai", specifier = ">=2.3.0" },
     { name = "pip", specifier = ">=25.2" },
     { name = "simplejson", specifier = ">=3.20.2" },
+    { name = "tiktoken", specifier = ">=0.12.0" },
 ]
 
 [[package]]

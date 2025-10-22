@@ -8,6 +8,8 @@ from utils.print_tool import (
     print_error,
 )
 from utils.json_tool import to_json_str
+from context.token import TokenStat
+
 
 # define roles
 ROLE_USER = "user"
@@ -56,6 +58,8 @@ class LLMModel(object):
 
         logger.info(f"model={self.openai_model_name}, max_tokens={max_tokens}")
 
+        self.tokenStat = TokenStat(id(self))
+
     # get a object abount llm model by openai api
     def get_llm_model(self):
         return openai.OpenAI(
@@ -64,6 +68,8 @@ class LLMModel(object):
         ).chat.completions
 
     def call_llm_model(self, messages):
+        self.tokenStat.add_msgs(messages)
+
         response = self.model.create(
             model=self.openai_model_name,
             messages=messages,
@@ -72,6 +78,9 @@ class LLMModel(object):
             n=1,
             stop=None,
         )
+
+        self.tokenStat.output_token_stat()
+
         return response.choices[0].message.content.strip()
 
     def chat(self, messages, for_raw=False):
