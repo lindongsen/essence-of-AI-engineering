@@ -5,8 +5,8 @@
   Purpose:
 '''
 
-from .base_logger import setup_logger
+from logger.base_logger import setup_logger
 
-LOGGER_NAME = "rag"
+LOGGER_NAME = "rag_server"
 
 logger = setup_logger(LOGGER_NAME, None)

@@ -15,7 +15,7 @@ class DBClient(object):
     def __init__(self, conn:dict=None):
         """
         :conn:
-            @key protocol: temp, file, http ...
+            @key protocol: temp for EphemeralClient, file for PersistentClient, http ...
             @key path: only for 'file' protocol
             @key host:
             @key port:
@@ -26,7 +26,7 @@ class DBClient(object):
         elif conn["protocol"] == "file":
             self.client = chromadb.PersistentClient(path=conn["path"])
 
-        assert self.client, "get db client failed: [%s]" % conn
+        assert self.client, f"get db client failed: [{conn}]"
 
     def get_collection(self, name):
         """ get collection instance """

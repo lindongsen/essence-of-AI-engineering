@@ -11,6 +11,7 @@ import sys
 import os
 CWD = os.path.dirname(__file__)
 sys.path.append(f"{CWD}/..")
+sys.path.append(f"{CWD}/../..")
 
 import time
 import argparse
@@ -51,7 +52,7 @@ def main():
     """ main entry """
     params = get_params()
 
-    from ai_base import rag_base
+    from rag_base import rag_base
     rag_ctler = rag_base.RAGCtler(None)
 
     print_with_time(f">>> generating with model={params['model']} ...")

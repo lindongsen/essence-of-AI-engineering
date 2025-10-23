@@ -5,13 +5,6 @@
   Purpose:
 '''
 
-import re
-
-#import nltk
-#nltk.download('punkt')
-#nltk.download('punkt_tab')
-#from nltk.tokenize import sent_tokenize
-
 import torch
 from sentence_transformers import (
     SentenceTransformer,
@@ -24,37 +17,16 @@ from transformers import (
     AutoModelForSequenceClassification,
 )
 
-try:
-    from logger.log_rag import logger
-except ImportError:
-    import logging
-    logger = logging.getLogger()
 
+from .chunk_tool import (
+    split_sentence,
+)
 
 # define global variables
 g_embedding_model_map = {}
 g_cross_encoder_model_map = {}
 g_abstract_model_map = {}
 
-SENTENCE_SPLIT_CHARS = list("。！？.!?")
-BRACKET_STRINGS = "([{<（【《"
-BRACKET_STRINGS_2 = ")]}>）】》"
-BRACKET_STRINGS_2_SEPARATORS = [f"{k}\n" for k in BRACKET_STRINGS_2]
-
-
-def recognize_separators(text:str):
-    """ recognize separators to truncate text """
-    separators = []
-    for k in BRACKET_STRINGS_2_SEPARATORS:
-        if k in text:
-            separators.append(k)
-    return separators
-
-def split_sentence(text:str):
-    """ return sentences """
-    #sentences = sent_tokenize(text)
-    sentences = re.split(r'(?<=[。！？.!?])', text)
-    return sentences
 
 def get_embedding_model(model_name="sentence-transformers/all-MiniLM-L6-v2"):
     """ return a instance of SentenceTransformer.
@@ -91,152 +63,6 @@ def get_abstract_model(model_name="google/pegasus-large"):
     pegasus_model = PegasusForConditionalGeneration.from_pretrained(model_name)
     g_abstract_model_map[model_name] = (pegasus_model, pegasus_tokenizer)
     return g_abstract_model_map[model_name]
-
-
-def format_separators(separators:list):
-    """
-    # args
-    :separators: list_str
-    """
-    if not separators:
-        return None
-    new_separators = []
-    for s in separators:
-        s = s.replace("\\n", "\n").replace("\\t", "\t")
-        new_separators.append(s)
-    return new_separators
-
-def match_separators(line:str, separators:list):
-    """ return True for matched """
-    if not line or not separators:
-        return False
-
-    line_strip = line.strip()
-    if not line_strip:
-        return False
-
-    for separator_str in separators:
-        if not separator_str:
-            continue
-        if line.endswith(separator_str):
-            return True
-
-        separator_str_strip = separator_str.strip()
-
-        # case: ")   \n", [first char, space, space, space, \n]
-        if len(separator_str_strip) == 1 \
-            and separator_str_strip == separator_str[0] \
-            and line_strip[-1] == separator_str_strip \
-            and line[-1] == separator_str[-1]:
-            return True
-    # end for
-    return False
-
-class IterChunks(object):
-    """ iter string for chunk by stream to read file. """
-    def __init__(self, file_path, chunk_size=1000, separators:list=None):
-        self.file_path = file_path
-        self.chunk_size = chunk_size
-        self.max_chunk_size = chunk_size + 1000
-        self.separators = format_separators(separators)
-
-        self.fd = open(file_path)
-
-        self.stat_chunk_count = 0
-        self.stat_current_seek = 0
-        return
-
-    def __del__(self):
-        try:
-            self.fd.close()
-        except Exception:
-            pass
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        content = self.get_chunk().strip()
-        content_size = len(content)
-        self.stat_chunk_count += 1
-        self.stat_current_seek += content_size
-        logger.info(
-            f"iter chunk progress: file={self.file_path}, chunk_count={self.stat_chunk_count}, current_seek={self.stat_current_seek}, content_size={content_size}"
-        )
-        return content
-
-    def get_chunk(self):
-        """ return string for chunk """
-        s = self.fd.readline()
-        if not s:
-            self.fd.close()
-            raise StopIteration
-
-        if len(s) > self.chunk_size:
-            if not s.strip():
-                s = "\n"
-            else:
-                return s
-
-        count = 0
-        while True:
-            count += 1
-            line = self.fd.readline()
-            if not line:
-                break
-
-            line_strip = line.strip()
-
-            # misc
-            if not line_strip:
-                if s[-1] in SENTENCE_SPLIT_CHARS:
-                    s += line
-                continue
-            elif len(line_strip) <= 7:
-                # case: (...)
-                if line_strip[0] in BRACKET_STRINGS:
-                    pass
-                elif line_strip[0] in ["'", '"', '`', '-', '+', '=', '_', '#', '@', '*', '/', '\\']:
-                    pass
-                else:
-                    s += line_strip + ";"
-            elif line_strip[-1] not in SENTENCE_SPLIT_CHARS:
-                if s.endswith(line_strip):
-                    s += "," + line_strip
-                else:
-                    s += line_strip
-            else:
-                s += line
-
-            # too small size
-            if not s.strip():
-                s = "\n"
-                continue
-            if len(s) < 100:
-                continue
-
-            # separators1
-            if match_separators(line, self.separators):
-                break
-            # separators2
-            if match_separators(line, BRACKET_STRINGS_2_SEPARATORS):
-                break
-
-            # too large size
-
-            ## normal size
-            if len(s) > self.chunk_size:
-                if line_strip == "":
-                    break
-                elif count == 1:
-                    break
-
-            ## force to truncate
-            if len(s) > self.max_chunk_size:
-                break
-
-        # end while
-        return s
 
 def embed_chunk(chunk: str) -> list[float]:
     """ return list of embeddings """
@@ -355,6 +181,10 @@ class Summarizer(object):
 class RAGCtler(object):
     """ controller for RAG """
     def __init__(self, db):
+        """
+        Args:
+            db: a instance of class from db_tool;
+        """
         self.db = db
 
     def retrieve(self, query: str, index_name:str, top_k: int) -> list[str]:

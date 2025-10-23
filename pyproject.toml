@@ -16,5 +16,5 @@ dependencies = [
 [tool.uv.workspace]
 members = [
     "voice",
-    "rag_traditional",
+    "rag_server",
 ]

@@ -11,15 +11,15 @@ import sys
 import os
 CWD = os.path.dirname(__file__)
 sys.path.append(f"{CWD}/..")
+sys.path.append(f"{CWD}/../..")
 
 import time
 import argparse
 
-from utils.db_tool import DBClient
 from utils.file_tool import get_filename
 from utils.print_tool import print_with_time
 
-from ai_base import rag_base
+from rag_base.db_tool import DBClient
 
 
 def get_params():
@@ -63,6 +63,7 @@ def main():
     name = params["index_name"] or get_filename(params["db_file"])
     db = DBClient(conn={"protocol": "file", "path": params["db_file"]})
 
+    from rag_base import rag_base
     rag_ctler = rag_base.RAGCtler(db)
 
     start_ts = time.time()

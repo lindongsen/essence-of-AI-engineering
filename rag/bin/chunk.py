@@ -8,9 +8,14 @@
 '''
 
 import sys
+import os
+CWD = os.path.dirname(__file__)
+sys.path.append(f"{CWD}/..")
+sys.path.append(f"{CWD}/../..")
+
 import argparse
 
-sys.path.append("..")
+from rag_base.chunk_tool import IterChunks
 
 
 def get_params():
@@ -60,7 +65,6 @@ def main():
     print(params)
     print("====")
     count = 1
-    from ai_base.rag_base import IterChunks
     for chunk in IterChunks(params["file"], params["size"], params["separators"]):
         print(f"\n[{count}]\n{chunk}")
         if count >= params["count"]:
