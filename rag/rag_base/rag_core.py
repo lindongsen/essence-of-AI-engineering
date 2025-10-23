@@ -66,7 +66,7 @@ def prepare_data(
             abstract_ids.append(chunk_id)
             abstract_embeddings.append(abstract_embedding)
 
-        # 批量添加到数据库
+        # （必须）直接添加到数据库，避免占用内存
         if documents:
             db_client.add_documents(raw_collection, documents, metadatas, ids, embeddings)
 

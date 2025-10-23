@@ -17,4 +17,4 @@ cp *.md "${WORKSPACE}"
 ls "${WORKSPACE}"
 
 cd "${CWD}/../../"
-DEBUG=1 OPENAI_MODEL=DeepSeek-V3.1 uv run AgentReAct.py -p ./rag/idea_for_abstract/plan-20251018.md -t 发挥你的专业水平完成任务吧
+DEBUG=1 uv run AgentReAct.py -p ./rag/idea_for_abstract/plan-20251018.md -t 发挥你的专业水平完成任务吧
