@@ -64,12 +64,6 @@ def get_abstract_model(model_name="google/pegasus-large"):
     g_abstract_model_map[model_name] = (pegasus_model, pegasus_tokenizer)
     return g_abstract_model_map[model_name]
 
-def embed_chunk(chunk: str) -> list[float]:
-    """ return list of embeddings """
-    model = get_embedding_model()
-    embeddings = model.encode(chunk)
-    return embeddings
-
 
 class Summarizer(object):
     """ abstract class """
@@ -88,7 +82,7 @@ class Summarizer(object):
         self.model = model
         self.model.eval()
 
-        self.top_k = top_k or 5
+        self.top_k = top_k
 
     def preprocess_text(self, text):
         """预处理文本，使用更精确的句子分割"""
@@ -124,7 +118,7 @@ class Summarizer(object):
 
         return scores
 
-    def extractive_summarize(self, text, ratio=0.3, top_k=5):
+    def extractive_summarize(self, text, ratio=0.3, top_k=0):
         """ 抽取式摘要
 
         Args:
@@ -132,6 +126,9 @@ class Summarizer(object):
             ratio: 摘要长度占原文的比例
         """
         sentences = self.preprocess_text(text)
+
+        if top_k <= 3:
+            top_k = len(sentences)
 
         # debug
         #print(f"sentences={sentences}, len={len(sentences)}, top_k={top_k}")
@@ -143,7 +140,7 @@ class Summarizer(object):
         scores = self.score_sentences(sentences)
 
         # 计算要选择的句子数
-        target_count = max(2, min(top_k, int(len(sentences) * ratio)))
+        target_count = max(3, min(top_k, int(len(sentences) * ratio)))
 
         # 选择评分最高的句子
         ranked = sorted(zip(sentences, scores), key=lambda x: x[1], reverse=True)
@@ -234,3 +231,14 @@ class RAGCtler(object):
         inputs = pegasus_tokenizer(text, return_tensors="pt", max_length=1024)
         summary_ids = pegasus_model.generate(inputs["input_ids"])
         return pegasus_tokenizer.batch_decode(summary_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+
+
+def embed_chunk(chunk: str) -> list[float]:
+    """ return list of embeddings """
+    model = get_embedding_model()
+    embeddings = model.encode(chunk)
+    return embeddings
+
+def summarize_chunk(chunk: str, model_name="eboafour1/bertsum", top_k=0, ratio=0.3):
+    """ return str for abstract """
+    return Summarizer(model_name=model_name, top_k=top_k).summarize(chunk, ratio=ratio)

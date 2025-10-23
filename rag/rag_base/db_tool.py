@@ -40,11 +40,21 @@ class DBClient(object):
             ids.append(md5sum(chunk))
         return ids
 
-    def save_embeddings(self, name, chunks, embeddings):
+    def save_embeddings(self, name, chunks, embeddings, ids=None, metadatas=None):
         """ save data """
         collection = self.get_collection(name)
         collection.add(
             documents=chunks,
             embeddings=embeddings,
-            ids=self.get_ids(chunks),
+            ids=ids or self.get_ids(chunks),
+            metadatas=metadatas,
+        )
+
+    def add_documents(self, collection, documents, metadatas, ids, embeddings):
+        """ save data to database """
+        self.get_collection(collection).add(
+            documents=documents,
+            metadatas=metadatas,
+            ids=ids or self.get_ids(documents),
+            embeddings=embeddings,
         )

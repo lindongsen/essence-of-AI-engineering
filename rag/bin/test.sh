@@ -6,7 +6,7 @@ CPATH=$(readlink -f "$0")
 CWD=$(dirname "${CPATH}")
 cd "${CWD}"
 
-TEST_FILE="../idea_for_abstract/rag_server/txt/t-ara.txt"
+TEST_FILE="../idea_for_abstract/rag/txt/t-ara.txt"
 TEST_CONTENT=$(head -5 ${TEST_FILE})
 TEST_DB_NAME="tiara"
 

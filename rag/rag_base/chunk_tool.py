@@ -5,11 +5,10 @@
   Purpose:
 '''
 
+import os
 import re
 
-import logging
-
-logger = logging.getLogger("rag_server")
+from .log_tool import logger
 
 
 SENTENCE_SPLIT_CHARS = list("。！？.!?")
@@ -75,11 +74,12 @@ class IterChunks(object):
     """ iter string for chunk by stream to read file. """
     def __init__(self, file_path, chunk_size=1000, separators:list=None):
         self.file_path = file_path
+        self.file_size = os.path.getsize(file_path)
         self.chunk_size = chunk_size
         self.max_chunk_size = chunk_size + 1000
         self.separators = format_separators(separators)
 
-        self.fd = open(file_path)
+        self.fd = open(file_path, mode="r", encoding="utf-8")
 
         self.stat_chunk_count = 0
         self.stat_current_seek = 0
@@ -99,8 +99,13 @@ class IterChunks(object):
         content_size = len(content)
         self.stat_chunk_count += 1
         self.stat_current_seek += content_size
+
+        percent = round(self.stat_current_seek/self.file_size*100, 2)
         logger.info(
-            f"iter chunk progress: file={self.file_path}, chunk_count={self.stat_chunk_count}, current_seek={self.stat_current_seek}, content_size={content_size}"
+            "iter chunk progress: " +
+            f"file={self.file_path}, chunk_count={self.stat_chunk_count}, " +
+            f"current_seek={self.stat_current_seek}, content_size={content_size}, " +
+            f"progress={percent}%"
         )
         return content
 
