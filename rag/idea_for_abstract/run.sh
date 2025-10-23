@@ -6,11 +6,13 @@ CWD=$(dirname "${CPATH}")
 
 set -x
 
-cd "${CWD}"
-
 WORKSPACE="/林生的奇思妙想/rag"
+mkdir -p "${WORKSPACE}"
 
-[ -d "${WORKSPACE}" ] && exit 1
+[ -d "/林生的奇思妙想/essence-of-AI-engineering" ] || exit 1
+[ -d "${WORKSPACE}" ] && exit 2
+
+cd "${CWD}"
 cp -r rag /林生的奇思妙想/
 cp *.md "${WORKSPACE}"
 ls "${WORKSPACE}"
