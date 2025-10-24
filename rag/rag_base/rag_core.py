@@ -120,8 +120,9 @@ def call_llm(prompt: str) -> str:
         if result.returncode == 0:
             return result.stdout.strip()
         else:
-            logger.error(f"llm_chat failed: {result.stderr}")
-            return "抱歉，大模型调用失败"
+            msg = f"llm_chat failed: stdout={result.stdout}, stderr={result.stderr}"
+            logger.error(msg)
+            return msg
 
     except subprocess.TimeoutExpired:
         logger.error("llm_chat timeout")

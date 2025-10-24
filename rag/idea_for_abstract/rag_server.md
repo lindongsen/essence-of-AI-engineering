@@ -84,7 +84,8 @@ RAG 是一种将外部知识库与大语言模型相结合的技术，旨在让�
 
 ## 注意事项
 
-- 为了代码重用性，你要使用`/林生的奇思妙想/essence-of-AI-engineering`这个作为PYTHONPATH，可以直接使用其中的`rag/rag_base`这个库。
+- 你要使用文件夹`{工作空间}/rag_server`去保存代码，使用`{工作空间}/rag_database`作为本地数据库路径。
+- 为了代码重用性，你要使用`/林生的奇思妙想/essence-of-AI-engineering`作为PYTHONPATH，可以直接使用其中的`rag/rag_base`这个库。
 - 你要(完整)读取此模块`/林生的奇思妙想/essence-of-AI-engineering/rag/rag_base`进行参考并使用它，你(必须)原样使用其中的`IterChunks`去生成分片内容，你(不能)改变技术栈，更不能改变(模型)。
 - 提供http服务的文件命名为`rag_server.py`，服务名字是`rag_server`。你要把相关功能都写到这个文件里面。
 - 代码需要对各种(操作行为)打印日志，日志内容必须包含：日志等级、时间、线程id、日志信息等。不用对操作“结果”打印日志，例如：知识分片、向量值的原始内容，不然会给日志阅读带来极大困难。`rag_server`的日志文件名为`rag_server.log`。
