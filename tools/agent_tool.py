@@ -89,4 +89,6 @@ def agent_programmer(msg_or_file:str, model_name:str=None):
 TOOLS = dict(
     agent_writer=agent_writer,
     agent_programmer=agent_programmer,
+    WritingAssistant=agent_writer,
+    ProgrammingAssistant=agent_programmer,
 )
