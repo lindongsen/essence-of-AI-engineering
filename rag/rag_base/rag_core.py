@@ -126,7 +126,7 @@ def call_llm(prompt: str) -> str:
 
     except subprocess.TimeoutExpired:
         logger.error("llm_chat timeout")
-        return "抱歉，大模型响应超时"
+        return "call llm_chat timeout"
     except FileNotFoundError:
         logger.error("llm_chat command not found")
         return "抱歉，大模型工具未安装"
