@@ -5,10 +5,14 @@
   Purpose:
 '''
 
+# pylint: disable=C0209
+
 import os
+import traceback
 
 from context import ctx_safe
 from utils import text_tool
+from utils import print_tool
 
 # lower of letter
 WHITE_LIST_NO_TRUNCATE_EXT = [
@@ -37,6 +41,39 @@ def write_file(file_path:str, content:str):
         return False
     return True
 
+def _do_step_read_bytes(fd, size:int):
+    """ read in a certain block size order.
+
+    return bytes.
+    """
+    offset = 1024
+
+    if size > 0 and size <= offset:
+        return fd.read(size)
+
+    content = b""
+    count = 0
+    while True:
+        _data = fd.read(offset)
+        if not _data:
+            break
+        content += _data
+        count += offset
+
+        if size > 0:
+            if count >= size:
+                break
+            remaining_size = size - count
+            if remaining_size <= offset:
+                content += fd.read(remaining_size)
+                return content
+
+        if ctx_safe.is_need_truncate(count):
+            break
+    if size > 0:
+        return content[:size]
+    return content
+
 def read_file(file_path:str, seek:int=0, size:int=-1):
     """ read a file and output file content.
 
@@ -50,7 +87,11 @@ def read_file(file_path:str, seek:int=0, size:int=-1):
 
     # attention
     - When it is explicitly required to read the complete file, these parameters are not needed: seek, size.
-    """
+    - When the file extension is not in white list, the file reading process may be (force to truncate).
+      - white list: {WHITE_LIST_NO_TRUNCATE_EXT}
+    """.format(
+        WHITE_LIST_NO_TRUNCATE_EXT=WHITE_LIST_NO_TRUNCATE_EXT,
+    )
     file_path_lower = file_path.lower()
     file_ext = file_path_lower.rsplit('.', 1)[-1]
 
@@ -60,7 +101,12 @@ def read_file(file_path:str, seek:int=0, size:int=-1):
                 fd.seek(seek, 2)
             else:
                 fd.seek(seek)
-            content = fd.read(size)
+
+            if file_ext not in WHITE_LIST_NO_TRUNCATE_EXT:
+                content = _do_step_read_bytes(fd, size)
+                content = ctx_safe.truncate_message(content)
+            else:
+                content = fd.read(size)
             content = text_tool.safe_decode(content)
 
             # context limit
@@ -70,7 +116,8 @@ def read_file(file_path:str, seek:int=0, size:int=-1):
                 content = ctx_safe.truncate_message(content)
 
             return content
-    except Exception as _:
+    except Exception:
+        print_tool.print_error(traceback.format_exc())
         return None
 
 def append_file(file_path: str, content: str) -> bool:

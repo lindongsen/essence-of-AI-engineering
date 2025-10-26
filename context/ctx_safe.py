@@ -9,13 +9,23 @@ from utils import print_tool
 
 MAX_MSG_SIZE = 3000
 
-def truncate_message(msg:str):
-    """
-    max_msg_size: 1000
-    """
+def is_need_truncate(msg_len:int):
+    """ return bool. True is need truncate. """
+    if msg_len >= MAX_MSG_SIZE:
+        return True
+    return False
+
+def truncate_message(msg):
+    """ force to truncate message by the max_msg_size """
     suffix = ""
-    if len(msg) > MAX_MSG_SIZE:
+    if is_need_truncate(len(msg)):
         print_tool.print_error(f"truncate message with the size: [{MAX_MSG_SIZE}]")
         suffix = " ... (force to truncate)"
+
+    if isinstance(msg, bytes):
+        if suffix:
+            suffix = bytes(suffix, "utf-8")
+        else:
+            suffix = b""
 
     return msg[:MAX_MSG_SIZE] + suffix
