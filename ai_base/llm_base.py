@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import simplejson
 import openai
@@ -8,6 +9,7 @@ from utils.print_tool import (
     print_error,
 )
 from utils.json_tool import to_json_str
+from utils import env_tool
 from context.token import TokenStat
 
 
@@ -50,6 +52,19 @@ def _format_response(response):
     raise JsonError("invalid json string")
 
 
+class ContentSender(object):
+    """ send content to endpoint. """
+    def send(self, content):
+        """ send content to endpoint """
+        raise NotImplementedError
+
+class ContentStdout(ContentSender):
+    """ send content to stdout """
+    def send(self, content):
+        """ write content to stdout """
+        sys.stdout.write(content)
+
+
 class LLMModel(object):
     def __init__(self, max_tokens=80000):
         self.max_tokens = max_tokens
@@ -59,6 +74,13 @@ class LLMModel(object):
         logger.info(f"model={self.openai_model_name}, max_tokens={max_tokens}")
 
         self.tokenStat = TokenStat(id(self))
+
+        self.content_senders = [] # instances of base class ContentSender
+
+    def send_content(self, content):
+        for sender in self.content_senders:
+            sender.send(content)
+        return
 
     def __del__(self):
         self.tokenStat.flag_running = False
@@ -84,9 +106,39 @@ class LLMModel(object):
 
         self.tokenStat.output_token_stat()
 
-        return response.choices[0].message.content.strip()
+        full_content = response.choices[0].message.content.strip()
+        self.send_content(full_content)
 
-    def chat(self, messages, for_raw=False):
+        return full_content
+
+    def call_llm_model_by_stream(self, messages):
+        self.tokenStat.add_msgs(messages)
+
+        response = self.model.create(
+            model=self.openai_model_name,
+            messages=messages,
+            temperature=0,
+            max_tokens=self.max_tokens,
+            n=1,
+            stop=None,
+            stream=True,
+        )
+
+        full_content = ""
+        for chunk in response:
+            delta_content = chunk.choices[0].delta.content
+            if delta_content:
+                full_content += delta_content
+                self.send_content(delta_content)
+
+        if env_tool.is_debug_mode():
+            print()
+
+        self.tokenStat.output_token_stat()
+
+        return full_content.strip()
+
+    def chat(self, messages, for_raw=False, for_stream=False):
         """ return list_dict """
         for i in range(10):
             if i > 0:
@@ -95,7 +147,10 @@ class LLMModel(object):
                 time.sleep(sec)
 
             try:
-                rsp = self.call_llm_model(messages)
+                if for_stream:
+                    rsp = self.call_llm_model_by_stream(messages)
+                else:
+                    rsp = self.call_llm_model(messages)
                 if for_raw:
                     return rsp
                 return _format_response(rsp)

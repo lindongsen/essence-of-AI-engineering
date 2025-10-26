@@ -11,8 +11,9 @@ import sys
 import os
 from dotenv import load_dotenv
 
-from ai_base.llm_base import LLMModel
+from ai_base.llm_base import LLMModel, ContentStdout
 from ai_base.prompt_base import PromptBase
+from utils import env_tool
 
 
 def get_message():
@@ -37,14 +38,17 @@ def main():
 
     message = get_message()
     llm_model = LLMModel()
+    llm_model.content_senders.append(ContentStdout())
 
     prompt_ctl = PromptBase("You are a helpful assistant.")
     prompt_ctl.new_session(message)
 
-    print(f">>> message:\n{message}")
-    answer = llm_model.chat(prompt_ctl.messages, for_raw=True)
+    if not env_tool.is_debug_mode():
+        print(f">>> message:\n{message}")
+        print(">>> answer:")
+    answer = llm_model.chat(prompt_ctl.messages, for_raw=True, for_stream=True)
     prompt_ctl.add_assistant_message(answer)
-    print(f">>> answer:\n{answer}")
+    print()
 
 if __name__ == "__main__":
     main()
