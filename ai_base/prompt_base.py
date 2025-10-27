@@ -100,7 +100,7 @@ class PromptBase(object):
         """
         try:
             now_date = time_tool.get_current_date(True)
-            file_name = f"{get_agent_name()}.{now_date}.msg"
+            file_name = f"dump.{get_agent_name()}.{now_date}.msg"
             file_path = file_name
             with open(file_path, 'w', encoding='utf-8') as fd:
                 fd.write(to_json_str(self.messages))

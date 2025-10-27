@@ -32,20 +32,40 @@ class PromptHubExtractor(object):
     """ a extractor to get prompt """
 
     # basic
-    prompt_common = \
-        read_prompt("security/file.md") + \
-        read_prompt("context/file.md") + \
-        read_prompt("search/text.md")
+    prompt_common = (
+        read_prompt("security/file.md")
+        + read_prompt("context/file.md")
+        + read_prompt("search/text.md")
+        + read_prompt("project/folder.md")
+    )
+
+    # task management
+    prompt_task = (
+        read_prompt("task/control.md")
+        + read_prompt("task/tracking.md")
+    )
 
     # interactive, json
     prompt_interactive_json = read_prompt("format/json.md")
 
     # work-mode ReAct
-    prompt_mode_ReAct = \
-        read_prompt("work_mode/ReAct.md") + prompt_common + prompt_interactive_json + \
-        read_prompt("format/json_ReAct.md")
+    prompt_mode_ReAct = (
+        read_prompt("work_mode/ReAct.md")
+        + prompt_common
+        + prompt_task
+
+        # place them to tail
+        + prompt_interactive_json
+        + read_prompt("format/json_ReAct.md")
+    )
 
     # work-mode PlanAndExecute
-    prompt_mode_PlanAndExecute = \
-        read_prompt("work_mode/PlanAndExecute.md") + prompt_common + prompt_interactive_json + \
-        read_prompt("format/json_PlanAndExecute.md")
+    prompt_mode_PlanAndExecute = (
+        read_prompt("work_mode/PlanAndExecute.md")
+        + prompt_common
+        + prompt_task
+
+        # place them to tail
+        + prompt_interactive_json
+        + read_prompt("format/json_PlanAndExecute.md")
+    )
