@@ -25,7 +25,6 @@ task="$*"
 task_ex=""
 if [ "$1" == "-" ]; then
   task=$(cat "$1")
-  [ "$2" != "" ] && task_ex="\n----\n$*"
+  [ "$2" != "" ] && task_ex=$(echo -e "\n----\n$*")
 fi
 DEBUG=1 uv run python AgentReAct.py -t "${task} ${task_ex}"
-
