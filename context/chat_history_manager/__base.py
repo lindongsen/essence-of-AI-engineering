@@ -122,8 +122,13 @@ class ContextManager(MessageStorageBase):
 
     def _link_msg_id(self, content_dict:dict):
         """ link content to msg_id """
+        message = None
+        if len(content_dict) == 2 and "raw_text" in content_dict:
+            message = content_dict["raw_text"]
+        else:
+            message = json_tool.json_dump(content_dict, indent=0)
         msg_obj = ChatHistoryMessageData(
-            message=json_tool.json_dump(content_dict, indent=0),
+            message=message,
             session_id=get_session_id(),
             msg_id=None,
         )
