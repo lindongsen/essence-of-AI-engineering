@@ -76,16 +76,22 @@ def fix_llm_mistakes_on_json(content):
 
     return content
 
-def to_json_str(content):
+def to_json_str(content, indent=2):
     """ convert list/dict to json string """
     if isinstance(content, str):
         content = fix_llm_mistakes_on_json(content)
         return content
     try:
-        return simplejson.dumps(content, indent=2, ensure_ascii=False)
+        return simplejson.dumps(content, indent=indent, ensure_ascii=False, default=str)
     except Exception as e:
         print_error(f"format_content error: {e}, content: {content}")
         return str(content)
+
+def json_dump(obj, indent=2):
+    """ dump object to json str """
+    if isinstance(obj, (set, tuple)):
+        obj = list(obj)
+    return to_json_str(obj, indent=indent)
 
 def json_load(content):
     """ load json str to a object """

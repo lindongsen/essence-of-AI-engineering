@@ -9,7 +9,10 @@ from ai_base.prompt_base import (
 from ai_base.llm_base import (
     LLMModel,
 )
-from utils.thread_local_tool import ctxm_give_agent_name
+from utils.thread_local_tool import (
+    ctxm_give_agent_name,
+    ctxm_set_agent,
+)
 from tools import get_tool_prompt, TOOLS as INTERNAL_TOOLS
 
 
@@ -78,6 +81,11 @@ class AgentBase(PromptBase):
         return
 
     @property
+    def max_tokens(self) -> int:
+        """ get max tokens """
+        return self.llm_model.max_tokens
+
+    @property
     def all_tools(self):
         """ return all of available tools. include of internal tools. """
         all_tools = {}
@@ -92,7 +100,10 @@ class AgentBase(PromptBase):
 
     def run(self, step_call:StepCallBase, user_input:str):
         """ run this agent """
-        with ctxm_give_agent_name(self.agent_name):
+        with (
+                ctxm_give_agent_name(self.agent_name),
+                ctxm_set_agent(self),
+            ):
             try:
                 return self._run(step_call, user_input)
             finally:

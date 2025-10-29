@@ -4,6 +4,10 @@
   Created: 2025-10-18
   Purpose:
 '''
+
+import os
+import traceback
+
 from logger.log_chat import logger
 from tools import get_tool_prompt
 from ai_base.constants import (
@@ -21,6 +25,40 @@ from utils import time_tool
 from utils.thread_local_tool import (
     get_agent_name,
 )
+from context.token import count_tokens
+from context.ctx_manager import get_managers_by_env
+
+
+class ThresholdContextHistory(object):
+    """ define threshold  """
+    token_max = 1280000
+    token_ratio = 0.8
+    messages_max_len = 13
+    def __init__(self):
+        self.token_max = os.getenv("MAX_TOKENS", self.token_max)
+
+    def exceed_ratio(self, token_count):
+        """ token count is exceeded ratio """
+        curr_ratio = float(token_count) / self.token_max
+        if curr_ratio >= self.token_ratio:
+            return True
+        return False
+
+    def exceed_msg_len(self, msg_len):
+        """ message list length is exceeded """
+        if msg_len >= self.messages_max_len:
+            return True
+        return False
+
+    def is_exceeded(self, messages:list):
+        """ return bool. True for exceeded """
+        if self.exceed_msg_len(len(messages)):
+            return True
+        token_count_now = count_tokens(str(messages))
+        if self.exceed_ratio(token_count_now):
+            return True
+        return False
+
 
 class PromptBase(object):
     """ prompt base manager """
@@ -39,15 +77,33 @@ class PromptBase(object):
         if self.tool_prompt:
             print_step(f"[tool_prompt]:\n{self.tool_prompt}\n")
 
+        # context history messages
+        self.threshold_ctx_history = ThresholdContextHistory()
+        self.hooks_ctx_history = get_managers_by_env() # func(messages)
+
         # context messages
         self.messages = []
         self.reset_messages(to_suppress_log=True)
+
+    def call_hooks_ctx_history(self):
+        """ let context messages become to history messages. remember these messages. """
+        # check threshold
+        if not self.threshold_ctx_history.is_exceeded(self.messages):
+            return
+
+        for hook in self.hooks_ctx_history:
+            try:
+                hook(self.messages)
+            except Exception:
+                logger.error(f"call hook of ctx_history failed: {traceback.format_exc()}")
+        return
 
     def append_message(self, msg:dict, to_suppress_log=False):
         """ append a message to context """
         if not to_suppress_log:
             logger.info(msg)
         self.messages.append(msg)
+        self.call_hooks_ctx_history()
 
     def init_prompt(self):
         """ init sth. """

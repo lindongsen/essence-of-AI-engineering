@@ -3,6 +3,8 @@ from contextlib import contextmanager
 
 # define static variables
 KEY_AGENT_NAME = "agent_name"
+KEY_SESSION_ID = "session_id"
+KEY_AGENT_OBJECT = "agent_object"
 
 # define a thread-local storage object
 g_thr_local = threading.local()
@@ -41,3 +43,25 @@ def ctxm_give_agent_name(agent_name):
 def get_agent_name():
     """ return str for agent name """
     return get_thread_var(KEY_AGENT_NAME)
+
+def get_session_id():
+    """ return  session id """
+    return str(get_thread_var(KEY_SESSION_ID))
+
+@contextmanager
+def ctxm_set_agent(agent_obj):
+    """ context manager to set agent object """
+    old_agent_obj = get_thread_var(KEY_AGENT_OBJECT)
+    set_thread_var(KEY_AGENT_OBJECT, agent_obj)
+    try:
+        yield
+    finally:
+        if old_agent_obj:
+            set_thread_var(KEY_AGENT_OBJECT, old_agent_obj)
+        else:
+            unset_thread_var(KEY_AGENT_OBJECT)
+    return
+
+def get_agent_object():
+    """ return agent object """
+    return get_thread_var(KEY_AGENT_OBJECT)

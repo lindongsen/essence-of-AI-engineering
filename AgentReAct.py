@@ -78,7 +78,11 @@ class Step4ReAct(StepCallBase):
                     return
                 # interactive mode, ask user for more input
                 # only thought, no action or final_answer, ask user for more input
-                user_input = input("\n>>> Your input: ")
+                while True:
+                    user_input = input("\n>>> Your input: ")
+                    if not user_input.strip():
+                        continue
+                    break
                 self.user_msg = user_input
                 self.code = self.CODE_STEP_FINAL
                 return

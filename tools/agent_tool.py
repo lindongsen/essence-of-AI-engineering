@@ -18,7 +18,7 @@ def get_all_agent_tools():
             agent_tools[tool_name] = tool_func
     return agent_tools
 
-def agent_writer(msg_or_file:str, model_name:str=None):
+def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace"):
     """ A professional Assistant for writer.
 
     # parameters
@@ -27,6 +27,7 @@ def agent_writer(msg_or_file:str, model_name:str=None):
         if the user does explicitly specify a file, should use it directly.
 
     :model_name: If the user does not explicitly specify, this parameter is not needed.
+    :workspace: a folder absolute path for workspace.
 
     # return
     return final answer.
@@ -37,6 +38,11 @@ def agent_writer(msg_or_file:str, model_name:str=None):
         if os.path.isfile(msg_or_file):
             with open(msg_or_file, "r", encoding="utf-8") as f:
                 message = f.read()
+
+    workspace = workspace.strip()
+    if workspace:
+        if 'workspace' not in message or '工作空间' not in message:
+            message += f"\n----\nworkspace:`{workspace}`\n"
 
     from ai_base.agent_base import AgentRun
     from AgentReAct import SYSTEM_PROMPT, Step4ReAct
@@ -52,7 +58,7 @@ def agent_writer(msg_or_file:str, model_name:str=None):
     agent.llm_model.openai_model_name = model_name
     return agent.run(Step4ReAct(), message)
 
-def agent_programmer(msg_or_file:str, model_name:str=None):
+def agent_programmer(msg_or_file:str, model_name:str=None, workspace:str="/workspace"):
     """ A professional Assistant for programmer.
 
     # parameters
@@ -61,6 +67,7 @@ def agent_programmer(msg_or_file:str, model_name:str=None):
         if the user does explicitly specify a file, should use it directly.
 
     :model_name: If the user does not explicitly specify, this parameter is not needed.
+    :workspace: a folder absolute path for workspace.
 
     # return
     return final answer.
@@ -71,6 +78,11 @@ def agent_programmer(msg_or_file:str, model_name:str=None):
         if os.path.isfile(msg_or_file):
             with open(msg_or_file, "r", encoding="utf-8") as f:
                 message = f.read()
+
+    workspace = workspace.strip()
+    if workspace:
+        if 'workspace' not in message or '工作空间' not in message:
+            message += f"\n----\nworkspace:`{workspace}`\n"
 
     from ai_base.agent_base import AgentRun
     from AgentReAct import SYSTEM_PROMPT, Step4ReAct

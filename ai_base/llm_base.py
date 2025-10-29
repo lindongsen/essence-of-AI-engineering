@@ -67,7 +67,7 @@ class ContentStdout(ContentSender):
 
 class LLMModel(object):
     def __init__(self, max_tokens=80000):
-        self.max_tokens = max_tokens
+        self.max_tokens = os.getenv("MAX_TOKENS", max_tokens)
         self.openai_model_name = os.getenv("OPENAI_MODEL", "DeepSeek-V3.1-Terminus")
         self.model = self.get_llm_model()
 

@@ -1,5 +1,6 @@
 *.log
 *.log.1
+*.db
 .env
 .venv
 __pycache__/

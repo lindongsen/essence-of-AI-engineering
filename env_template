@@ -2,3 +2,9 @@
 OPENAI_MODEL="DeepSeek-V3.1-Terminus"
 OPENAI_API_KEY=""
 OPENAI_API_BASE="https://openapi.coreshub.cn/v1"
+
+# internal
+DEBUG=1
+MAX_TOKENS=128000
+# Managers are separated by semicolons(';'), and parameters are separated by spaces(' ').
+CONTEXT_HISTORY_MANAGERS="sql.ChatHistorySQLAlchemy conn=sqlite:///memory.db;"
