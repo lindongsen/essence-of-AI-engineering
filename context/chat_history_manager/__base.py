@@ -49,6 +49,7 @@ class ContextManager(object):
     """ context messages manager """
     ignored_roles = set([ROLE_SYSTEM, ROLE_USER])
     attention_step_names = set(["action", "observation"])
+    prefix_raw_text_retrieve_msg = "retrieve_msg by msg_id="
 
     def add_message(self, msg: ChatHistoryMessageData):
         """ add a message to storage. """
@@ -66,7 +67,7 @@ class ContextManager(object):
         content_dict.update(
             dict(
                 step_name="archive",
-                raw_text=f"ctx_tool.retrieve_msg({msg_obj.msg_id})"
+                raw_text=f"{self.prefix_raw_text_retrieve_msg}{msg_obj.msg_id}"
             )
         )
         logger.info(
