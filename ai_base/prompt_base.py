@@ -88,6 +88,9 @@ class PromptBase(object):
 
     def call_hooks_ctx_history(self):
         """ let context messages become to history messages. remember these messages. """
+        if not self.hooks_ctx_history:
+            return
+
         # record session
         if get_session_id():
             for hook in self.hooks_ctx_history:
