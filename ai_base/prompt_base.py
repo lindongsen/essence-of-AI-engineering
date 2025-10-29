@@ -25,6 +25,7 @@ from utils import time_tool
 from utils.thread_local_tool import (
     get_agent_name,
 )
+from utils.thread_local_tool import get_session_id
 from context.token import count_tokens
 from context.ctx_manager import get_managers_by_env
 
@@ -79,7 +80,7 @@ class PromptBase(object):
 
         # context history messages
         self.threshold_ctx_history = ThresholdContextHistory()
-        self.hooks_ctx_history = get_managers_by_env() # func(messages)
+        self.hooks_ctx_history = get_managers_by_env() # list[ChatHistoryBase]
 
         # context messages
         self.messages = []
@@ -87,15 +88,21 @@ class PromptBase(object):
 
     def call_hooks_ctx_history(self):
         """ let context messages become to history messages. remember these messages. """
-        # check threshold
-        if not self.threshold_ctx_history.is_exceeded(self.messages):
-            return
+        # record session
+        if get_session_id():
+            for hook in self.hooks_ctx_history:
+                try:
+                    hook.add_session_message(self.messages[-1])
+                except Exception:
+                    logger.error(f"failed to call hook add_session_message: {traceback.format_exc()}")
 
-        for hook in self.hooks_ctx_history:
-            try:
-                hook(self.messages)
-            except Exception:
-                logger.error(f"call hook of ctx_history failed: {traceback.format_exc()}")
+        # check threshold, link messages to reduce content
+        if self.threshold_ctx_history.is_exceeded(self.messages):
+            for hook in self.hooks_ctx_history:
+                try:
+                    hook.link_messages(self.messages)
+                except Exception:
+                    logger.error(f"failed to call hook link_messages: {traceback.format_exc()}")
         return
 
     def append_message(self, msg:dict, to_suppress_log=False):

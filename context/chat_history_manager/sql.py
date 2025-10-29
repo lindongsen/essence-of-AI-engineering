@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 '''
   Author: DawsonLin
   Email: lin_dongsen@126.com
@@ -214,7 +212,7 @@ class ChatHistorySQLAlchemy(ChatHistoryBase):
             # Query SessionMessage with join to Message
             results = session.query(SessionMessage, Message).join(
                 Message, SessionMessage.msg_id == Message.msg_id
-            ).filter(SessionMessage.session_id == session_id).order_by(SessionMessage.create_time.desc()).all()
+            ).filter(SessionMessage.session_id == session_id).order_by(SessionMessage.create_time.asc()).all()
 
             messages = []
             for mapping, message in results:

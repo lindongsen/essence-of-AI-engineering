@@ -1,0 +1,27 @@
+#!/bin/bash
+# Author: DawsonLin
+# Email: developer@yunify.com
+# Created: 2025-10-29
+# Purpose: Delete a session by session ID
+
+WORK_DIR=""
+
+function error_quit() {
+    echo "ERROR: $*"
+    echo ""
+    exit 1
+}
+
+# get work_dir
+for _dir in "/root/ai/essence-of-AI-engineering" "/林生的奇思妙想/essence-of-AI-engineering"; do
+  [ -e "${_dir}" ] && WORK_DIR=${_dir} && break
+done
+
+[ -n "${WORK_DIR}" ] || error_quit "no found work_dir"
+
+cd "${WORK_DIR}" || error_quit "enter work_dir failed: ${WORK_DIR}"
+
+# debug, default is 0
+[ "${DEBUG}" == "" ] && DEBUG=0
+
+DEBUG=${DEBUG} uv run python ./bin/delete_session.py $@

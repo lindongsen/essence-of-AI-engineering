@@ -10,8 +10,12 @@ import os
 from logger import logger
 
 from .chat_history_manager import ALL_MANAGERS
+from .chat_history_manager.__base import ChatHistoryBase
+from .session_manager.__base import SessionStorageBase
+from .session_manager.sql import SessionSQLAlchemy
 
-def get_managers_by_env():
+
+def get_managers_by_env() -> list[ChatHistoryBase]:
     """ get instance of managers """
     env_ctx_history_managers = os.getenv("CONTEXT_HISTORY_MANAGERS")
     if not env_ctx_history_managers:
@@ -42,4 +46,11 @@ def get_managers_by_env():
             ALL_MANAGERS[mgr_name](*args, **kwargs)
         )
     # end for
+    if mgrs:
+        logger.info(f"got CONTEXT_HISTORY_MANAGERS: count={len(mgrs)}")
     return mgrs
+
+def get_session_manager(conn="sqlite:///memory.db") -> SessionStorageBase:
+    """ get a object of session manager """
+    mgr = SessionSQLAlchemy(conn)
+    return mgr

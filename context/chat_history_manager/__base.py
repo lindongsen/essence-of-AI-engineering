@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 '''
   Author: DawsonLin
   Email: lin_dongsen@126.com
@@ -45,100 +43,12 @@ class ChatHistoryMessageData(object):
         self.access_count = None
 
 
-class ContextManager(object):
-    """ context messages manager """
-    ignored_roles = set([ROLE_SYSTEM, ROLE_USER])
-    attention_step_names = set(["action", "observation"])
-    prefix_raw_text_retrieve_msg = "retrieve_msg by msg_id="
+class MessageStorageBase(object):
+    """ Base class for chat history messages manager. """
 
-    def add_message(self, msg: ChatHistoryMessageData):
-        """ add a message to storage. """
+    def add_session_message(self, last_message:dict):
+        """ add message for session """
         raise NotImplementedError
-
-    def _link_msg_id(self, content_dict:dict):
-        """ link content to msg_id """
-        msg_obj = ChatHistoryMessageData(
-            message=json_tool.json_dump(content_dict, indent=0),
-            session_id=get_session_id(),
-            msg_id=None,
-        )
-        self.add_message(msg_obj)
-        content_dict.clear()
-        content_dict.update(
-            dict(
-                step_name="archive",
-                raw_text=f"{self.prefix_raw_text_retrieve_msg}{msg_obj.msg_id}"
-            )
-        )
-        logger.info(
-            f"message is archived: "
-            f"msg_id={msg_obj.msg_id}, "
-            f"length={msg_obj.msg_size}, "
-            f"save_tokens={count_tokens(msg_obj.message)}"
-        )
-        return
-
-    def link_messages(self, messages, index_start=3, index_end=-5, max_size=1024):
-        """ link a message to msg_id """
-        for msg in messages[index_start:index_end]:
-            if msg["role"] in self.ignored_roles:
-                continue
-            content = msg["content"]
-            if content[0] not in ["{", "["]:
-                continue
-            content_obj = None
-            try:
-                content_obj = json_tool.json_load(content)
-            except Exception as _:
-                continue
-
-            if not content_obj:
-                continue
-
-            new_content_obj = []
-            flag_changed = False
-            for content_dict in format_tool.to_list(content_obj):
-                new_content_obj.append(content_dict)
-                if content_dict["step_name"] not in self.attention_step_names:
-                    continue
-                if len(str(content_dict)) <= max_size:
-                    continue
-
-                self._link_msg_id(content_dict)
-                flag_changed = True
-
-            if flag_changed:
-                msg["content"] = json_tool.json_dump(new_content_obj)
-
-        # end for
-        return
-
-    def get_message(self, msg_id: str) -> ChatHistoryMessageData:
-        """ get a message from storage """
-        raise NotImplementedError
-
-    def retrieve_message(self, msg_id: str) -> str:
-        """ retrieve a message """
-        return self.get_message(msg_id).message
-
-    def __call__(self, messages:list):
-        return self.link_messages(messages)
-
-
-class ChatHistoryBase(ContextManager):
-    """
-    Base class for chat history messages manager.
-
-    This abstract base class defines the interface for managing chat history messages
-    and sessions. Subclasses must implement all abstract methods to provide specific
-    storage implementations.
-
-    Class Attributes:
-        tb_chat_history_messages (str): Table name for chat history messages.
-        tb_map_session_message (str): Table name for session-message mapping.
-    """
-    tb_chat_history_messages = "chat_history_messages"
-    tb_map_session_message = "map_session_message"
 
     def add_message(self, msg: ChatHistoryMessageData):
         """
@@ -203,3 +113,119 @@ class ChatHistoryBase(ContextManager):
             msg_id (str): The unique identifier of the message to update.
         """
         raise NotImplementedError
+
+class ContextManager(MessageStorageBase):
+    """ context messages manager """
+    ignored_roles = set([ROLE_SYSTEM, ROLE_USER])
+    attention_step_names = set(["action", "observation"])
+    prefix_raw_text_retrieve_msg = "retrieve_msg by msg_id="
+
+    def _link_msg_id(self, content_dict:dict):
+        """ link content to msg_id """
+        msg_obj = ChatHistoryMessageData(
+            message=json_tool.json_dump(content_dict, indent=0),
+            session_id=get_session_id(),
+            msg_id=None,
+        )
+        self.add_message(msg_obj)
+        content_dict.clear()
+        content_dict.update(
+            dict(
+                step_name="archive",
+                raw_text=f"{self.prefix_raw_text_retrieve_msg}{msg_obj.msg_id}"
+            )
+        )
+        logger.info(
+            f"message is archived: "
+            f"msg_id={msg_obj.msg_id}, "
+            f"length={msg_obj.msg_size}, "
+            f"save_tokens={count_tokens(msg_obj.message)}"
+        )
+        return
+
+    def link_messages(self, messages, index_start=3, index_end=-5, max_size=1024):
+        """ link a message to msg_id """
+        for msg in messages[index_start:index_end]:
+            if msg["role"] in self.ignored_roles:
+                continue
+            content = msg["content"]
+            if content[0] not in ["{", "["]:
+                continue
+            content_obj = None
+            try:
+                content_obj = json_tool.json_load(content)
+            except Exception as _:
+                continue
+
+            if not content_obj:
+                continue
+
+            new_content_obj = []
+            flag_changed = False
+            for content_dict in format_tool.to_list(content_obj):
+                new_content_obj.append(content_dict)
+                if content_dict["step_name"] not in self.attention_step_names:
+                    continue
+                if len(str(content_dict)) <= max_size:
+                    continue
+
+                self._link_msg_id(content_dict)
+                flag_changed = True
+
+            if flag_changed:
+                msg["content"] = json_tool.json_dump(new_content_obj)
+
+        # end for
+        return
+
+    def retrieve_message(self, msg_id: str) -> str:
+        """ retrieve a message """
+        return self.get_message(msg_id).message
+
+    def retrieve_messages(self, session_id:str) -> list[dict]:
+        """ retrieve messages for session continue """
+        msg_set = self.get_messages_by_session(session_id)
+        return [
+            json_tool.json_load(msg.message) for msg in msg_set
+        ]
+
+    def __call__(self, messages:list):
+        """ callable """
+        # reduce the content of context messages.
+        self.link_messages(messages)
+        return
+
+    def add_session_message(self, last_message:dict):
+        """ add message for session """
+        # add last message to storage
+        session_id = get_session_id()
+        if not session_id or session_id == "None":
+            return
+
+        # save last message
+        last_message = json_tool.json_dump(last_message)
+        msg_data = ChatHistoryMessageData(
+            message=last_message,
+            session_id=session_id,
+            msg_id=None,
+        )
+        self.add_message(msg_data)
+        logger.info(f"add message for session: session_id={session_id}, msg_id={msg_data.msg_id}")
+
+        return
+
+
+class ChatHistoryBase(ContextManager):
+    """
+    Base class for chat history messages manager.
+
+    This abstract base class defines the interface for managing chat history messages
+    and sessions. Subclasses must implement all abstract methods to provide specific
+    storage implementations.
+
+    Class Attributes:
+        tb_chat_history_messages (str): Table name for chat history messages.
+        tb_map_session_message (str): Table name for session-message mapping.
+    """
+    tb_chat_history_messages = "chat_history_messages"
+    tb_map_session_message = "map_session_message"
