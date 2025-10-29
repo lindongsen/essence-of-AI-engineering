@@ -62,11 +62,10 @@ class ContextManager(object):
             msg_id=None,
         )
         self.add_message(msg_obj)
-        step_name = content_dict["step_name"]
         content_dict.clear()
         content_dict.update(
             dict(
-                step_name=step_name,
+                step_name="archive",
                 raw_text=f"ctx_tool.retrieve_msg({msg_obj.msg_id})"
             )
         )

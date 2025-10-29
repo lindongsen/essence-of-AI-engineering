@@ -12,8 +12,8 @@ from utils.thread_local_tool import (
 
 def retrieve_msg(msg_id:str):
     """
-    When you see the content "ctx_tool.retrieve_msg", it means this message has been archived.
-    If you need this message, call this tool to retrieve it.
+    When you see the `raw_text` has "ctx_tool.retrieve_msg", or `step_name` is "archive", it means this message has been archived.
+    If you need this message, call this tool to retrieve the message.
 
     Args:
         msg_id (str):
