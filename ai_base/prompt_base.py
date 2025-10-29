@@ -46,7 +46,7 @@ class ThresholdContextHistory(object):
 
     def exceed_msg_len(self, msg_len):
         """ message list length is exceeded """
-        if msg_len >= self.messages_max_len:
+        if msg_len >= max(13, self.messages_max_len):
             return True
         return False
 

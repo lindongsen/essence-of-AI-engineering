@@ -95,13 +95,20 @@ class ContextManager(object):
             if not content_obj:
                 continue
 
+            new_content_obj = []
+            flag_changed = False
             for content_dict in format_tool.to_list(content_obj):
+                new_content_obj.append(content_dict)
                 if content_dict["step_name"] not in self.attention_step_names:
                     continue
                 if len(str(content_dict)) <= max_size:
                     continue
 
                 self._link_msg_id(content_dict)
+                flag_changed = True
+
+            if flag_changed:
+                msg["content"] = json_tool.json_dump(new_content_obj)
 
         # end for
         return
