@@ -209,7 +209,7 @@ class ContextManager(MessageStorageBase):
             return
 
         if last_message["role"] != ROLE_SYSTEM:
-            new_last_message = {"create_time": get_current_date()}
+            new_last_message = {"create_time": get_current_date(include_ms=True)}
             new_last_message.update(last_message)
             last_message = new_last_message
 

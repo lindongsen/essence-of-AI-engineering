@@ -7,11 +7,21 @@
 
 from datetime import datetime
 
-def get_current_date(with_t=False):
+def get_current_date(with_t=False, include_ms=False):
     """
-    :with_t: ISO 8601
+    Get the current date and time in a formatted string.
+
+    :param with_t: If True, use 'T' as separator between date and time (ISO 8601 format).
+                   Default is False, using space.
+    :param include_ms: If True, include milliseconds in the time portion.
+    :return: Formatted date time string.
     """
     c = " "
     if with_t:
         c = "T"
-    return datetime.now().strftime(f"%Y-%m-%d{c}%H:%M:%S")
+    dt = datetime.now()
+    time_format = "%H:%M:%S"
+    if include_ms:
+        ms = f".{dt.microsecond // 1000:03d}"
+        time_format += ms
+    return dt.strftime(f"%Y-%m-%d{c}{time_format}")
