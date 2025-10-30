@@ -65,8 +65,17 @@ def fix_llm_mistakes_on_json(content):
         content = _new_content
         return content
 
-    # case4, \n]}]
+    # case4
     if content[0] == '[':
+        # case, "\n}\n]"
+        i = content.find("\n}\n]")
+        fixed_i = content.find("\n}\n}\n]")
+        if i > 0 and fixed_i < 0:
+            content = content[:i] + "\n}" + content[i:]
+            print_error("!!! LLM makes a mistake, fix it: found '\\n}\\n]'")
+            return content
+
+        # case, "\n]}]"
         i = content.find("\n]")
         if i > 0:
             content_tail = content[i+2:].strip()

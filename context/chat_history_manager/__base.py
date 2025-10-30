@@ -148,7 +148,7 @@ class ContextManager(MessageStorageBase):
         )
         return
 
-    def link_messages(self, messages, index_start=3, index_end=-5, max_size=1024):
+    def link_messages(self, messages, index_start=3, index_end=-11, max_size=1024):
         """ link a message to msg_id """
         for msg in messages[index_start:index_end]:
             if msg["role"] in self.ignored_roles:

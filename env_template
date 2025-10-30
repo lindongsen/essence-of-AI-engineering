@@ -5,6 +5,13 @@ OPENAI_API_BASE="https://openapi.coreshub.cn/v1"
 
 # internal
 DEBUG=1
+
+# LLM
 MAX_TOKENS=128000
-# Managers are separated by semicolons(';'), and parameters are separated by spaces(' ').
+
+# Context Management
+
+## Managers are separated by semicolons(';'), and parameters are separated by spaces(' ').
+## If not set, context management will not be enabled.
 CONTEXT_HISTORY_MANAGERS="sql.ChatHistorySQLAlchemy conn=sqlite:///memory.db;"
+CONTEXT_MESSAGES_SLIM_THRESHOLD_LENGTH=43

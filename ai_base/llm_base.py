@@ -13,13 +13,6 @@ from utils import env_tool
 from context.token import TokenStat
 
 
-# define roles
-ROLE_USER = "user"
-ROLE_ASSISTANT = "assistant"
-ROLE_SYSTEM = "system"
-ROLE_TOOL = "tool"
-
-
 class JsonError(Exception):
     """ invalid json string """
     pass
@@ -43,11 +36,13 @@ def _format_response(response):
     """ format response to list if it is json string """
     if isinstance(response, (list, dict)):
         return _to_list(response)
-    try:
-        response = to_json_str(response)
-        return _to_list(simplejson.loads(response))
-    except Exception as e:
-        print_error(f"parsing response: {e}\n>>>\n{response}\n<<<")
+
+    for count in range(3):
+        try:
+            response = to_json_str(response)
+            return _to_list(simplejson.loads(response))
+        except Exception as e:
+            print_error(f"parsing response: {e}\n>>>\n{response}\n<<<\nretrying times: {count}")
 
     raise JsonError("invalid json string")
 

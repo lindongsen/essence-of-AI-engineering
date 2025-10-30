@@ -32,11 +32,18 @@ from context.ctx_manager import get_managers_by_env
 
 class ThresholdContextHistory(object):
     """ define threshold  """
+
+    # variables
     token_max = 1280000
     token_ratio = 0.8
-    messages_max_len = 13
+    slim_len = 43
+
+    # constants
+    SLIM_MIN_LEN = 27
+
     def __init__(self):
         self.token_max = os.getenv("MAX_TOKENS", self.token_max)
+        self.slim_len = os.getenv("CONTEXT_MESSAGES_SLIM_THRESHOLD_LENGTH", self.slim_len)
 
     def exceed_ratio(self, token_count):
         """ token count is exceeded ratio """
@@ -47,7 +54,7 @@ class ThresholdContextHistory(object):
 
     def exceed_msg_len(self, msg_len):
         """ message list length is exceeded """
-        if msg_len >= max(13, self.messages_max_len):
+        if msg_len >= max(self.SLIM_MIN_LEN, self.slim_len):
             return True
         return False
 
