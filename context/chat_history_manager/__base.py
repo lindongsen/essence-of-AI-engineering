@@ -12,6 +12,7 @@ from utils.hash_tool import md5sum
 from utils import json_tool
 from utils import format_tool
 from utils.thread_local_tool import get_session_id
+from utils.time_tool import get_current_date
 from context.token import count_tokens
 from ai_base.constants import ROLE_SYSTEM, ROLE_USER
 
@@ -206,6 +207,11 @@ class ContextManager(MessageStorageBase):
         session_id = get_session_id()
         if not session_id or session_id == "None":
             return
+
+        if last_message["role"] != ROLE_SYSTEM:
+            new_last_message = {"create_time": get_current_date()}
+            new_last_message.update(last_message)
+            last_message = new_last_message
 
         # save last message
         last_message = json_tool.json_dump(last_message)

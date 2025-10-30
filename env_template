@@ -11,6 +11,13 @@ MAX_TOKENS=128000
 
 # Context Management
 
+## Session Management for chat histroy messages
+#SESSION_ID=
+    # Example:
+    #  `SESSION_ID=001 llm_chat "say sth."`
+    #  `ai_list_sessions` will show all of history sessions.
+    #  `ai_retrieve_messages 001` will show all of history messages.
+
 ## Managers are separated by semicolons(';'), and parameters are separated by spaces(' ').
 ## If not set, context management will not be enabled.
 CONTEXT_HISTORY_MANAGERS="sql.ChatHistorySQLAlchemy conn=sqlite:///memory.db;"
