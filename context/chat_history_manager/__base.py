@@ -126,6 +126,8 @@ class ContextManager(MessageStorageBase):
         message = None
         if len(content_dict) == 2 and "raw_text" in content_dict:
             message = content_dict["raw_text"]
+            if not isinstance(message, str):
+                message = json_tool.json_dump(message, indent=0)
         else:
             message = json_tool.json_dump(content_dict, indent=0)
         msg_obj = ChatHistoryMessageData(

@@ -93,6 +93,10 @@ class PromptBase(object):
         self.messages = []
         self.reset_messages(to_suppress_log=True)
 
+        # set flags
+        if os.getenv("FLAG_DUMP_MESSAGES") == "1":
+            self.flag_dump_messages = True
+
     def call_hooks_ctx_history(self):
         """ let context messages become to history messages. remember these messages. """
         if not self.hooks_ctx_history:

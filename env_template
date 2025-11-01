@@ -22,3 +22,9 @@ MAX_TOKENS=128000
 ## If not set, context management will not be enabled.
 CONTEXT_HISTORY_MANAGERS="sql.ChatHistorySQLAlchemy conn=sqlite:///memory.db;"
 CONTEXT_MESSAGES_SLIM_THRESHOLD_LENGTH=43
+
+## Flags
+
+## After the execution is completed, dump the chat history messages to a file.
+## Set 1 to enable.
+FLAG_DUMP_MESSAGES=0
