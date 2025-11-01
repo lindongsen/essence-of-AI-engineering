@@ -42,8 +42,8 @@ class ThresholdContextHistory(object):
     SLIM_MIN_LEN = 27
 
     def __init__(self):
-        self.token_max = os.getenv("MAX_TOKENS", self.token_max)
-        self.slim_len = os.getenv("CONTEXT_MESSAGES_SLIM_THRESHOLD_LENGTH", self.slim_len)
+        self.token_max = int(os.getenv("MAX_TOKENS", self.token_max))
+        self.slim_len = int(os.getenv("CONTEXT_MESSAGES_SLIM_THRESHOLD_LENGTH", self.slim_len))
 
     def exceed_ratio(self, token_count):
         """ token count is exceeded ratio """
