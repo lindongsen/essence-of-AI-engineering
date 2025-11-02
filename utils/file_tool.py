@@ -2,23 +2,27 @@
   Author: DawsonLin
   Email: lin_dongsen@126.com
   Created: 2025-10-17
-  Purpose:
+  Purpose: File path manipulation and file system utilities
 '''
 
 from pathlib import Path
 
 def get_filename(file_path: str) -> str:
-    """Get the file name (without the final extension) from a path.
-
+    """Extract the filename without extension from a file path.
+    
+    This function returns the stem (filename without the final extension)
+    from a given file path. It handles both Unix and Windows path formats.
+    
+    Args:
+        file_path: Full path to the file
+    
+    Returns:
+        str: Filename without extension, or empty string for invalid input
+    
     Examples:
         "/tmp/123.txt" -> "123"
         "C:\\data\\report.pdf" -> "report"
-
-    Args:
-        file_path: Path to the file.
-
-    Returns:
-        Filename without its final suffix, or an empty string for falsy input.
+        "" -> ""
     """
     if not file_path:
         return ""
