@@ -82,6 +82,7 @@ class LLMModel(object):
 
     # get a object abount llm model by openai api
     def get_llm_model(self):
+        logger.info("getting llm model ...")
         return openai.OpenAI(
             api_key=os.getenv("OPENAI_API_KEY", ""),
             base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
@@ -136,6 +137,7 @@ class LLMModel(object):
     def chat(self, messages, for_raw=False, for_stream=False):
         """ return list_dict """
         retry_times = 10
+        err_count_map = {}
         for i in range(100):
             if i > retry_times:
                 break
@@ -172,6 +174,14 @@ class LLMModel(object):
                 print_error(f"!!! [{i}] InternalServerError, {e}")
                 if i > 7:
                     retry_times += 1
+
+                if 'InternalServerError' not in err_count_map:
+                    err_count_map["InternalServerError"] = 0
+                err_count_map["InternalServerError"] += 1
+
+                if err_count_map["InternalServerError"] > 5:
+                    self.model = self.get_llm_model()
+
                 continue
             except openai.APIConnectionError as e:
                 print_error(f"!!! [{i}] APIConnectionError, {e}")

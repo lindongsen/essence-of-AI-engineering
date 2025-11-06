@@ -141,12 +141,33 @@ def exists_file(file_path:str):
     """ check the file or folder if exists.
 
     # parameters
-    :file_path: string
+    :file_path: string, one file or one folder.
 
     # return
     bool, True for existing.
     """
     return os.path.exists(file_path)
+
+def check_files_existing(**files):
+    """ check multiple files or folders if exist.
+
+    # parameters
+    :**files: keyword arguments, each key is a name (string), value is the file or folder path (string) to check existence.
+
+    # return
+    dict of str to bool, where keys are the provided names, values are True if the path exists, False otherwise.
+
+    # Example
+        exist_files(
+            file1="path1",
+            file2="path2",
+            ...
+        )
+    """
+    results = {}
+    for fname, fpath in files.items():
+        results[fname] = os.path.exists(fpath)
+    return results
 
 
 TOOLS = dict(
@@ -154,4 +175,5 @@ TOOLS = dict(
     read_file=read_file,
     exists_file=exists_file,
     append_file=append_file,
+    check_files_existing=check_files_existing,
 )
