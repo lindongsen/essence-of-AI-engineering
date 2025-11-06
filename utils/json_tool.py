@@ -3,7 +3,7 @@ from utils.print_tool import print_error
 
 def convert_code_block_to_json_str(content:str):
     """Convert markdown code blocks containing JSON to valid JSON string.
-    
+
     This function extracts JSON content from markdown code blocks and converts
     it to a valid JSON string. It handles both single and multiple JSON objects
     within code blocks.
@@ -28,7 +28,7 @@ def convert_code_block_to_json_str(content:str):
 
 def fix_llm_mistakes_on_json(content):
     """Fix common JSON formatting mistakes made by language models.
-    
+
     This function attempts to correct various JSON formatting errors that
     language models might produce, such as missing brackets, incorrect
     structure, or markdown code block artifacts.
@@ -96,11 +96,15 @@ def fix_llm_mistakes_on_json(content):
                 print_error(f"!!! LLM makes a mistake, fix it: found error on tail '{content_tail}'")
                 return content[:i+2]
 
+    # case, \-
+    if "\\-" in content:
+        content = content.replace("\\-", "\\n-")
+
     return content
 
 def to_json_str(content, indent=2):
     """Convert Python objects to JSON string with error handling.
-    
+
     This function converts Python objects (dict, list, etc.) to JSON strings.
     It also handles string inputs by attempting to fix common LLM mistakes
     before returning the result.
@@ -126,7 +130,7 @@ def to_json_str(content, indent=2):
 
 def json_dump(obj, indent=2):
     """Serialize Python object to JSON string.
-    
+
     This is a convenience wrapper around to_json_str that handles
     set and tuple objects by converting them to lists first.
 
@@ -143,7 +147,7 @@ def json_dump(obj, indent=2):
 
 def json_load(content):
     """Deserialize JSON string to Python object.
-    
+
     Args:
         content: JSON string to parse
 
