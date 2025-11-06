@@ -19,6 +19,9 @@ from utils.print_tool import (
     enable_flag_print_step,
     disable_flag_print_step,
 )
+from utils.thread_tool import (
+    is_main_thread,
+)
 
 
 # define prompt of ReAct framework
@@ -78,7 +81,10 @@ class Step4ReAct(StepCallBase):
                     return
                 # interactive mode, ask user for more input
                 # only thought, no action or final_answer, ask user for more input
+                user_input = "continue"
                 while True:
+                    if not is_main_thread():
+                        break
                     user_input = input("\n>>> Your input: ")
                     if not user_input.strip():
                         continue
