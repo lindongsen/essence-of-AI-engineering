@@ -135,9 +135,15 @@ class LLMModel(object):
 
     def chat(self, messages, for_raw=False, for_stream=False):
         """ return list_dict """
-        for i in range(10):
+        retry_times = 10
+        for i in range(100):
+            if i > retry_times:
+                break
+
             if i > 0:
-                sec = i*5
+                sec = (i%retry_times)*5
+                if sec <= 0:
+                    sec = 3
                 print_error(f"[{i}] blocking chat {sec}s ...")
                 time.sleep(sec)
 
@@ -154,18 +160,26 @@ class LLMModel(object):
                 continue
             except openai.RateLimitError as e:
                 print_error(f"!!! [{i}] RateLimitError, {e}")
+                if i > 7:
+                    retry_times += 1
                 continue
             except TypeError as e:
                 print_error(f"!!! [{i}] TypeError, {e}")
                 continue
             except openai.InternalServerError as e:
                 print_error(f"!!! [{i}] InternalServerError, {e}")
+                if i > 7:
+                    retry_times += 1
                 continue
             except openai.APIConnectionError as e:
                 print_error(f"!!! [{i}] APIConnectionError, {e}")
+                if i > 7:
+                    retry_times += 1
                 continue
             except openai.APITimeoutError as e:
                 print_error(f"!!! [{i}] APITimeoutError, {e}")
+                if i > 7:
+                    retry_times += 1
                 continue
 
         raise Exception("chat to LLM is failed")

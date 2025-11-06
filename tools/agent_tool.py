@@ -154,12 +154,13 @@ def async_multitasks_agent_writer(
         result = agent_writer(
             *args, **kwargs
         )
-        results[_key] = {
-            "task": tasks[_key],
-            "result": result,
-        }
+        results[_key]["result"] = result
 
     for k, v in tasks.items():
+        results[k] = {
+            "task": v,
+            "result": "task failed"
+        }
         if k.lower().startswith("task"):
             thr = threading.Thread(
                 name=f"async_multitasks_agent_writer.{k}",
