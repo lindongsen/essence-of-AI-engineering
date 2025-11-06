@@ -144,6 +144,8 @@ class LLMModel(object):
                 sec = (i%retry_times)*5
                 if sec <= 0:
                     sec = 3
+                if sec > 120:
+                    sec = 120
                 print_error(f"[{i}] blocking chat {sec}s ...")
                 time.sleep(sec)
 
