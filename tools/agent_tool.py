@@ -9,7 +9,8 @@ import os
 import threading
 
 from logger import logger
-from utils.json_tool import json_dump
+from utils.json_tool import json_dump, json_load
+from utils.format_tool import to_list
 
 
 def get_all_agent_tools():
@@ -142,6 +143,9 @@ def async_multitasks_agent_writer(
     thrs = {}
     results = {}
 
+    # thread control
+    semaphore = threading.Semaphore(10)
+
     task_prompt = ""
     if task_prompt_file and os.path.exists(task_prompt_file):
         with open(task_prompt_file, encoding="utf-8") as fd:
@@ -151,12 +155,15 @@ def async_multitasks_agent_writer(
         task_prompt += "\n\n----\n\n"
 
     def _execute_task(_key, *args, **kwargs):
-        result = agent_writer(
-            *args, **kwargs
-        )
-        results[_key]["result"] = result
+        with semaphore:
+            result = agent_writer(
+                *args, **kwargs
+            )
+            results[_key]["result"] = result
+        return
 
     for k, v in tasks.items():
+        v = str(v)
         results[k] = {
             "task": v,
             "result": "task failed"
@@ -193,8 +200,65 @@ def async_multitasks_agent_writer(
     return agent_writer(goal, model_name=model_name, workspace=workspace)
 
 
+def async_multitasks_agent_writer2(
+        goal:str,
+        goal_report_file:str,
+        task_prompt_file:str,
+        tasks_file_or_json:str,
+        model_name:str=None,
+        workspace:str="/workspace"
+    ):
+    """ A professional writing assistant capable of executing tasks concurrently.
+
+    one goal, multiple tasks:
+        These tasks will be executed concurrently by WritingAssistant;
+        Finally, the goal will be called to summarize the execution results of these tasks.
+
+    # Example:
+    WritingAssistantMultiTasks(
+        goal={GOAL OR PLAN},
+        goal_report_file={REPORT_FILE_PATH},
+        task_prompt_file={PROMPT_FILE_PATH},
+        tasks_file_or_json={TASKS_FILE_PATH} or {JSON_STRING},
+        model_name={LLM_NAME},
+        workspace={FOLDER}
+    )
+
+    # parameters
+    :goal: string, one goal.
+    :goal_report_file: the file path for saving the final report of this goal.
+    :task_prompt_file: a file path; This document is a supplementary explanation or task requirements.
+    :tasks_file_or_json: a file path or a json string, if file path, its content is json string;
+        The JSON string is a list, and this list is a collection of tasks.
+
+    :model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
+    :workspace: a folder absolute path for workspace.
+
+    # return
+    return final answer.
+    """
+    tasks_content = tasks_file_or_json
+    if tasks_file_or_json[0] in ["/", "."]:
+        with open(tasks_file_or_json, encoding="utf-8") as fd:
+            tasks_content = fd.read()
+    assert tasks_content
+    tasks = json_load(tasks_content)
+    tasks_kv = {}
+    for i, task in enumerate(to_list(tasks)):
+        tasks_kv[f"task{i}"] = task
+
+    return async_multitasks_agent_writer(
+        goal=goal,
+        goal_report_file=goal_report_file,
+        task_prompt_file=task_prompt_file,
+        model_name=model_name,
+        workspace=workspace,
+        **tasks_kv
+    )
+
+
 TOOLS = dict(
     WritingAssistant=agent_writer,
     ProgrammingAssistant=agent_programmer,
-    WritingAssistantMultiTasks=async_multitasks_agent_writer,
+    WritingAssistantMultiTasks=async_multitasks_agent_writer2,
 )

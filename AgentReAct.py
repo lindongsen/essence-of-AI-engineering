@@ -9,6 +9,7 @@ import os
 import argparse
 from dotenv import load_dotenv
 
+from logger import logger
 from prompt_hub.prompt_tool import PromptHubExtractor
 from ai_base.agent_base import (
     StepCallBase,
@@ -57,6 +58,7 @@ class Step4ReAct(StepCallBase):
                     obs = tool_func(**args)
                 except Exception as e:
                     obs = str(e)
+                    logger.exception(e)
                 obs_json = {
                     "step_name": "observation",
                     "raw_text": obs

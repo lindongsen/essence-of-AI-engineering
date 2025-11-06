@@ -193,5 +193,8 @@ class LLMModel(object):
                 if i > 7:
                     retry_times += 1
                 continue
+            except openai.PermissionDeniedError as e:
+                print_error(f"!!! [{i}] PermissionDeniedError, {e}")
+                continue
 
         raise Exception("chat to LLM is failed")
