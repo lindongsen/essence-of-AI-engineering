@@ -3,6 +3,11 @@ OPENAI_MODEL="DeepSeek-V3.1-Terminus"
 OPENAI_API_KEY=""
 OPENAI_API_BASE="https://openapi.coreshub.cn/v1"
 
+# models
+#     split item by ';', split key_value by ','.
+#     example: api_key=aaa,api_base=bbb;api_key=ccc,api_base=ddd
+MODEL_SETTINGS=""
+
 # internal
 DEBUG=1
 

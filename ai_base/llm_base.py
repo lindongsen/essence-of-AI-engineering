@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import random
 import simplejson
 import openai
 
@@ -60,11 +61,57 @@ class ContentStdout(ContentSender):
         sys.stdout.write(content)
 
 
+def parse_model_settings():
+    """Parse model settings from the MODEL_SETTINGS environment variable.
+
+    The variable should contain settings in the format: key1=value1,key2=value2;key3=value3,key4=value4
+
+    Items are separated by ';', and within each item, key-value pairs are separated by ','.
+
+    Each key-value pair is separated by '='.
+
+    Returns a list of dictionaries, where each dictionary represents one item.
+
+    Example:
+
+        MODEL_SETTINGS="k1_a=v1_a,k2_a=v2_a;k1_b=v1_b,k2_b=v2_b"
+
+        Returns: [{"k1_a": "v1_a", "k2_a": "v2_a"}, {"k1_b": "v1_b", "k2_b": "v2_b"}]
+
+    """
+    settings_str = os.getenv("MODEL_SETTINGS")
+    if not settings_str:
+        return []
+    items = settings_str.split(';')
+    result = []
+    for item in items:
+        item = item.strip()
+        if not item:
+            continue
+        kv_pairs = item.split(',')
+        d = {}
+        for kv in kv_pairs:
+            kv = kv.strip()
+            if '=' in kv:
+                k, v = kv.split('=', 1)
+                d[k.strip()] = v.strip()
+        if d:  # only append if dict is not empty
+            result.append(d)
+    return result
+
+
 class LLMModel(object):
     def __init__(self, max_tokens=80000):
         self.max_tokens = int(os.getenv("MAX_TOKENS", max_tokens))
         self.openai_model_name = os.getenv("OPENAI_MODEL", "DeepSeek-V3.1-Terminus")
-        self.model = self.get_llm_model()
+
+        self.model_name = self.openai_model_name
+        self.model_config = {"api_key": "", "api_base": ""} # in using
+        self.model = self.get_llm_model() # in using
+
+        # multiple models, list_dict, _model=self.get_llm_model(model_config)
+        self.models = [] # supported
+        self.get_llm_models()
 
         logger.info(f"model={self.openai_model_name}, max_tokens={max_tokens}")
 
@@ -80,18 +127,50 @@ class LLMModel(object):
     def __del__(self):
         self.tokenStat.flag_running = False
 
+    @property
+    def chat_model(self):
+        """ get a available model object to chat """
+        if self.models:
+            self.model_config = random.choice(self.models)
+            self.model = self.model_config["_model"]
+        return self.model
+
+    def get_llm_models(self):
+        """ add model to self.models;
+
+        self.models format is list_dict;
+
+        About dict:
+            :api_key: a secret key
+            :api_base: a url link
+            :_model: the object of chat
+
+        return self.models.
+        """
+        model_settings = parse_model_settings()
+        if not model_settings:
+            return
+        for model_config in model_settings:
+            _model = self.get_llm_model(
+                api_key=model_config["api_key"],
+                api_base=model_config.get("api_base"),
+            )
+            model_config["_model"] = _model
+            self.models.append(model_config)
+        return self.models
+
     # get a object abount llm model by openai api
-    def get_llm_model(self):
+    def get_llm_model(self, api_key=None, api_base=None):
         logger.info("getting llm model ...")
         return openai.OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY", ""),
-            base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
+            api_key=api_key or os.getenv("OPENAI_API_KEY", ""),
+            base_url=api_base or os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
         ).chat.completions
 
     def call_llm_model(self, messages):
         self.tokenStat.add_msgs(messages)
 
-        response = self.model.create(
+        response = self.chat_model.create(
             model=self.openai_model_name,
             messages=messages,
             temperature=0,
@@ -110,7 +189,7 @@ class LLMModel(object):
     def call_llm_model_by_stream(self, messages):
         self.tokenStat.add_msgs(messages)
 
-        response = self.model.create(
+        response = self.chat_model.create(
             model=self.openai_model_name,
             messages=messages,
             temperature=0,
@@ -163,7 +242,7 @@ class LLMModel(object):
                 print_error(f"!!! [{i}] JsonError, {e}")
                 continue
             except openai.RateLimitError as e:
-                print_error(f"!!! [{i}] RateLimitError, {e}")
+                print_error(f"!!! [{i}] RateLimitError, {self.model_config["api_key"][:7]}, {e}")
                 if i > 7:
                     retry_times += 1
                 continue
