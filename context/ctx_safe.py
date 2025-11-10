@@ -24,6 +24,8 @@ def truncate_message(msg):
     if is_need_truncate(len(msg)):
         print_tool.print_error(f"truncate message with the size: [{MAX_MSG_SIZE}]")
         suffix = " ... (force to truncate)"
+    else:
+        return msg
 
     if isinstance(msg, bytes):
         if suffix:
