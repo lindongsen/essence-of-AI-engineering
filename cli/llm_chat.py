@@ -5,6 +5,9 @@
   Email: lin_dongsen@126.com
   Created: 2025-10-19
   Purpose:
+  Env:
+    @SESSION_ID: string;
+    @SYSTEM_PROMPT: file or content;
 '''
 
 import sys
@@ -47,6 +50,7 @@ def main():
 
     message = get_message()
 
+    # session
     session_id = os.getenv("SESSION_ID")
     messages_from_session = None
     if session_id:
@@ -61,10 +65,24 @@ def main():
                 SessionData(session_id=session_id, task=message)
             )
 
+    # system prompt
+    env_sys_prompt = os.getenv("SYSTEM_PROMPT")
+    sys_prompt_file = ""
+    sys_prompt_content = ""
+    if env_sys_prompt:
+        if os.path.exists(env_sys_prompt):
+            sys_prompt_file = env_sys_prompt
+        else:
+            sys_prompt_content = env_sys_prompt
+
+    if sys_prompt_file:
+        with open(sys_prompt_file, encoding="utf-8") as fd:
+            sys_prompt_content = fd.read().strip()
+
     llm_model = LLMModel()
     llm_model.content_senders.append(ContentStdout())
 
-    prompt_ctl = PromptBase("You are a helpful assistant.")
+    prompt_ctl = PromptBase(sys_prompt_content or "You are a helpful assistant.")
     if messages_from_session:
         prompt_ctl.messages = messages_from_session
         prompt_ctl.add_user_message(message)

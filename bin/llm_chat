@@ -3,6 +3,9 @@
 # Email: developer@yunify.com
 # Created: 2025-10-19
 # Purpose:
+#  Env:
+#    @SESSION_ID: string;
+#    @SYSTEM_PROMPT: file or content;
 
 WORK_DIR=""
 
