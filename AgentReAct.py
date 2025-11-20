@@ -98,7 +98,7 @@ class Step4ReAct(StepCallBase):
             self.result = step["raw_text"]
             self.code = self.CODE_TASK_FINAL
             return
-        elif len(response) == (index-1):
+        elif len(response) == (index+1):
             # the last element, LLM has a mistake
             logger.error("LLM has a mistake: agent can not handle it [%s]", step_name)
             self.code = self.CODE_TASK_FAILED
