@@ -3,6 +3,8 @@
 # Email: developer@yunify.com
 # Created: 2025-10-19
 # Purpose:
+#  Env:
+#    @SYSTEM_PROMPT: file;
 
 WORK_DIR=""
 
@@ -27,4 +29,8 @@ if [ "$1" == "-" ]; then
   task=$(cat "$1")
   [ "$2" != "" ] && task_ex=$(echo -e "\n----\n$*")
 fi
-DEBUG=1 uv run python AgentReAct.py -t "${task} ${task_ex}"
+
+ext_options=""
+[ -n "${SYSTEM_PROMPT}" ] && ext_options="${ext_options} -p '${SYSTEM_PROMPT}'"
+
+DEBUG=1 uv run python AgentReAct.py -t "${task} ${task_ex}" ${ext_options}

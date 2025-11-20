@@ -67,16 +67,20 @@ def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace
     agent.llm_model.openai_model_name = model_name
     return agent.run(Step4ReAct(), message)
 
-def agent_programmer(msg_or_file:str, model_name:str=None, workspace:str="/workspace"):
+def agent_programmer(
+        msg_or_file:str, model_name:str=None, workspace:str="/workspace",
+        system_prompt:str="",
+    ):
     """ A professional Assistant for programmer.
 
     # parameters
-    :msg_or_file: string, can be message or file path.
+    :msg_or_file: string, it can be message or file path for a TASK.
         if user pass a file path, the content of the file will be read as message.
         if the user does explicitly specify a file, should use it directly.
 
     :model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
     :workspace: a folder absolute path for workspace.
+    :system_prompt: string, it can be content or a filepath; If the user does not explicitly specify, this parameter is not needed.
 
     # return
     return final answer.
@@ -93,10 +97,16 @@ def agent_programmer(msg_or_file:str, model_name:str=None, workspace:str="/works
         if 'workspace' not in message or '工作空间' not in message:
             message += f"\n----\nworkspace:`{workspace}`\n"
 
+    # system prompt
+    if system_prompt[0] in ["/", "."]:
+        if os.path.isfile(system_prompt):
+            with open(system_prompt, encoding="utf-8") as fd:
+                system_prompt = fd.read()
+
     from ai_base.agent_base import AgentRun
     from AgentReAct import SYSTEM_PROMPT, Step4ReAct
     agent = AgentRun(
-        system_prompt=SYSTEM_PROMPT + "\nYou are a professional programmer.\n",
+        system_prompt=SYSTEM_PROMPT + system_prompt + "\nYou are a professional programmer.\n",
         tools=None,
         agent_name="AgentProgrammer",
         excluded_tool_kits=get_all_agent_tools().keys(),
