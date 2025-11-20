@@ -98,7 +98,7 @@ def agent_programmer(
             message += f"\n----\nworkspace:`{workspace}`\n"
 
     # system prompt
-    if system_prompt[0] in ["/", "."]:
+    if system_prompt and system_prompt[0] in ["/", "."]:
         if os.path.isfile(system_prompt):
             with open(system_prompt, encoding="utf-8") as fd:
                 system_prompt = fd.read()
