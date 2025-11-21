@@ -281,8 +281,6 @@ class LLMModel(object):
             except openai.BadRequestError as e:
                 # I don't know why some large model services return this issue, but retrying usually resolves it.
                 print_error(f"!!! [{i}] BadRequestError, {e}")
-                if i > 2:
-                    raise e
                 continue
 
         raise Exception("chat to LLM is failed")
