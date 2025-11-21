@@ -78,8 +78,12 @@ class Step4ReAct(StepCallBase):
         elif step_name == "thought":
             if len(response) == 1:
                 if not g_flag_interactive:
-                    self.code = self.CODE_TASK_FAILED
-                    self.result = ("only thought step without action or final_answer in non-interactive mode, exiting.")
+                    # for retry
+                    self.code = self.CODE_STEP_FINAL
+                    self.user_msg = "no found action"
+                    # for failed
+                    # self.code = self.CODE_TASK_FAILED
+                    # self.result = ("only thought step without action or final_answer in non-interactive mode, exiting.")
                     return
                 # interactive mode, ask user for more input
                 # only thought, no action or final_answer, ask user for more input

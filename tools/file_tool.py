@@ -169,6 +169,19 @@ def check_files_existing(**files):
         results[fname] = os.path.exists(fpath)
     return results
 
+def mkdirs(dirs):
+    """make folders.
+
+    Parameters:
+    :dirs: list, multiple folders.
+
+    Returns:
+        raise an Error if error, else return true.
+    """
+    for d in dirs:
+        os.makedirs(d, exist_ok=True)
+    return True
+
 
 TOOLS = dict(
     write_file=write_file,
@@ -176,4 +189,5 @@ TOOLS = dict(
     exists_file=exists_file,
     append_file=append_file,
     check_files_existing=check_files_existing,
+    mkdirs=mkdirs,
 )

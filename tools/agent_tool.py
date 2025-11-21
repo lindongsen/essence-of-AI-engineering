@@ -62,9 +62,8 @@ def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace
         agent_name="AgentWriter",
         excluded_tool_kits=get_all_agent_tools().keys(),
     )
-    if not model_name:
-        model_name = "DeepSeek-V3.1"
-    agent.llm_model.openai_model_name = model_name
+    if model_name:
+        agent.llm_model.openai_model_name = model_name
     return agent.run(Step4ReAct(), message)
 
 def agent_programmer(
@@ -111,9 +110,8 @@ def agent_programmer(
         agent_name="AgentProgrammer",
         excluded_tool_kits=get_all_agent_tools().keys(),
     )
-    if not model_name:
-        model_name = "DeepSeek-V3.1"
-    agent.llm_model.openai_model_name = model_name
+    if model_name:
+        agent.llm_model.openai_model_name = model_name
     return agent.run(Step4ReAct(), message)
 
 def async_multitasks_agent_writer(

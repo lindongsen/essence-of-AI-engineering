@@ -181,7 +181,10 @@ class LLMModel(object):
 
         self.tokenStat.output_token_stat()
 
-        full_content = response.choices[0].message.content.strip()
+        full_content = response.choices[0].message.content
+        if full_content is None:
+            raise TypeError("no response")
+        full_content = full_content.strip()
         self.send_content(full_content)
 
         return full_content
@@ -274,6 +277,12 @@ class LLMModel(object):
                 continue
             except openai.PermissionDeniedError as e:
                 print_error(f"!!! [{i}] PermissionDeniedError, {e}")
+                continue
+            except openai.BadRequestError as e:
+                # I don't know why some large model services return this issue, but retrying usually resolves it.
+                print_error(f"!!! [{i}] BadRequestError, {e}")
+                if i > 2:
+                    raise e
                 continue
 
         raise Exception("chat to LLM is failed")

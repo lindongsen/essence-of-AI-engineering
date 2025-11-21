@@ -168,7 +168,7 @@ class PromptBase(object):
             return
         content = self.hook_format_content(content)
         print_step(content)
-        self.append_message({"role": ROLE_TOOL, "content": content})
+        self.append_message({"role": ROLE_TOOL, "content": content, "tool_call_id": ""})
 
     def dump_messages(self):
         """ dump messages to a file.
