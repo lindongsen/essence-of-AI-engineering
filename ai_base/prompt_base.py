@@ -13,6 +13,7 @@ from tools import get_tool_prompt
 from ai_base.constants import (
     ROLE_USER, ROLE_ASSISTANT, ROLE_SYSTEM, ROLE_TOOL,
 )
+from prompt_hub import prompt_tool
 from utils.print_tool import (
     print_step,
     print_error,
@@ -80,6 +81,9 @@ class PromptBase(object):
         self.tool_prompt = tool_prompt or ""
         if tools_name:
             self.tool_prompt += get_tool_prompt(tools_name)
+
+        # extra tools
+        self.tool_prompt += prompt_tool.get_extra_tools()
 
         # debug
         if self.tool_prompt:

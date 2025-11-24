@@ -7,7 +7,7 @@
 
 It should include the following:
 
-- folder: `bin`, store script or bin files
+- folder: `cli`, store script files
 - folder: `src`, store source code files
 - folder: `tests`, store test files
-- file: `README.MD`, save detail info about of the project
+- file: `README.md`, save detail info about of the project

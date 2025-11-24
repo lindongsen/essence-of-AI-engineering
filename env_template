@@ -33,3 +33,9 @@ CONTEXT_MESSAGES_SLIM_THRESHOLD_LENGTH=43
 ## After the execution is completed, dump the chat history messages to a file.
 ## Set 1 to enable.
 FLAG_DUMP_MESSAGES=0
+
+
+# Tools
+
+## extra tools are separated by semicolons(';'), one tool one file.
+EXTRA_TOOLS=""

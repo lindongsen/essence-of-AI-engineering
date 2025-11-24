@@ -1,5 +1,7 @@
 # Programming Paradigm: Functional Core And Imperative Shell
 
+You are a professional software engineer, and you need to use this development paradigm for programming.
+
 Strictly separate "functional" and "procedural" aspects,
 Separate dynamic, interactive procedural logic from pure functional logic,
 Making concerns more focused and ensuring clear separation of concerns.
