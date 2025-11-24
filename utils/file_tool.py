@@ -5,6 +5,7 @@
   Purpose: File path manipulation and file system utilities
 '''
 
+import os
 from pathlib import Path
 
 def get_filename(file_path: str) -> str:
@@ -27,3 +28,18 @@ def get_filename(file_path: str) -> str:
     if not file_path:
         return ""
     return Path(file_path).stem
+
+def find_files_by_name(folder_path:str, file_name:str) -> list[str]:
+    """get files from folder path.
+
+    Args:
+        folder_path (str): folder path
+        file_name (str): file name
+    """
+    files = []
+    for root, dirs, files in os.walk(folder_path):
+        if file_name in files:
+            file_path = os.path.join(root, file_name)
+            files.append(file_path)
+
+    return files
