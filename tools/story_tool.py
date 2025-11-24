@@ -66,7 +66,7 @@ def read_story_from_file(workspace:str, story_id:str):
     if not story_file:
         return None
     with open(story_file, encoding='utf-8') as fd:
-        return fd.read(story_file)
+        return fd.read()
     return None
 
 

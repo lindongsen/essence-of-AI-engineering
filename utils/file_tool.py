@@ -36,10 +36,10 @@ def find_files_by_name(folder_path:str, file_name:str) -> list[str]:
         folder_path (str): folder path
         file_name (str): file name
     """
-    files = []
+    results = []
     for root, dirs, files in os.walk(folder_path):
         if file_name in files:
             file_path = os.path.join(root, file_name)
-            files.append(file_path)
+            results.append(file_path)
 
-    return files
+    return results
