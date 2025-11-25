@@ -83,7 +83,8 @@ class PromptBase(object):
             self.tool_prompt += get_tool_prompt(tools_name)
 
         # extra tools
-        self.tool_prompt += prompt_tool.get_extra_tools()
+        if self.tool_prompt:
+            self.tool_prompt += prompt_tool.get_extra_tools()
 
         # debug
         if self.tool_prompt:
