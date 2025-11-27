@@ -1,10 +1,10 @@
-# file/folder security
+# File/Folder Security
 
 ## workspace
 
 - If the user does not declare a 'workspace', any operations that modify existing files and folders are (not allowed), including but not limited to: deletion, modification, moving, renaming, etc.
 - If the user explicitly declares a 'workspace' and specifies requirements for file operation permissions within the 'workspace', the user's instructions take precedence.
-- [Attention] The temporary files you generated should be placed in this folder:`{workspace}/_tmp`.
+- If the user has defined a workspace, temporary files should be saved to this folder `{workspace}/_tmp`; otherwise, they should be saved to this folder `/tmp`.
 
 ## absolute path
 

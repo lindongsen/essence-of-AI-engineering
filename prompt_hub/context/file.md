@@ -20,6 +20,8 @@ Core Principle: When calling tools or executing commands, efforts should be made
 
 ### Temporary File Utilization
 
+For the storage location of temporary files, refer to Section "File/Folder Security".
+
 - Save results to temporary files when not all tool output needs attention
 - Read partial content from temporary files for inspection
 - Promptly clean up temporary resources after inspection completion

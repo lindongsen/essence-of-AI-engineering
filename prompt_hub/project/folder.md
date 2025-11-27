@@ -1,6 +1,8 @@
-# project folder
+# Project Folder
 
-- When the "project name" is clearly defined, you should place the generated code (including test code and operational scripts) inside `{workspace}/{project_name}`.
+This (Project Folder) method is only effective when `workspace` and `project_name` are explicitly defined.
+
+- You should place all of the generated code inside `{workspace}/{project_name}`.
 - The relevant folders need to be created in advance.
 
 ## project folder structure
