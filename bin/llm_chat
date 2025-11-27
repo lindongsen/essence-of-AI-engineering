@@ -7,6 +7,22 @@
 #    @SESSION_ID: string;
 #    @SYSTEM_PROMPT: file or content;
 
+BASE_NAME=$(basename "$0")
+ARG1=$1
+[ "${ARG1}" != "-" ] && [ "${ARG1:0:1}" == "-" ] && {
+  echo "Usage: ${BASE_NAME} [TASK]"
+  echo "
+Env:
+  [SESSION_ID]
+    set session id for persistent memory
+
+  [SYSTEM_PROMPT]
+    a file path
+"
+
+  exit 1
+}
+
 WORK_DIR=""
 
 function error_quit() {
