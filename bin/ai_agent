@@ -14,6 +14,10 @@ ARG1=$1
 Env:
   [SYSTEM_PROMPT]
     a file path
+
+Example:
+  - ${BASE_NAME} 'task content'
+  - SYSTEM_PROMPT=/path/to/file ${BASE_NAME} 'task content'
 "
 
   exit 1
@@ -44,6 +48,6 @@ if [ "$1" == "-" ]; then
 fi
 
 ext_options=""
-[ -n "${SYSTEM_PROMPT}" ] && ext_options="${ext_options} -p '${SYSTEM_PROMPT}'"
+[ -n "${SYSTEM_PROMPT}" ] && ext_options="${ext_options} -p ${SYSTEM_PROMPT}"
 
 DEBUG=1 uv run python AgentReAct.py -t "${task} ${task_ex}" ${ext_options}

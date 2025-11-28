@@ -18,6 +18,10 @@ Env:
 
   [SYSTEM_PROMPT]
     a file path
+
+Example:
+  - ${BASE_NAME} 'chat content'
+  - SYSTEM_PROMPT=/path/to/file ${BASE_NAME} 'chat content'
 "
 
   exit 1
