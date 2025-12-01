@@ -101,8 +101,18 @@ def parse_model_settings():
 
 
 class LLMModel(object):
-    def __init__(self, max_tokens=80000):
+    def __init__(
+            self,
+            max_tokens=800,
+            temperature=0.3,
+            top_p=0.97,
+            frequency_penalty=0.3,
+        ):
         self.max_tokens = int(os.getenv("MAX_TOKENS", max_tokens))
+        self.temperature = float(os.getenv("TEMPERATURE", temperature))
+        self.top_p = float(os.getenv("TOP_P", top_p))
+        self.frequency_penalty = float(os.getenv("FREQUENCY_PENALTY", frequency_penalty))
+
         self.openai_model_name = os.getenv("OPENAI_MODEL", "DeepSeek-V3.1-Terminus")
 
         self.model_name = self.openai_model_name
@@ -167,16 +177,25 @@ class LLMModel(object):
             base_url=api_base or os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
         ).chat.completions
 
+    def build_parameters_for_chat(self, messages, stream=False):
+        params = dict(
+            model=self.openai_model_name,
+            messages=messages,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            top_p=self.top_p,
+            frequency_penalty=self.frequency_penalty,
+            n=1,
+            stop=None,
+            stream=stream,
+        )
+        return params
+
     def call_llm_model(self, messages):
         self.tokenStat.add_msgs(messages)
 
         response = self.chat_model.create(
-            model=self.openai_model_name,
-            messages=messages,
-            temperature=0,
-            max_tokens=self.max_tokens,
-            n=1,
-            stop=None,
+            **self.build_parameters_for_chat(messages)
         )
 
         self.tokenStat.output_token_stat()
@@ -193,13 +212,7 @@ class LLMModel(object):
         self.tokenStat.add_msgs(messages)
 
         response = self.chat_model.create(
-            model=self.openai_model_name,
-            messages=messages,
-            temperature=0,
-            max_tokens=self.max_tokens,
-            n=1,
-            stop=None,
-            stream=True,
+            **self.build_parameters_for_chat(messages, stream=True)
         )
 
         full_content = ""

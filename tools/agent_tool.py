@@ -62,6 +62,7 @@ def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace
         agent_name="AgentWriter",
         excluded_tool_kits=get_all_agent_tools().keys(),
     )
+    agent.llm_model.max_tokens = max(1600, agent.llm_model.max_tokens)
     if model_name:
         agent.llm_model.openai_model_name = model_name
     return agent.run(Step4ReAct(), message)

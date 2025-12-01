@@ -81,6 +81,8 @@ def main():
 
     llm_model = LLMModel()
     llm_model.content_senders.append(ContentStdout())
+    llm_model.max_tokens = max(1600, llm_model.max_tokens)
+    llm_model.temperature = 0.97
 
     prompt_ctl = PromptBase(sys_prompt_content or "You are a helpful assistant.")
     if messages_from_session:

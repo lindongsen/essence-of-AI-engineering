@@ -12,7 +12,10 @@ MODEL_SETTINGS=""
 DEBUG=1
 
 # LLM
-MAX_TOKENS=128000
+MAX_TOKENS=800
+TEMPERATURE=0.3
+TOP_P=0.97
+FREQUENCY_PENALTY=0.3
 
 # Context Management
 
@@ -37,5 +40,5 @@ FLAG_DUMP_MESSAGES=0
 
 # Tools
 
-## extra tools are separated by semicolons(';'), one tool one file.
+## extra tools are separated by semicolons(';'), one tool one MD file.
 EXTRA_TOOLS=""
