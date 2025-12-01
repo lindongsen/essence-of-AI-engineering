@@ -103,10 +103,10 @@ def parse_model_settings():
 class LLMModel(object):
     def __init__(
             self,
-            max_tokens=800,
+            max_tokens=8000,
             temperature=0.3,
             top_p=0.97,
-            frequency_penalty=0.3,
+            frequency_penalty=0.0,
         ):
         self.max_tokens = int(os.getenv("MAX_TOKENS", max_tokens))
         self.temperature = float(os.getenv("TEMPERATURE", temperature))
