@@ -16,7 +16,7 @@ def get_extra_tools():
     if extra_tools:
        # split by ';'
        extra_tools = extra_tools.split(';')
-    for tool_prompt_file in extra_tools:
+    for tool_prompt_file in extra_tools or []:
         tool_prompt_file = tool_prompt_file.strip()
         if not tool_prompt_file:
             continue

@@ -19,7 +19,7 @@ Making concerns more focused and ensuring clear separation of concerns.
 
 ## Code Structure Management
 
-All modules must be organized into three categories according to folders, referred to as the "Three-Category Partitioning Principle":
+All modules must be organized into multiple categories according to folders:
 
 1. **Pure Functional Core** (functional_core);
 
@@ -30,11 +30,11 @@ All modules must be organized into three categories according to folders, referr
    Example: Creating a qcow2 image file, where a parameter may indicate it could be created either locally or on another storage path.
 
 The imperative shell can be extended further outward,
-e.g., a `handler_shell` used to respond to the first layer of API programs,
+such as `handler_shell` used to respond to the first layer of API programs,
 forming the call chain: `handler_shell -> component.procedural_shell -> module.procedural_shell -> module.let_shell -> module.functional_core`.
 
-The code structure of modules, components, and the entire project will follow the "Three-Category Partitioning Principle."
-Some common methods can be stored in dedicated folders, such as `common`, which also adhere to the "Three-Category Partitioning Principle."
+The code structure of modules, components, and the entire project will follow the Principle.
+In a scenario with multiple components: Some common methods can be stored in dedicated folders, such as `common`, which also adhere to the Principle.
 
 Example:
 ```
@@ -55,6 +55,9 @@ root@topsail:/workspace# tree
     │   ├── module2
     │   └── procedural_shell
     ├── component2
+    │   ├── functional_core
+    │   ├── let_shell
+    │   └── procedural_shell
     └── handler_shell
 
 [Attention] File/Folder naming should be adapted according to the actual project situation.
