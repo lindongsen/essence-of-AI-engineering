@@ -159,3 +159,16 @@ def get_tools_by_env(raw_tools:list[str]):
     tools = disable_tools_by_env(tools)
 
     return tools
+
+def get_prompt_by_tools(tools:list[str]) -> str:
+    """ return prompt content from prompt_hub """
+    prompt_keys = set()
+    for tool_name in tools:
+        if tool_name.startswith("agent_tool"):
+            key = "tools/agent_tool.md"
+            prompt_keys.add(key)
+
+    prompt_content = ""
+    for key in prompt_keys:
+        prompt_content += read_prompt(key)
+    return prompt_content
