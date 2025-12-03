@@ -40,5 +40,11 @@ FLAG_DUMP_MESSAGES=0
 
 # Tools
 
+## disabled tools of internal, starts with keyword. e.g. "agent_tool;story_tool"
+DISABLED_TOOLS=""
+
+## enabled tools of internal, starts with keyword.
+ENABLED_TOOLS=""
+
 ## extra tools are separated by semicolons(';'), one tool one MD file.
 EXTRA_TOOLS=""

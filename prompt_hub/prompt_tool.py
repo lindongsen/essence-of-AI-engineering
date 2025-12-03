@@ -100,3 +100,62 @@ class PromptHubExtractor(object):
         + prompt_interactive_json
         + read_prompt("format/json_PlanAndExecute.md")
     )
+
+def disable_tools(raw_tools:list[str], target_tools:list[str]):
+    """ return available tools """
+    if not raw_tools:
+        return raw_tools
+    new_tools = raw_tools[:]
+    target_tools = set(target_tools)
+    for raw_tool_name in raw_tools:
+        for disabled_tool_name in target_tools:
+            if raw_tool_name.startswith(disabled_tool_name):
+                new_tools.remove(raw_tool_name)
+                break
+    return new_tools
+
+def disable_tools_by_env(raw_tools:list[str]):
+    """ return available tools """
+    if not raw_tools:
+        return raw_tools
+    env_target_tools = os.getenv("DISABLED_TOOLS")
+    if not env_target_tools:
+        return raw_tools
+    env_target_tools = env_target_tools.replace(',', ';').split(';')
+    return disable_tools(raw_tools, env_target_tools)
+
+def enable_tools(raw_tools:list[str], target_tools:list[str]):
+    """ return available tools """
+    if not raw_tools:
+        return raw_tools
+    new_tools = set()
+    target_tools = set(target_tools)
+    for raw_tool_name in raw_tools:
+        for enabled_tool_name in target_tools:
+            if raw_tool_name.startswith(enabled_tool_name):
+                new_tools.add(raw_tool_name)
+                break
+    return list(new_tools)
+
+def enable_tools_by_env(raw_tools:list[str]):
+    """ return available tools """
+    if not raw_tools:
+        return raw_tools
+    env_target_tools = os.getenv("ENABLED_TOOLS")
+    if not env_target_tools:
+        return raw_tools
+    env_target_tools = env_target_tools.replace(',', ';').split(';')
+    return enable_tools(raw_tools, env_target_tools)
+
+def get_tools_by_env(raw_tools:list[str]):
+    """ return available tools """
+    if not raw_tools:
+        return raw_tools
+
+    # enabled first
+    tools = enable_tools_by_env(raw_tools)
+
+    # disabled secondary
+    tools = disable_tools_by_env(tools)
+
+    return tools

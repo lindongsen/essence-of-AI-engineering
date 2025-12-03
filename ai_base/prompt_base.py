@@ -80,6 +80,7 @@ class PromptBase(object):
         self.system_prompt = system_prompt
         self.tool_prompt = tool_prompt or ""
         if tools_name:
+            tools_name = prompt_tool.get_tools_by_env(tools_name)
             self.tool_prompt += get_tool_prompt(tools_name)
 
         # extra tools
