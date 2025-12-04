@@ -55,7 +55,9 @@ def fix_llm_mistakes_on_json(content):
         print_error("!!! LLM makes a mistake, trying to fix it: no found ']'")
 
         # case: missing one '}' too.
-        if content.endswith("\n}"):
+        if content.endswith("\n}") \
+            or content[-1] in ('"', '}') \
+            :
             try:
                 simplejson.loads(content + "}]")
                 return content + "}]"
