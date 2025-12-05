@@ -10,8 +10,13 @@ import os
 from logger import logger
 
 from .chat_history_manager import ALL_MANAGERS
-from .chat_history_manager.__base import ChatHistoryBase
-from .session_manager.__base import SessionStorageBase
+from .chat_history_manager.__base import (
+    ChatHistoryBase,
+)
+from .session_manager.__base import (
+    SessionStorageBase,
+    SessionData,
+)
 from .session_manager.sql import SessionSQLAlchemy
 
 
@@ -54,3 +59,48 @@ def get_session_manager(conn="sqlite:///memory.db") -> SessionStorageBase:
     """ get a object of session manager """
     mgr = SessionSQLAlchemy(conn)
     return mgr
+
+def get_messages_by_session(session_id:str="", session_mgr:SessionStorageBase=None) -> list[dict]:
+    """ retrieve messages.
+    if session_id is null, trying to get it from env.
+    """
+    if not session_id:
+        session_id = os.getenv("SESSION_ID")
+
+    if not session_id:
+        return []
+
+    if session_mgr is None:
+        session_mgr = get_session_manager()
+    if session_mgr.exists_session(session_id):
+        messages_from_session = session_mgr.retrieve_messages(session_id)
+        logger.info(f"retrieve messages: session_id={session_id}, count={len(messages_from_session)}")
+        return messages_from_session
+
+    return []
+
+def create_session(session_id:str, task:str, session_mgr:SessionStorageBase=None) -> bool:
+    """ record a new session for the task """
+    if not session_id:
+        return False
+    if not task:
+        return False
+
+    if session_mgr is None:
+        session_mgr = get_session_manager()
+
+    session_mgr.create_session(
+        SessionData(session_id=session_id, task=task)
+    )
+    return True
+
+def add_session_message(session_id:str, message:str) -> bool:
+    """ add message to a session """
+    history_mgrs = get_managers_by_env()
+    if not history_mgrs:
+        return False
+
+    for mgr in history_mgrs:
+        mgr.add_session_message(message, session_id=session_id)
+
+    return True

@@ -20,13 +20,14 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from logger import logger
-from ai_base.llm_base import LLMModel, ContentStdout
+from ai_base.llm_base import ContentStdout
+from ai_base.agent_base import AgentRun
+from ai_base.agent_types import react
 from ai_base.prompt_base import PromptBase
 from utils import env_tool
-from utils.thread_local_tool import set_thread_var, KEY_SESSION_ID
 
 from context import ctx_manager
-from context.session_manager.__base import SessionData
+
 
 def get_message():
     """ return str for message """
@@ -44,6 +45,21 @@ def get_message():
     assert message, "message is null"
     return message
 
+def get_agent(system_prompt="", to_dump_messages=False):
+    """ return a agent object. """
+    agent = AgentRun(
+        react.SYSTEM_PROMPT + "\n====\n" + system_prompt,
+        tools=None,
+        agent_name=react.AGENT_NAME,
+        excluded_tool_kits=["agent_tool"]
+    )
+
+    # set flags
+    if to_dump_messages:
+        agent.flag_dump_messages = True
+
+    return agent
+
 def main():
     """ main entry """
     load_dotenv()
@@ -55,7 +71,6 @@ def main():
     messages_from_session = None
     if session_id:
         print(f"session_id: {session_id}")
-        set_thread_var(KEY_SESSION_ID, session_id)
 
         messages_from_session = ctx_manager.get_messages_by_session(session_id)
         if not messages_from_session:
@@ -75,23 +90,30 @@ def main():
         with open(sys_prompt_file, encoding="utf-8") as fd:
             sys_prompt_content = fd.read().strip()
 
-    llm_model = LLMModel()
-    llm_model.content_senders.append(ContentStdout())
+    # agent
+    agent = get_agent(sys_prompt_content)
+
+    # llm
+    llm_model = agent.llm_model
     llm_model.max_tokens = max(1600, llm_model.max_tokens)
-    llm_model.temperature = 0.97
+    llm_model.temperature = max(0.97, llm_model.temperature)
 
-    prompt_ctl = PromptBase(sys_prompt_content or "You are a helpful assistant.")
-    if messages_from_session:
-        prompt_ctl.messages = messages_from_session
-        prompt_ctl.add_user_message(message)
-    else:
-        prompt_ctl.new_session(message)
+    def hook_after_init_prompt(self):
+        if messages_from_session:
+            self.messages += messages_from_session
 
-    if not env_tool.is_debug_mode():
-        print(f">>> message:\n{message}")
-        print(">>> answer:")
-    answer = llm_model.chat(prompt_ctl.messages, for_raw=True, for_stream=True)
-    prompt_ctl.add_assistant_message(answer)
+    def hook_after_new_session(self):
+        ctx_manager.add_session_message(session_id, self.messages[-1])
+
+    agent.hooks_after_init_prompt.append(hook_after_init_prompt)
+    agent.hooks_after_new_session.append(hook_after_new_session)
+
+    answer = agent.run(react.Step4ReAct(), message)
+    if answer:
+        ctx_manager.add_session_message(session_id, agent.messages[-1])
+    print()
+    print(">>> answer:")
+    print(answer)
     print()
 
 if __name__ == "__main__":

@@ -22,13 +22,16 @@ class StepCallBase(object):
     CODE_STEP_FINAL = 1
     CODE_TASK_FAILED = -1
 
-    def __init__(self):
+    def __init__(self, flag_interactive:bool=False):
 
         # for result
         self.code = None
         self.user_msg = None
         self.tool_msg = None
         self.result = None
+
+        # flags
+        self.flag_interactive = True if flag_interactive else False
 
         return
 
@@ -76,6 +79,11 @@ class AgentBase(PromptBase):
             for tool_name in excluded_tool_kits:
                 if tool_name in tool_kits:
                     tool_kits.remove(tool_name)
+                    continue
+                for _tool in tool_kits[:]:
+                    if _tool.startswith(tool_name):
+                        if _tool in tool_kits:
+                            tool_kits.remove(_tool)
 
         super(AgentBase, self).__init__(self.system_prompt, tool_prompt, tool_kits)
         return

@@ -54,7 +54,7 @@ def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace
             message += f"\n----\nworkspace:`{workspace}`\n"
 
     from ai_base.agent_base import AgentRun
-    from AgentReAct import SYSTEM_PROMPT, Step4ReAct
+    from ai_base.agent_types.react import SYSTEM_PROMPT, Step4ReAct
 
     agent = AgentRun(
         system_prompt=SYSTEM_PROMPT + "\nYou are a professional writer.\n",
@@ -104,7 +104,7 @@ def agent_programmer(
                 system_prompt = fd.read()
 
     from ai_base.agent_base import AgentRun
-    from AgentReAct import SYSTEM_PROMPT, Step4ReAct
+    from ai_base.agent_types.react import SYSTEM_PROMPT, Step4ReAct
     agent = AgentRun(
         system_prompt=SYSTEM_PROMPT + system_prompt + "\nYou are a professional programmer.\n",
         tools=None,

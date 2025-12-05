@@ -103,6 +103,10 @@ class PromptBase(object):
         if os.getenv("FLAG_DUMP_MESSAGES") == "1":
             self.flag_dump_messages = True
 
+        # hooks, func(self)
+        self.hooks_after_init_prompt = []
+        self.hooks_after_new_session = []
+
     def call_hooks_ctx_history(self):
         """ let context messages become to history messages. remember these messages. """
         if not self.hooks_ctx_history:
@@ -135,11 +139,23 @@ class PromptBase(object):
     def init_prompt(self):
         """ init sth. """
         self.reset_messages()
+        for hook in self.hooks_after_init_prompt:
+            try:
+                hook(self)
+            except Exception:
+                logger.error(f"failed to call hook: {traceback.format_exc()}")
+        return
 
     def new_session(self, user_message):
         """ start a new session """
         self.init_prompt()
         self.add_user_message(user_message)
+        for hook in self.hooks_after_new_session:
+            try:
+                hook(self)
+            except Exception:
+                logger.error(f"failed to call hook: {traceback.format_exc()}")
+        return
 
     def hook_format_content(self, content):
         """ set a hook to format content to text for LLM can to read """

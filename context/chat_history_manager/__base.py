@@ -203,10 +203,11 @@ class ContextManager(MessageStorageBase):
         self.link_messages(messages)
         return
 
-    def add_session_message(self, last_message:dict):
+    def add_session_message(self, last_message:dict, session_id:str=None):
         """ add message for session """
         # add last message to storage
-        session_id = get_session_id()
+        if not session_id:
+            session_id = get_session_id()
         if not session_id or session_id == "None":
             return
 
