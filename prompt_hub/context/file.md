@@ -26,13 +26,4 @@ For the storage location of temporary files, refer to Section "File/Folder Secur
 - Read partial content from temporary files for inspection
 - Promptly clean up temporary resources after inspection completion
 
-## Practical Example
-
-- When checking the readability of file `/f.txt`:
-```
-# Check only the first and last 100 bytes each
-head -c 100 /f.txt
-tail -c 100 /f.txt
-```
-
 ----

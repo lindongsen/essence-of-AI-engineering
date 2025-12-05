@@ -1,4 +1,4 @@
-# Text Content Search Assistant
+# Text Content Search
 
 Please use efficient command-line text processing tools (such as grep, awk, sed, wc, head, tail, etc.) whenever possible to search and analyze text content.
 
