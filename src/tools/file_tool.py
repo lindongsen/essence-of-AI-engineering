@@ -186,7 +186,6 @@ def mkdirs(dirs):
 TOOLS = dict(
     write_file=write_file,
     read_file=read_file,
-    exists_file=exists_file,
     append_file=append_file,
     check_files_existing=check_files_existing,
     mkdirs=mkdirs,

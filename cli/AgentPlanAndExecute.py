@@ -26,7 +26,12 @@ from ai_base.agent_types.plan_and_execute import (
     StepCall4PlanAndExecute,
 )
 
-from tools import agent_tool
+from tools import (
+    ctx_tool,
+    file_tool,
+    time_tool,
+    agent_tool,
+)
 
 
 def agent_shell(message):
@@ -73,9 +78,15 @@ def get_params():
 def get_agent(user_prompt=""):
     return AgentRun(
         SYSTEM_PROMPT + "\n====\n" + user_prompt,
-        tools={"agent_shell": agent_shell},
+        tools={
+            "agent_shell": agent_shell,
+            "ctx_tool.retrieve_msg": ctx_tool.retrieve_msg,
+            "file_tool.read_file": file_tool.read_file,
+            "file_tool.write_file": file_tool.write_file,
+            "file_tool.check_files_existing": file_tool.check_files_existing,
+            "time_tool.get_local_date": time_tool.get_local_date,
+        },
         agent_name="AgentPlanAndExecute",
-        excluded_tool_kits=agent_tool.get_all_agent_tools().keys()
     )
 
 def run_once(user_input, user_prompt=""):
