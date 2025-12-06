@@ -28,5 +28,4 @@ def get_local_day():
 TOOLS = dict(
     get_local_date=get_local_date,
     get_local_time=get_local_time,
-    get_local_day=get_local_day,
 )

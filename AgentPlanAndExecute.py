@@ -8,22 +8,15 @@ from dotenv import load_dotenv
 import argparse
 
 #from logger import logger
-from prompt_hub.prompt_tool import PromptHubExtractor
 from ai_base.agent_base import (
-    StepCallBase,
     AgentRun,
+)
+from ai_base.agent_types.plan_and_execute import (
+    SYSTEM_PROMPT,
+    StepCall4PlanAndExecute,
 )
 
 from tools import agent_tool
-
-# define roles
-ROLE_USER = "user"
-ROLE_ASSISTANT = "assistant"
-ROLE_SYSTEM = "system"
-ROLE_TOOL = "tool"
-
-# define prompt of Plan-And-Execute framework
-SYSTEM_PROMPT = PromptHubExtractor.prompt_mode_PlanAndExecute
 
 
 def agent_shell(message):
@@ -36,41 +29,6 @@ def agent_shell(message):
     """
     final_answer = agent_tool.agent_programmer(message)
     return {"step_name":"subtask_result","raw_text":final_answer}
-
-class StepCall4PlanAndExecute(StepCallBase):
-    """ running on Plan-And-Execute mode """
-    def _execute(self, step:dict, tools:dict, response:list, index:int):
-        """ acting steps """
-        step_name = step.get("step_name", "")
-        raw_text = step.get("raw_text", "")
-        tool_call = step.get("tool_call", "")
-        tool_args = step.get("tool_args", {})
-
-        if step_name == "final":
-            self.result = raw_text
-            self.code = self.CODE_TASK_FINAL
-            return
-
-        elif step_name == "task-ask":
-            # Ask user for more information
-            user_reply = input(f">>> LLM: {raw_text}\n>>> Your input: ")
-            self.user_msg = {"step_name":"task","raw_text":user_reply}
-            self.code = self.CODE_STEP_FINAL
-            return
-
-        elif step_name == "execute-subtask":
-            if tool_call in tools:
-                tool_func = tools[tool_call]
-                result = tool_func(**tool_args)
-                self.tool_msg = result
-                self.code = self.CODE_STEP_FINAL
-                return
-            else:
-                self.result = (f"Unknown tool call {tool_call}.")
-                self.code = self.CODE_TASK_FAILED
-                return
-
-        return
 
 def get_params():
     ''' return dict for parameters '''
