@@ -6,8 +6,17 @@
 # it can use tool exec_cmd to execute command line in local system.
 
 import os
+import sys
 import argparse
 from dotenv import load_dotenv
+
+# Add project root to path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    sys.path.insert(0, project_root + "/src")
+
+os.chdir(project_root)
 
 from utils.print_tool import (
     enable_flag_print_step,

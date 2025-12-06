@@ -4,8 +4,18 @@
 # it can plan a task into multiple sub-tasks, and execute them one by one.
 # it can use tool agent_shell to execute single sub-task.
 
-from dotenv import load_dotenv
+import os
+import sys
 import argparse
+from dotenv import load_dotenv
+
+# Add project root to path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+    sys.path.insert(0, project_root + "/src")
+
+os.chdir(project_root)
 
 #from logger import logger
 from ai_base.agent_base import (

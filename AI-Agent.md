@@ -18,9 +18,9 @@ cp env_template .env
 
 举例：
 ```
-~/essence-of-AI-engineering# DEBUG=1 uv run AgentPlanAndExecute.py
+~/essence-of-AI-engineering# DEBUG=1 uv run cli/AgentPlanAndExecute.py
 Welcome to the Plan-And-Execute AI Agent. Type 'exit' to quit.
 
->>> Please enter your task: 
+>>> Please enter your task:
 ...
 ```

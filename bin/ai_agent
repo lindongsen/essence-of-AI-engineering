@@ -50,4 +50,4 @@ fi
 ext_options=""
 [ -n "${SYSTEM_PROMPT}" ] && ext_options="${ext_options} -p ${SYSTEM_PROMPT}"
 
-DEBUG=1 uv run python AgentReAct.py -t "${task} ${task_ex}" ${ext_options}
+DEBUG=1 uv run python cli/AgentReAct.py -t "${task} ${task_ex}" ${ext_options}
