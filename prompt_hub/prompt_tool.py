@@ -39,7 +39,7 @@ def get_extra_tools():
 def read_prompt(relative_path):
     """ return string for file content.
 
-    :relative_path: e.g. 'format/json.md'
+    :relative_path: e.g. 'work_mode/format/json.md'
     """
     file_path = relative_path
     if not os.path.exists(file_path):
@@ -67,7 +67,6 @@ class PromptHubExtractor(object):
         read_prompt("security/file.md")
         + read_prompt("context/file.md")
         + read_prompt("search/text.md")
-        + read_prompt("project/folder.md")
     )
 
     # task management
@@ -77,7 +76,7 @@ class PromptHubExtractor(object):
     )
 
     # interactive, json
-    prompt_interactive_json = read_prompt("format/json.md")
+    prompt_interactive_json = read_prompt("work_mode/format/json.md")
 
     # work-mode ReAct
     prompt_mode_ReAct = (
@@ -87,7 +86,7 @@ class PromptHubExtractor(object):
 
         # place them to tail
         + prompt_interactive_json
-        + read_prompt("format/json_ReAct.md")
+        + read_prompt("work_mode/format/json_ReAct.md")
     )
 
     # work-mode PlanAndExecute
@@ -98,7 +97,7 @@ class PromptHubExtractor(object):
 
         # place them to tail
         + prompt_interactive_json
-        + read_prompt("format/json_PlanAndExecute.md")
+        + read_prompt("work_mode/format/json_PlanAndExecute.md")
     )
 
 def disable_tools(raw_tools:list[str], target_tools:list[str]):

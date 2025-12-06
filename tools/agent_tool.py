@@ -11,6 +11,7 @@ import threading
 from logger import logger
 from utils.json_tool import json_dump, json_load
 from utils.format_tool import to_list
+from prompt_hub import prompt_tool
 
 
 def get_all_agent_tools():
@@ -60,9 +61,10 @@ def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace
         system_prompt=SYSTEM_PROMPT + "\nYou are a professional writer.\n",
         tools=None,
         agent_name="AgentWriter",
-        excluded_tool_kits=get_all_agent_tools().keys(),
+        excluded_tool_kits=["agent_tool"],
     )
     agent.llm_model.max_tokens = max(1600, agent.llm_model.max_tokens)
+    agent.llm_model.temperature = max(0.97, agent.llm_model.temperature)
     if model_name:
         agent.llm_model.openai_model_name = model_name
     return agent.run(Step4ReAct(), message)
@@ -106,10 +108,15 @@ def agent_programmer(
     from ai_base.agent_base import AgentRun
     from ai_base.agent_types.react import SYSTEM_PROMPT, Step4ReAct
     agent = AgentRun(
-        system_prompt=SYSTEM_PROMPT + system_prompt + "\nYou are a professional programmer.\n",
+        system_prompt=(
+            SYSTEM_PROMPT +
+            prompt_tool.read_prompt("project/programmer/folder.md") +
+            system_prompt +
+            "\nYou are a professional programmer.\n"
+        ),
         tools=None,
         agent_name="AgentProgrammer",
-        excluded_tool_kits=get_all_agent_tools().keys(),
+        excluded_tool_kits=["agent_tool"],
     )
     if model_name:
         agent.llm_model.openai_model_name = model_name

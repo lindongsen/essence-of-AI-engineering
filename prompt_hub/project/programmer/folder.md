@@ -13,3 +13,12 @@ It should include the following:
 - folder: `src`, store source code files
 - folder: `tests`, store test files
 - file: `README.md`, save detail info about of the project
+
+## Python Project Management
+
+Use the uv tool to manage the project:
+
+- Initialize project: `uv init`. You cannot create or edit the configuration file `pyproject.toml` - it must be managed exclusively by the uv tool itself.
+- Add dependency: `uv add {package_name}`
+- Remove dependency: `uv remove {package_name}`
+- Execute command: `uv run {python_file_or_command}`
