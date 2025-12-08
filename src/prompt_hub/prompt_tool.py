@@ -94,6 +94,7 @@ class PromptHubExtractor(object):
         read_prompt("work_mode/PlanAndExecute.md")
         + prompt_common
         + prompt_task
+        + read_prompt("work_mode/sop/sub_tasks.md")
 
         # place them to tail
         + prompt_interactive_json

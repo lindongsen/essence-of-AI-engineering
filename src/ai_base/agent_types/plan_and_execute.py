@@ -34,6 +34,7 @@ class StepCall4PlanAndExecute(StepCallBase):
             return
 
         elif step_name == "task-ask":
+            assert is_main_thread()
             # Ask user for more information
             user_reply = input(f">>> LLM: {raw_text}\n>>> Your input: ")
             self.user_msg = {"step_name":"task","raw_text":user_reply}
