@@ -50,10 +50,10 @@ def read_prompt(relative_path):
         content = fd.read().strip()
         if content:
             # add split line to tail
-            if content.endswith("====") or content.endswith("----"):
+            if content.endswith("===") or content.endswith("---"):
                 content += "\n"
             else:
-                content += "\n----\n\n"
+                content += "\n---\n\n"
             return content
 
     return ""

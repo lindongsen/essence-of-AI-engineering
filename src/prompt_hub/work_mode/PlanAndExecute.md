@@ -16,4 +16,4 @@ Special notes:
 - In the plan-list and replan-list steps, when encountering ambiguous issues, such as unclear operating system versions or whether relevant tools exist, plan such ambiguous events as subtasks for confirmation.
 - If you "do not understand" the task objective, the output must include 'task-ask'; otherwise, the output must include one and only one 'execute-subtask' or 'final'.
 
-----
+---

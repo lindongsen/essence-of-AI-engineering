@@ -112,5 +112,3 @@ def main():
 
 If your goal is to implement a script, use Method "Script File Structure".
 Else use Method "Component Folder Structure".
-
-----

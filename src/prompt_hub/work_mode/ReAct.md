@@ -10,4 +10,4 @@ Notes:
 - You will reflect on the content of the observation and continue to the "thought" step to reason about the current situation, repeating this cycle until the final answer is obtained.
 - If the user does not raise a specific question, there will only be one "thought" response; otherwise, each response must include two components: one "thought" and one "action" or "final_answer."
 
-----
+---

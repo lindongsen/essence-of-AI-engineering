@@ -17,5 +17,3 @@ Output example:
   }
 ]
 ```
-
-----

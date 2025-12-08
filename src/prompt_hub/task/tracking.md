@@ -20,5 +20,3 @@ Fill in time
   - When a task starts, you can write information such as 'content', 'start_time', etc.
   - While the task is in progress, you can extend the task information on your own and (append) it to the task file.
   - When the task ends, you can write information such as 'end_time', etc.
-
-----
