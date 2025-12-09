@@ -72,6 +72,11 @@ def fix_llm_mistakes_on_json(content):
         i = content.find("\n]")
         if i > 0:
             return content[:i+2]
+        i = content.find("  ]\n")
+        if i > 0:
+            return content[:i+3]
+        if content.endswith("]\n}"):
+            return content[:-2]
 
     # case3: JSON wrapped in markdown code blocks
     _new_content = convert_code_block_to_json_str(content)
