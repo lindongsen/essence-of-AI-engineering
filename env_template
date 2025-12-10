@@ -48,3 +48,8 @@ ENABLED_TOOLS=""
 
 ## extra tools are separated by semicolons(';'), one tool one MD file.
 EXTRA_TOOLS=""
+
+## sandbox
+# split sandbox by ';', split key=value by ','.
+# example: tag=ai,protocol=ssh,node={hostname};tag=ai,protocol=docker,node={hostname},name={container_name}
+SANDBOX_SETTINGS=""

@@ -1,7 +1,5 @@
-import os
-import subprocess
-
 from utils.text_tool import safe_decode
+from utils.cmd_tool import exec_cmd as exec_command
 from context import ctx_safe
 
 def format_text(s, need_truncate=True):
@@ -13,17 +11,6 @@ def format_text(s, need_truncate=True):
     if need_truncate:
         s = ctx_safe.truncate_message(s).strip()
     return s
-
-def build_env(d:dict=None):
-    """ build environs, return dict. """
-    env = {}
-    for k in ["PYTHONPATH", "PATH", "HOSTNAME", "SHELL"]:
-        v = os.getenv(k)
-        if v:
-            env[k] = v
-    if d:
-        env.update(d)
-    return env
 
 def _need_whole_stdout(cmd_string:str):
     """ some cases need stdout """
@@ -61,33 +48,22 @@ def format_return(cmd_string:str, t:tuple):
 
     return _format_return(cmd_string, t)
 
-def exec_cmd(cmd_string, no_need_stderr=False):
-    """
-    # parameters
-    :cmd_string: cmd line.
-    :no_need_stderr: bool; if True, stderr will be null string; default is False for raw content.
+def exec_cmd(cmd_string:str, no_need_stderr:bool=False):
+    """ execute command
 
-    # return
-    tuple(code, stdout, stderr)
-    """
-    env = build_env()
-    t = None
-    try:
-        result = subprocess.run(cmd_string, env=env, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False)
-        # return tuple(returncode, stdout, stderr)
-        t = (
-            result.returncode,
-            result.stdout,
-            "" if no_need_stderr else result.stderr
-        )
-    except subprocess.CalledProcessError as e:
-        t = (
-            e.returncode,
-            e.stdout,
-            "" if no_need_stderr else e.stderr
-        )
+    Args:
+        cmd_string (str):
+        no_need_stderr (bool, optional): if True, stderr still be null. Defaults to False.
 
-    return format_return(cmd_string, t)
+    Returns:
+        tuple: (code, stdout, stderr)
+    """
+    result = exec_command(
+        cmd_string,
+        no_need_stderr=no_need_stderr,
+    )
+
+    return format_return(cmd_string, result)
 
 # name: func
 TOOLS = dict(
