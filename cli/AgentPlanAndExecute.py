@@ -6,6 +6,8 @@
 
 import os
 import sys
+# DONOT DELETE THIS FOR FUNCTION 'input'
+import readline
 import argparse
 from dotenv import load_dotenv
 

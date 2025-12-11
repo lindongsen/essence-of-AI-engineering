@@ -10,8 +10,10 @@
     @SYSTEM_PROMPT: file or content;
 '''
 
-import sys
 import os
+import sys
+# DONOT DELETE THIS FOR FUNCTION 'input'
+import readline
 from dotenv import load_dotenv
 
 # Add project root to path
