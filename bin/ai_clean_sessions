@@ -1,8 +1,8 @@
 #!/bin/bash
 # Author: DawsonLin
 # Email: lin_dongsen@126.com
-# Created: 2025-10-29
-# Purpose: Delete a session by session ID
+# Created: 2025-12-11
+# Purpose: Clean old sessions from session storage
 
 WORK_DIR=""
 
@@ -24,4 +24,4 @@ cd "${WORK_DIR}" || error_quit "enter work_dir failed: ${WORK_DIR}"
 # debug, default is 0
 [ "${DEBUG}" == "" ] && DEBUG=0
 
-DEBUG=${DEBUG} uv run python cli/ai_delete_session.py $*
+DEBUG=${DEBUG} uv run python cli/ai_clean_sessions.py $*

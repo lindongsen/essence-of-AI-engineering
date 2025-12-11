@@ -14,7 +14,7 @@
 
 from sqlalchemy import create_engine, Column, String, Text, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from topsailai.context.chat_history_manager.sql import ChatHistorySQLAlchemy
 from topsailai.logger.log_chat import logger
@@ -101,16 +101,31 @@ class SessionSQLAlchemy(SessionStorageBase):
         finally:
             db_session.close()
 
-    def list_sessions(self) -> list[SessionData]:
+    def list_sessions(self, offset: int = None, limit: int = None) -> list[SessionData]:
         """
-        List all sessions from the storage.
+        List sessions from the storage with optional pagination.
+
+        Args:
+            offset (int, optional): Number of sessions to skip. Defaults to None.
+            limit (int, optional): Maximum number of sessions to return. If None, returns all sessions.
 
         Returns:
-            list[SessionData]: List of all session data objects, ordered by creation time (descending).
+            list[SessionData]: List of session data objects, ordered by creation time (descending).
         """
         db_session = self.SessionLocal()
         try:
-            sessions = db_session.query(Session).order_by(Session.create_time.desc()).all()
+            query = db_session.query(Session).order_by(Session.create_time.desc())
+
+            # Apply offset if provided
+            if offset is not None:
+                query = query.offset(offset)
+
+            # Apply limit if provided, otherwise get all
+            if limit is not None:
+                sessions = query.limit(limit).all()
+            else:
+                sessions = query.all()
+
             result = []
             for session in sessions:
                 session_data = SessionData(
@@ -182,6 +197,53 @@ class SessionSQLAlchemy(SessionStorageBase):
         except Exception as e:
             db_session.rollback()
             logger.error(f"delete_session failed: session_id={session_id}, {e}")
+            raise e
+        finally:
+            db_session.close()
+
+    def clean_sessions(self, before_seconds: int):
+        """
+        Delete sessions that were created before the specified number of seconds ago.
+
+        Args:
+            before_seconds (int): Delete sessions older than this many seconds from current time.
+
+        Returns:
+            int: Number of sessions deleted.
+        """
+        db_session = self.SessionLocal()
+        try:
+            # Calculate the cutoff time
+            cutoff_time = datetime.now() - timedelta(seconds=before_seconds)
+
+            # Find sessions to delete
+            # Use <= for before_seconds=0 edge case to avoid deleting sessions created at exactly the current time
+            if before_seconds == 0:
+                # When before_seconds=0, we should delete nothing since create_time >= now
+                sessions_to_delete = []
+            else:
+                sessions_to_delete = db_session.query(Session).filter(
+                    Session.create_time < cutoff_time
+                ).all()
+
+            deleted_count = 0
+            for session in sessions_to_delete:
+                # Delete associated chat history first
+                self.chat_history.del_messages(session_id=session.session_id)
+                # Delete the session
+                db_session.delete(session)
+                deleted_count += 1
+                logger.info(f"Cleaned old session: session_id={session.session_id}, created={session.create_time}")
+
+            if deleted_count > 0:
+                db_session.commit()
+                logger.info(f"Cleaned {deleted_count} sessions older than {before_seconds} seconds")
+
+            return deleted_count
+
+        except Exception as e:
+            db_session.rollback()
+            logger.error(f"clean_sessions failed: {e}")
             raise e
         finally:
             db_session.close()

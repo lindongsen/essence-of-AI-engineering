@@ -115,6 +115,20 @@ class MessageStorageBase(object):
         """
         raise NotImplementedError
 
+    def clean_messages(self, before_seconds:int) -> int:
+        """
+        Delete messages that have not been accessed within the specified time period.
+
+        Args:
+            before_seconds (int): Number of seconds before current time.
+                                Messages with access_time less than (current time - before_seconds) will be deleted.
+
+        Returns:
+            int: Number of messages deleted.
+        """
+        raise NotImplementedError
+
+
 class ContextManager(MessageStorageBase):
     """ context messages manager """
     ignored_roles = set([ROLE_SYSTEM, ROLE_USER])

@@ -103,3 +103,15 @@ class SessionStorageBase(object):
     def retrieve_messages(self, session_id:str) -> list[dict]:
         """ retrieve messages by chat_history_manager """
         raise NotImplementedError
+
+    def clean_sessions(self, before_seconds: int):
+        """
+        Delete sessions that were created before the specified number of seconds ago.
+
+        Args:
+            before_seconds (int): Delete sessions older than this many seconds from current time.
+
+        Returns:
+            int: Number of sessions deleted.
+        """
+        raise NotImplementedError

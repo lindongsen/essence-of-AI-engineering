@@ -29,7 +29,7 @@
 
 from sqlalchemy import create_engine, Column, String, Text, DateTime, Integer, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .__base import ChatHistoryBase, ChatHistoryMessageData
 from topsailai.logger.log_chat import logger
@@ -303,6 +303,46 @@ class ChatHistorySQLAlchemy(ChatHistoryBase):
         except Exception as e:
             session.rollback()
             logger.error("del_messages failed: msg_id={msg_id}, session_id={session_id}, {e}")
+            raise e
+        finally:
+            session.close()
+
+    def clean_messages(self, before_seconds:int) -> int:
+        """
+        Delete messages that have not been accessed within the specified time period.
+
+        Args:
+            before_seconds (int): Number of seconds before current time.
+                                Messages with access_time less than (current time - before_seconds) will be deleted.
+
+        Returns:
+            int: Number of messages deleted.
+        """
+        session = self.SessionLocal()
+        try:
+            # Calculate the cutoff time
+            cutoff_time = datetime.now() - timedelta(seconds=before_seconds)
+
+            # First, delete all session mappings for messages that meet the condition
+            session_mappings_deleted = session.query(SessionMessage).filter(
+                SessionMessage.msg_id.in_(
+                    session.query(Message.msg_id).filter(Message.access_time < cutoff_time)
+                )
+            ).delete(synchronize_session=False)
+
+            # Then, delete the messages themselves
+            messages_deleted = session.query(Message).filter(
+                Message.access_time < cutoff_time
+            ).delete(synchronize_session=False)
+
+            session.commit()
+
+            logger.info(f"clean messages ok: session_mappings={session_mappings_deleted}, messages={messages_deleted}, before_seconds={before_seconds}")
+            return messages_deleted
+
+        except Exception as e:
+            session.rollback()
+            logger.error(f"clean_messages failed: before_seconds={before_seconds}, {e}")
             raise e
         finally:
             session.close()
