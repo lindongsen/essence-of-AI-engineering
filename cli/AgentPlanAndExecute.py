@@ -15,16 +15,15 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-#from logger import logger
-from ai_base.agent_base import (
+from topsailai.ai_base.agent_base import (
     AgentRun,
 )
-from ai_base.agent_types.plan_and_execute import (
+from topsailai.ai_base.agent_types.plan_and_execute import (
     SYSTEM_PROMPT,
     StepCall4PlanAndExecute,
 )
 
-from tools import (
+from topsailai.tools import (
     ctx_tool,
     file_tool,
     time_tool,

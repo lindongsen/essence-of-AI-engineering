@@ -20,14 +20,14 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from logger import logger
-from ai_base.llm_base import ContentStdout
-from ai_base.agent_base import AgentRun
-from ai_base.agent_types import react
-from ai_base.prompt_base import PromptBase
-from utils import env_tool
+from topsailai.logger import logger
+from topsailai.ai_base.llm_base import ContentStdout
+from topsailai.ai_base.agent_base import AgentRun
+from topsailai.ai_base.agent_types import react
+from topsailai.ai_base.prompt_base import PromptBase
+from topsailai.utils import env_tool
 
-from context import ctx_manager
+from topsailai.context import ctx_manager
 
 
 def get_message():

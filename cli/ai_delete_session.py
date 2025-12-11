@@ -26,7 +26,7 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from context.session_manager.sql import SessionSQLAlchemy
+from topsailai.context.session_manager.sql import SessionSQLAlchemy
 
 
 def main():

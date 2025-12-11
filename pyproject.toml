@@ -1,5 +1,5 @@
 [project]
-name = "essence-of-ai-engineering"
+name = "TopsailAI"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -15,8 +15,3 @@ dependencies = [
     "tiktoken>=0.12.0",
 ]
 
-[tool.uv.workspace]
-members = [
-    "voice",
-    "rag",
-]

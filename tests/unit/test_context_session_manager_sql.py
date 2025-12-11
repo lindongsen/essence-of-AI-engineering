@@ -11,7 +11,7 @@ workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '
 if workspace_root not in sys.path:
     sys.path.insert(0, workspace_root)
     sys.path.insert(0, workspace_root + "/src")
-from context.session_manager.sql import SessionSQLAlchemy, SessionData
+from topsailai.context.session_manager.sql import SessionSQLAlchemy, SessionData
 
 class TestSessionSQLAlchemy:
     @pytest.fixture

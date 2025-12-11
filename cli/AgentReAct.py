@@ -16,16 +16,16 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from utils.print_tool import (
+from topsailai.utils.print_tool import (
     enable_flag_print_step,
     disable_flag_print_step,
 )
 
-from ai_base.agent_base import (
+from topsailai.ai_base.agent_base import (
     AgentRun,
 )
-from ai_base.prompt_base import PromptBase
-from ai_base.agent_types.react import (
+from topsailai.ai_base.prompt_base import PromptBase
+from topsailai.ai_base.agent_types.react import (
     Step4ReAct,
     SYSTEM_PROMPT,
 )

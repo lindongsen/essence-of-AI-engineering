@@ -20,14 +20,14 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from logger import logger
-from ai_base.llm_base import LLMModel, ContentStdout
-from ai_base.prompt_base import PromptBase
-from utils import env_tool
-from utils.thread_local_tool import set_thread_var, KEY_SESSION_ID
+from topsailai.logger import logger
+from topsailai.ai_base.llm_base import LLMModel, ContentStdout
+from topsailai.ai_base.prompt_base import PromptBase
+from topsailai.utils import env_tool
+from topsailai.utils.thread_local_tool import set_thread_var, KEY_SESSION_ID
 
-from context import ctx_manager
-from context.session_manager.__base import SessionData
+from topsailai.context import ctx_manager
+from topsailai.context.session_manager.__base import SessionData
 
 def get_message():
     """ return str for message """

@@ -26,8 +26,8 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from context.session_manager.sql import SessionSQLAlchemy
-from utils import json_tool
+from topsailai.context.session_manager.sql import SessionSQLAlchemy
+from topsailai.utils import json_tool
 
 
 def format_messages(messages):
