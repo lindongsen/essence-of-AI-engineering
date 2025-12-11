@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # 设置Python路径
-export PYTHONPATH="/林生的奇思妙想/essence-of-AI-engineering:$PYTHONPATH"
+export PYTHONPATH="/林生的奇思妙想/TopsailAI:$PYTHONPATH"
 
 # 检查服务是否已经在运行
 if pgrep -f "rag_server.py" > /dev/null; then

@@ -8,7 +8,7 @@ set -x
 
 WORKSPACE="/林生的奇思妙想/rag"
 
-[ -d "/林生的奇思妙想/essence-of-AI-engineering" ] || exit 1
+[ -d "/林生的奇思妙想/TopsailAI" ] || exit 1
 [ -d "${WORKSPACE}" ] && exit 2
 
 cd "${CWD}"

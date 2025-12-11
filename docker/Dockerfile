@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 WORKDIR /林生的奇思妙想
 
 # 4. Clone the repository into the working directory
-RUN git clone https://github.com/lindongsen/essence-of-AI-engineering.git
+RUN git clone https://github.com/lindongsen/TopsailAI.git
 
 # 5. Install the 'uv' build tool globally
 RUN pip install uv
@@ -17,7 +17,7 @@ RUN pip install uv
 # RUN uv sync
 
 # 7. Add the virtual environment's bin directory to PATH
-ENV PATH="/林生的奇思妙想/essence-of-AI-engineering/.venv/bin:/林生的奇思妙想/essence-of-AI-engineering/bin:$PATH"
+ENV PATH="/林生的奇思妙想/TopsailAI/.venv/bin:/林生的奇思妙想/TopsailAI/bin:$PATH"
 
 ENV LANG=C.UTF-8
 

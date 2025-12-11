@@ -18,8 +18,8 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-# Add the essence-of-AI-engineering to Python path
-sys.path.insert(0, '/林生的奇思妙想/essence-of-AI-engineering')
+# Add the TopsailAI to Python path
+sys.path.insert(0, '/林生的奇思妙想/TopsailAI')
 
 from rag.rag_base.chunk_tool import IterChunks
 from rag.rag_base.rag_core import prepare_data, build_prompt, call_llm
