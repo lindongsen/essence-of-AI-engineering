@@ -5,6 +5,7 @@
   Purpose: import all of tools to support AI-Agent.
 '''
 
+import os
 import simplejson
 
 from utils import (
@@ -50,3 +51,18 @@ def get_tool_prompt(tools_name:list=None, tools_map:dict=None):
     return TOOL_PROMPT.format(
         __TOOLS__=simplejson.dumps(tools_doc, indent=2, ensure_ascii=False)
     )
+
+def expand_plugin_tools():
+    """ expand tools by external plugins """
+    env_plugin_tools = os.getenv("PLUGIN_TOOLS")
+    if not env_plugin_tools:
+        return
+    for plugin_path in env_plugin_tools.split(';'):
+        _tools = module_tool.get_external_function_map(plugin_path)
+        if _tools:
+            TOOLS.update(_tools)
+    return
+
+
+# init
+expand_plugin_tools()
