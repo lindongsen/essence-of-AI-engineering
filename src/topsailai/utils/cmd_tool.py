@@ -9,6 +9,9 @@ import os
 import socket
 import subprocess
 
+from .text_tool import safe_decode
+
+
 def build_env(d:dict=None):
     """ build environs, return dict. """
     env = {}
@@ -43,8 +46,8 @@ def exec_cmd(cmd_string:str, no_need_stderr:bool=False, timeout:int=None):
     )
     return (
         result.returncode,
-        result.stdout,
-        "" if no_need_stderr else result.stderr,
+        safe_decode(result.stdout),
+        "" if no_need_stderr else safe_decode(result.stderr),
     )
 
 def exec_cmd_in_remote(cmd:str, remote:str, port=22, timeout:int=None):

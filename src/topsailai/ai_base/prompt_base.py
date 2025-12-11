@@ -29,6 +29,7 @@ from topsailai.utils.thread_local_tool import (
 from topsailai.utils.thread_local_tool import get_session_id
 from topsailai.context.token import count_tokens
 from topsailai.context.ctx_manager import get_managers_by_env
+from topsailai.context.prompt_env import generate_prompt_for_env
 
 
 class ThresholdContextHistory(object):
@@ -133,6 +134,11 @@ class PromptBase(object):
         """ append a message to context """
         if not to_suppress_log:
             logger.info(msg)
+
+        # debug
+        #if self.messages and msg == self.messages[-1]:
+        #    logger.warning("duplicate message")
+
         self.messages.append(msg)
         self.call_hooks_ctx_history()
 
@@ -162,11 +168,26 @@ class PromptBase(object):
         return to_json_str(content)
 
     def reset_messages(self, to_suppress_log=False):
-        """ reset context message. clear all of messages. """
+        """ reset context message. clear all of messages.
+
+        index:
+        - system
+        - env
+        - tool
+        """
         self.messages = []
+        # 1
         self.append_message({"role": ROLE_SYSTEM, "content": self.system_prompt}, to_suppress_log)
+        # 2
+        self.append_message({"role": ROLE_SYSTEM, "content": generate_prompt_for_env()}, to_suppress_log)
         if self.tool_prompt:
+            # last
             self.append_message({"role": ROLE_SYSTEM, "content": self.tool_prompt}, to_suppress_log)
+
+    def update_message_for_env(self):
+        """ update env info """
+        self.messages[1] = {"role": ROLE_SYSTEM, "content": generate_prompt_for_env()}
+        return
 
     def add_user_message(self, content):
         """ the message from human """

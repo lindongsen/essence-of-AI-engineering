@@ -107,7 +107,6 @@ def main():
     max_count = 100
     while True:
         max_count -= 1
-        prompt_ctl.add_user_message(message)
         print(">>> LLM Answer:")
         answer = llm_model.chat(prompt_ctl.messages, for_raw=True, for_stream=True)
         prompt_ctl.add_assistant_message(answer)
@@ -115,6 +114,8 @@ def main():
         if max_count == 0:
             break
         message = input_message()
+        prompt_ctl.add_user_message(message)
+        prompt_ctl.update_message_for_env()
 
     return
 

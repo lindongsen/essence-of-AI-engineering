@@ -158,4 +158,8 @@ class AgentRun(AgentBase):
             if len(self.messages) == ctx_count:
                 print_error("No progress made in this iteration, exiting.")
                 return None
+
+            # update env
+            self.update_message_for_env()
+
         # raise RuntimeError("Unreachable code reached")
