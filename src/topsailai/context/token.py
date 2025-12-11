@@ -81,6 +81,8 @@ class TokenStat(threading.Thread):
         self.total_text_len = 0
         self.current_text_len = 0
 
+        self.msg_count = 0
+
         self.buffer = None
         self.rlock = threading.RLock()
 
@@ -96,6 +98,7 @@ class TokenStat(threading.Thread):
                 current_count=self.current_count,
                 total_text_len=self.total_text_len,
                 current_text_len=self.current_text_len,
+                msg_count=self.msg_count,
             )
         msg = f"[token_stat] {info}"
         print_step(msg)
@@ -107,6 +110,7 @@ class TokenStat(threading.Thread):
         with self.rlock:
             self.buffer = msgs
 
+            self.msg_count = len(msgs)
             self.current_count = 0
             self.current_text_len = 0
 
