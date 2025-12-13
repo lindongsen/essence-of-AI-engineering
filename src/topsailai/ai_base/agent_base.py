@@ -91,9 +91,9 @@ class AgentBase(PromptBase):
             tool_kits = prompt_tool.get_tools_by_env(tool_kits)
 
         self.available_tools = dict()
-        for tool_name in tool_kits:
+        for tool_name in tool_kits or []:
             self.available_tools[tool_name] = INTERNAL_TOOLS[tool_name]
-        for tool_name in self.tools:
+        for tool_name in self.tools or {}:
             self.available_tools[tool_name] = self.tools[tool_name]
 
         super(AgentBase, self).__init__(self.system_prompt, tool_prompt, tool_kits)
@@ -140,6 +140,7 @@ class AgentRun(AgentBase):
             self.new_session({"step_name":"task","raw_text":user_input})
 
         all_tools = self.available_tools
+        logger.info("available tools: %s", all_tools)
 
         while True:
             response = self.llm_model.chat(self.messages)

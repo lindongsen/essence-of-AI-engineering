@@ -63,7 +63,7 @@ class CurrentSystem(_Base):
 def generate_prompt_for_env() -> str:
     """ return env info """
 
-    env_prompt = os.getenv("ENV_PROMPT")
+    env_prompt = os.getenv("ENV_PROMPT") or ""
     if env_prompt:
         # Dynamically retrieve file content
         if env_prompt[0] in ['.', '/']:
