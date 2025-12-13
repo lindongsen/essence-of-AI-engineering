@@ -108,7 +108,13 @@ def disable_tools(raw_tools:list[str], target_tools:list[str]):
     new_tools = raw_tools[:]
     target_tools = set(target_tools)
     for raw_tool_name in raw_tools:
+        raw_tool_name = raw_tool_name.strip()
+        if not raw_tool_name:
+            continue
         for disabled_tool_name in target_tools:
+            disabled_tool_name = disabled_tool_name.strip()
+            if not disabled_tool_name:
+                continue
             if raw_tool_name.startswith(disabled_tool_name):
                 new_tools.remove(raw_tool_name)
                 break
@@ -131,7 +137,13 @@ def enable_tools(raw_tools:list[str], target_tools:list[str]):
     new_tools = set()
     target_tools = set(target_tools)
     for raw_tool_name in raw_tools:
+        raw_tool_name = raw_tool_name.strip()
+        if not raw_tool_name:
+            continue
         for enabled_tool_name in target_tools:
+            enabled_tool_name = enabled_tool_name.strip()
+            if not enabled_tool_name:
+                continue
             if raw_tool_name.startswith(enabled_tool_name):
                 new_tools.add(raw_tool_name)
                 break
