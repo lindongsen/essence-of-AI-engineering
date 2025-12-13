@@ -1,58 +1,135 @@
-# openai
+# =============================================================================
+# OpenAI Configuration
+# =============================================================================
+
+# OpenAI Model Configuration
+# Default model used for LLM interactions
 OPENAI_MODEL="DeepSeek-V3.1-Terminus"
+
+# OpenAI API Key
+# Required for accessing OpenAI-compatible API endpoints
 OPENAI_API_KEY=""
+
+# OpenAI API Base URL
+# Base URL for OpenAI-compatible API services
 OPENAI_API_BASE="https://openapi.coreshub.cn/v1"
 
-# models
-#     split item by ';', split key_value by ','.
-#     example: api_key=aaa,api_base=bbb;api_key=ccc,api_base=ddd
+
+# =============================================================================
+# Multi-Model Configuration
+# =============================================================================
+
+# Multiple Model Configuration
+# Format: Multiple model configurations separated by semicolons (';')
+# Each model: key-value pairs separated by commas (',')
+# Example: api_key=aaa,api_base=bbb;api_key=ccc,api_base=ddd
+# Purpose: Allows using multiple LLM providers with automatic failover
 MODEL_SETTINGS=""
 
-# internal
+
+# =============================================================================
+# Application Settings
+# =============================================================================
+
+# Debug Mode
+# 0 = Production mode (disabled)
+# 1 = Debug mode (enabled) - enables verbose logging and debugging features
 DEBUG=1
 
-# LLM
+
+# =============================================================================
+# LLM Parameters
+# =============================================================================
+
+# Maximum Tokens
+# Maximum number of tokens to generate in each LLM response
 MAX_TOKENS=8000
+
+# Temperature
+# Controls randomness: 0.0 = deterministic, 1.0 = creative
 TEMPERATURE=0.3
+
+# Top P (Commented out - available for advanced configuration)
+# Controls diversity via nucleus sampling
 #TOP_P=0.97
+
+# Frequency Penalty (Commented out - available for advanced configuration)
+# Penalizes repeated tokens: 0.0 = no penalty, 1.0 = maximum penalty
 #FREQUENCY_PENALTY=0.3
 
+
+# =============================================================================
 # Context Management
+# =============================================================================
 
-## Session Management for chat histroy messages
-#SESSION_ID=
-    # Example:
-    #  `SESSION_ID=001 llm_chat "say sth."`
-    #  `ai_list_sessions` will show all of history sessions.
-    #  `ai_retrieve_messages 001` will show all of history messages.
+# Session Management
+# SESSION_ID=
+# When set, enables session-based chat history persistence
+# Example usage:
+#   SESSION_ID=001 llm_chat "your message here"
+#   ai_list_sessions - lists all available sessions
+#   ai_retrieve_messages 001 - retrieves messages for session 001
 
-## Managers are separated by semicolons(';'), and parameters are separated by spaces(' ').
-## If not set, context management will not be enabled.
+# Chat History Managers
+# Format: Manager classes separated by semicolons (';')
+# Each manager: class_name parameters separated by spaces (' ')
+# If not set, context management is disabled
+# Current implementation supports SQLAlchemy-based storage
 CONTEXT_HISTORY_MANAGERS="sql.ChatHistorySQLAlchemy conn=sqlite:///memory.db;"
+
+# Message Slimming Threshold
+# Messages longer than this threshold (in tokens) will be automatically slimmed
+# to optimize context window usage and prevent token overflow
 CONTEXT_MESSAGES_SLIM_THRESHOLD_LENGTH=43
 
-## Flags
 
-## After the execution is completed, dump the chat history messages to a file.
-## Set 1 to enable.
+# =============================================================================
+# Feature Flags
+# =============================================================================
+
+# Dump Messages Flag
+# When set to 1, chat history messages are automatically dumped to a file
+# after each execution for debugging and analysis purposes
 FLAG_DUMP_MESSAGES=0
 
 
-# Tools
+# =============================================================================
+# Tool Configuration
+# =============================================================================
 
-## disabled tools of internal, starts with keyword. e.g. "agent_tool;story_tool"
+# Disabled Tools
+# Internal tools to disable (tools starting with these keywords)
+# Format: Tool names separated by semicolons (';')
+# Example: "agent_tool;story_tool" - disables all tools starting with these prefixes
 DISABLED_TOOLS=""
 
-## enabled tools of internal, starts with keyword.
+# Enabled Tools
+# Internal tools to enable (tools starting with these keywords)
+# Format: Tool names separated by semicolons (';')
+# Takes precedence over DISABLED_TOOLS - only tools matching these prefixes will be available
 ENABLED_TOOLS=""
 
-## extra tools are separated by semicolons(';'), one tool one MD file.
+# Extra Tools
+# Additional external tools to include in the agent's toolset
+# Format: File paths separated by semicolons (';')
+# Each tool should be defined in a separate Markdown (.md) file
 EXTRA_TOOLS=""
 
-## plugin tools are separated by ';', one plugin one folder.
+# Plugin Tools
+# External plugin tools to dynamically load
+# Format: Plugin directory paths separated by semicolons (';')
+# Each plugin is loaded from a separate directory and integrated via the 'TOOLS' variable
 PLUGIN_TOOLS=""
 
-## sandbox
-# split sandbox by ';', split key=value by ','.
-# example: tag=ai,protocol=ssh,node={hostname};tag=ai,protocol=docker,node={hostname},name={container_name}
+
+# =============================================================================
+# Sandbox Configuration
+# =============================================================================
+
+# Sandbox Environment Settings
+# Format: Multiple sandbox configurations separated by semicolons (';')
+# Each sandbox: key-value pairs separated by commas (',')
+# Example: tag=ai,protocol=ssh,node=hostname;tag=ai,protocol=docker,node=host,name=container
+# Supported protocols: ssh, docker
+# Purpose: Enables command execution in isolated environments
 SANDBOX_SETTINGS=""
