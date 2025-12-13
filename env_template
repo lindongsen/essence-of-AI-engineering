@@ -57,6 +57,15 @@ TEMPERATURE=0.3
 # Penalizes repeated tokens: 0.0 = no penalty, 1.0 = maximum penalty
 #FREQUENCY_PENALTY=0.3
 
+# =============================================================================
+# System Prompt
+# =============================================================================
+
+# one file or content
+# SYSTEM_PROMPT=""
+
+# one file or content
+# ENV_PROMPT=""
 
 # =============================================================================
 # Context Management

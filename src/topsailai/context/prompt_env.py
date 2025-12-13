@@ -62,9 +62,18 @@ class CurrentSystem(_Base):
 
 def generate_prompt_for_env() -> str:
     """ return env info """
+
+    env_prompt = os.getenv("ENV_PROMPT")
+    if env_prompt:
+        # Dynamically retrieve file content
+        if env_prompt[0] in ['.', '/']:
+            with open(env_prompt, encoding="utf-8") as fd:
+                env_prompt = fd.read()
+
     return "# Environment\n" + "\n".join(
         [
             CurrentDate().prompt,
             CurrentSystem().prompt,
+            env_prompt,
         ]
     )

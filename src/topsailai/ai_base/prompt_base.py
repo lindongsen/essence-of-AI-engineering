@@ -172,7 +172,7 @@ class PromptBase(object):
 
         index:
         - system
-        - env
+        - env, dynamic
         - tool
         """
         self.messages = []
