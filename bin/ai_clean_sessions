@@ -4,7 +4,8 @@
 # Created: 2025-12-11
 # Purpose: Clean old sessions from session storage
 
-WORK_DIR=""
+CWD=$(dirname "$(readlink -f $0)")
+WORK_DIR="${CWD}/../"
 
 function error_quit() {
     echo "ERROR: $*"

@@ -4,7 +4,8 @@
 # Created: 2025-10-29
 # Purpose: Delete a session by session ID
 
-WORK_DIR=""
+CWD=$(dirname "$(readlink -f $0)")
+WORK_DIR="${CWD}/../"
 
 function error_quit() {
     echo "ERROR: $*"

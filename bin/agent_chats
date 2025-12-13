@@ -27,7 +27,8 @@ Example:
   exit 1
 }
 
-WORK_DIR=""
+CWD=$(dirname "$(readlink -f $0)")
+WORK_DIR="${CWD}/../"
 
 function error_quit() {
     echo "ERROR: $*"
