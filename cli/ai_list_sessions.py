@@ -25,7 +25,7 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from topsailai.context.session_manager.sql import SessionSQLAlchemy
+from topsailai.context.ctx_manager import get_session_manager
 
 
 def format_sessions(sessions):
@@ -56,11 +56,13 @@ def format_sessions(sessions):
 
 def main():
     # Get database connection from command line or use default
-    db_conn = "sqlite:///memory.db"
+    db_conn = None
+    if len(sys.argv) > 2:
+        db_conn = sys.argv[2]
 
     try:
         # Create manager
-        manager = SessionSQLAlchemy(db_conn)
+        manager = get_session_manager(db_conn)
 
         # List sessions
         sessions = manager.list_sessions()

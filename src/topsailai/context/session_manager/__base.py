@@ -50,6 +50,11 @@ class SessionStorageBase(object):
     """
     tb_session = "session"
 
+    def __init__(self):
+
+        # chat_history_manager
+        self.chat_history = None
+
     def exists_session(self, session_id) -> bool:
         """ True for existing """
         raise NotImplementedError

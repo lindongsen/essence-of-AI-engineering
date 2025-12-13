@@ -18,7 +18,6 @@ Examples:
 
 import sys
 import os
-from datetime import datetime
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -26,7 +25,7 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from topsailai.context.session_manager.sql import SessionSQLAlchemy
+from topsailai.context.ctx_manager import get_session_manager
 
 
 def main():
@@ -38,12 +37,13 @@ def main():
 
     session_id = sys.argv[1]
 
-    # Get database connection from command line or use default
-    db_conn = "sqlite:///memory.db"
+    db_conn = None
+    if len(sys.argv) > 2:
+        db_conn = sys.argv[2]
 
     try:
         # Create manager
-        manager = SessionSQLAlchemy(db_conn)
+        manager = get_session_manager(db_conn)
 
         # Check if session exists
         if not manager.exists_session(session_id):

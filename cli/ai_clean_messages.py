@@ -29,17 +29,15 @@ sys.path.insert(0, project_root + "/src")
 
 os.chdir(project_root)
 
-from topsailai.context.chat_history_manager.sql import ChatHistorySQLAlchemy
+from topsailai.context.ctx_manager import get_session_manager
 
 
 def main():
     # Default values
     default_before_seconds = 30 * 24 * 60 * 60  # 30 days in seconds
-    default_db_conn = "sqlite:///memory.db"
 
     # Parse command line arguments
     before_seconds = default_before_seconds
-    db_conn = default_db_conn
 
     if len(sys.argv) > 1:
         try:
@@ -51,12 +49,14 @@ def main():
             print("Error: before_seconds must be a valid integer")
             sys.exit(1)
 
+    db_conn = None
     if len(sys.argv) > 2:
         db_conn = sys.argv[2]
 
     try:
         # Create manager
-        manager = ChatHistorySQLAlchemy(db_conn)
+        session_manager = get_session_manager(db_conn)
+        manager = session_manager.chat_history
 
         # Clean messages
         deleted_count = manager.clean_messages(before_seconds)

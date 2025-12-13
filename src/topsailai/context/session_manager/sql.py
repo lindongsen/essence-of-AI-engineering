@@ -21,6 +21,8 @@ from topsailai.logger.log_chat import logger
 
 from .__base import SessionStorageBase, SessionData
 
+DEFAULT_CONN = "sqlite:///memory.db"
+
 Base = declarative_base()
 
 class Session(Base):

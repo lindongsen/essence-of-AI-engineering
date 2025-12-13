@@ -17,10 +17,10 @@ from .session_manager.__base import (
     SessionStorageBase,
     SessionData,
 )
-from .session_manager.sql import SessionSQLAlchemy
+from .session_manager.sql import SessionSQLAlchemy, DEFAULT_CONN
 
 
-def get_managers_by_env() -> list[ChatHistoryBase]:
+def get_managers_by_env(count=10) -> list[ChatHistoryBase]:
     """ get instance of managers """
     env_ctx_history_managers = os.getenv("CONTEXT_HISTORY_MANAGERS")
     if not env_ctx_history_managers:
@@ -50,15 +50,32 @@ def get_managers_by_env() -> list[ChatHistoryBase]:
         mgrs.append(
             ALL_MANAGERS[mgr_name](*args, **kwargs)
         )
+        count -= 1
+        if count <= 0:
+            break
     # end for
     if mgrs:
         logger.info(f"got CONTEXT_HISTORY_MANAGERS: count={len(mgrs)}")
     return mgrs
 
-def get_session_manager(conn="sqlite:///memory.db") -> SessionStorageBase:
-    """ get a object of session manager """
-    mgr = SessionSQLAlchemy(conn)
-    return mgr
+def get_session_manager(conn=None, default_conn=DEFAULT_CONN) -> SessionStorageBase:
+    """ get a object of session manager.
+
+    get manager by conn ->
+    get one manager by env ->
+    get manager by default_conn
+    """
+    if conn:
+        return SessionSQLAlchemy(conn)
+
+    mgrs = get_managers_by_env(1)
+    if mgrs:
+        return mgrs[0]
+
+    if default_conn:
+        return SessionSQLAlchemy(default_conn)
+
+    raise Exception("fail to get session manager")
 
 def get_messages_by_session(session_id:str="", session_mgr:SessionStorageBase=None) -> list[dict]:
     """ retrieve messages.
