@@ -41,7 +41,7 @@ for _dir in "/root/ai/TopsailAI" "/林生的奇思妙想/TopsailAI"; do
   [ -e "${_dir}" ] && WORK_DIR=${_dir} && break
 done
 
-[ -n "${WORK_DIR}" ] || error_quit “no found work_dir”
+[ -n "${WORK_DIR}" ] || error_quit "no found work_dir"
 
 cd "${WORK_DIR}" || error_quit "enter work_dir failed: ${WORK_DIR}"
 
@@ -62,5 +62,8 @@ fi
   command -v ai_retrieve_messages > /dev/null && ai_retrieve_messages "${SESSION_ID}"
 }
 
+run_cli="uv run"
+[ "${UV_NO_DEV}" == "1" ] && run_cli="python"
+
 # start
-uv run python cli/llm_chats.py "${task} ${task_ex}"
+${run_cli} cli/llm_chats.py "${task} ${task_ex}"
