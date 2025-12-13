@@ -2,6 +2,10 @@ from topsailai.logger.log_chat import logger
 from topsailai.utils.print_tool import (
     print_error,
 )
+from topsailai.utils.thread_local_tool import (
+    ctxm_give_agent_name,
+    ctxm_set_agent,
+)
 
 from topsailai.ai_base.prompt_base import (
     PromptBase,
@@ -9,10 +13,8 @@ from topsailai.ai_base.prompt_base import (
 from topsailai.ai_base.llm_base import (
     LLMModel,
 )
-from topsailai.utils.thread_local_tool import (
-    ctxm_give_agent_name,
-    ctxm_set_agent,
-)
+from topsailai.prompt_hub import prompt_tool
+
 from topsailai.tools import get_tool_prompt, TOOLS as INTERNAL_TOOLS
 
 
@@ -85,6 +87,15 @@ class AgentBase(PromptBase):
                         if _tool in tool_kits:
                             tool_kits.remove(_tool)
 
+        if tool_kits:
+            tool_kits = prompt_tool.get_tools_by_env(tool_kits)
+
+        self.available_tools = dict()
+        for tool_name in tool_kits:
+            self.available_tools[tool_name] = INTERNAL_TOOLS[tool_name]
+        for tool_name in self.tools:
+            self.available_tools[tool_name] = self.tools[tool_name]
+
         super(AgentBase, self).__init__(self.system_prompt, tool_prompt, tool_kits)
         return
 
@@ -128,7 +139,7 @@ class AgentRun(AgentBase):
         if user_input:
             self.new_session({"step_name":"task","raw_text":user_input})
 
-        all_tools = self.all_tools
+        all_tools = self.available_tools
 
         while True:
             response = self.llm_model.chat(self.messages)
