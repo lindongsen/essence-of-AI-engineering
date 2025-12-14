@@ -1,8 +1,8 @@
 import os
 from datetime import datetime
-import simplejson
 
 from topsailai.logger.log_chat import logger
+from topsailai.utils import json_tool
 
 from . import thread_local_tool
 from .format_tool import to_list
@@ -18,6 +18,20 @@ def get_truncation_len() -> int|None:
     except Exception:
         pass
     return None
+
+def truncate_msg(msg:str|list|dict) -> str:
+    truncation_len = get_truncation_len()
+    if truncation_len and truncation_len > 0:
+        if isinstance(msg, str) and len(msg) > (truncation_len + 5):
+            msg = json_tool.json_load(msg)
+
+        if isinstance(msg, (dict, list)):
+            for _msg_d in to_list(msg):
+                _raw_text = _msg_d.get("raw_text")
+                if _raw_text and len(_raw_text) > truncation_len:
+                    _msg_d["raw_text"] = _msg_d["raw_text"][:truncation_len] + " ..."
+            msg = json_tool.json_dump(msg, indent=2)
+    return msg
 
 def enable_flag_print_step():
     """Enable step-by-step printing for debugging purposes.
@@ -47,17 +61,10 @@ def print_with_time(msg):
     - Optional agent name if set in thread-local storage
     - The message content
     """
-    truncation_len = get_truncation_len()
-    if truncation_len and truncation_len > 0:
-        if isinstance(msg, str):
-            msg = simplejson.loads(msg)
-
-        if isinstance(msg, (dict, list)):
-            for _msg_d in to_list(msg):
-                _raw_text = _msg_d.get("raw_text")
-                if _raw_text and len(_raw_text) > truncation_len:
-                    _msg_d["raw_text"] = _msg_d["raw_text"][:truncation_len] + " ..."
-            msg = simplejson.dumps(msg, indent=2, default=str, ensure_ascii=False)
+    try:
+        msg = truncate_msg(msg)
+    except Exception:
+        pass
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     content = (f"[{now}] {msg}")
