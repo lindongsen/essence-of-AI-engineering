@@ -2,11 +2,6 @@ import os
 from datetime import datetime
 
 from topsailai.logger.log_chat import logger
-from topsailai.utils import json_tool
-
-from . import thread_local_tool
-from .format_tool import to_list
-
 
 g_flag_print_step = None
 
@@ -20,6 +15,9 @@ def get_truncation_len() -> int|None:
     return None
 
 def truncate_msg(msg:str|list|dict) -> str:
+    from topsailai.utils import json_tool
+    from .format_tool import to_list
+
     truncation_len = get_truncation_len()
     if truncation_len and truncation_len > 0:
         if isinstance(msg, str) and len(msg) > (truncation_len + 5):
@@ -61,6 +59,8 @@ def print_with_time(msg):
     - Optional agent name if set in thread-local storage
     - The message content
     """
+    from . import thread_local_tool
+
     try:
         msg = truncate_msg(msg)
     except Exception:
