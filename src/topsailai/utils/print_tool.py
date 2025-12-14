@@ -20,14 +20,14 @@ def truncate_msg(msg:str|list|dict) -> str:
 
     truncation_len = get_truncation_len()
     if truncation_len and truncation_len > 0:
-        if isinstance(msg, str) and len(msg) > (truncation_len + 5):
+        if isinstance(msg, str) and len(msg) > (truncation_len + 100):
             msg = json_tool.json_load(msg)
 
         if isinstance(msg, (dict, list)):
             for _msg_d in to_list(msg):
                 _raw_text = _msg_d.get("raw_text")
                 if _raw_text and len(_raw_text) > truncation_len:
-                    _msg_d["raw_text"] = _msg_d["raw_text"][:truncation_len] + " ..."
+                    _msg_d["raw_text"] = _msg_d["raw_text"][:truncation_len] + f" (truncated) ... total_len={len(_raw_text)} tail_content=[{_raw_text[-30:]}]"
             msg = json_tool.json_dump(msg, indent=2)
     return msg
 
