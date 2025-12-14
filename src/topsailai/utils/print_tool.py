@@ -8,6 +8,15 @@ from . import thread_local_tool
 
 g_flag_print_step = None
 
+def get_truncation_len() -> int|None:
+    truncation_len = os.getenv("DEBUG_PRINT_TRUNCATE_LENGTH")
+    try:
+        if truncation_len:
+            return int(truncation_len)
+    except Exception:
+        pass
+    return None
+
 def enable_flag_print_step():
     """Enable step-by-step printing for debugging purposes.
 
@@ -41,6 +50,11 @@ def print_with_time(msg):
     agent_name = thread_local_tool.get_thread_var(thread_local_tool.KEY_AGENT_NAME)
     if agent_name:
         content = f"[{agent_name}] " + content
+
+    truncation_len = get_truncation_len()
+    if truncation_len and truncation_len > 0:
+        content = content[:truncation_len]
+
     print(content)
 
 def print_step(msg):
