@@ -45,15 +45,19 @@ def print_with_time(msg):
     - Optional agent name if set in thread-local storage
     - The message content
     """
+    truncation_len = get_truncation_len()
+    if truncation_len and truncation_len > 0:
+        if isinstance(msg, list):
+            for _msg_d in msg:
+                _raw_text = _msg_d.get("raw_text")
+                if _raw_text and len(_raw_text) > truncation_len:
+                    _msg_d["raw_text"] = _msg_d["raw_text"][:truncation_len] + " ..."
+
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     content = (f"[{now}] {msg}")
     agent_name = thread_local_tool.get_thread_var(thread_local_tool.KEY_AGENT_NAME)
     if agent_name:
         content = f"[{agent_name}] " + content
-
-    truncation_len = get_truncation_len()
-    if truncation_len and truncation_len > 0:
-        content = content[:truncation_len]
 
     print(content)
 
