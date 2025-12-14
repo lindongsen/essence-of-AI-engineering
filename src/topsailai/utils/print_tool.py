@@ -1,9 +1,11 @@
 import os
 from datetime import datetime
+import simplejson
 
 from topsailai.logger.log_chat import logger
 
 from . import thread_local_tool
+from .format_tool import to_list
 
 
 g_flag_print_step = None
@@ -47,11 +49,15 @@ def print_with_time(msg):
     """
     truncation_len = get_truncation_len()
     if truncation_len and truncation_len > 0:
-        if isinstance(msg, list):
-            for _msg_d in msg:
+        if isinstance(msg, str):
+            msg = simplejson.loads(msg)
+
+        if isinstance(msg, (dict, list)):
+            for _msg_d in to_list(msg):
                 _raw_text = _msg_d.get("raw_text")
                 if _raw_text and len(_raw_text) > truncation_len:
                     _msg_d["raw_text"] = _msg_d["raw_text"][:truncation_len] + " ..."
+            msg = simplejson.dumps(msg, indent=2, default=str, ensure_ascii=False)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     content = (f"[{now}] {msg}")

@@ -36,7 +36,7 @@ MODEL_SETTINGS=""
 # 1 = Debug mode (enabled) - enables verbose logging and debugging features
 DEBUG=1
 
-DEBUG_PRINT_TRUNCATE_LENGTH=300
+DEBUG_PRINT_TRUNCATE_LENGTH=3000
 
 # =============================================================================
 # LLM Parameters
