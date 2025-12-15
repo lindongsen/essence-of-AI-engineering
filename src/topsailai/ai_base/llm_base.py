@@ -294,6 +294,16 @@ class LLMModel(object):
             except openai.BadRequestError as e:
                 # I don't know why some large model services return this issue, but retrying usually resolves it.
                 print_error(f"!!! [{i}] BadRequestError, {e}")
+
+                # case: Requested token count exceeds the model's maximum context length
+                e_str = str(e).lower()
+                for key in [
+                    "exceed",
+                    "maximum context",
+                ]:
+                    if key in e_str:
+                        break
+
                 continue
 
         raise Exception("chat to LLM is failed")

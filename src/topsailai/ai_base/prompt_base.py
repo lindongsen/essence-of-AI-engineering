@@ -210,7 +210,20 @@ class PromptBase(object):
             return
         content = self.hook_format_content(content)
         print_step(content)
-        self.append_message({"role": ROLE_TOOL, "content": content, "tool_call_id": ""})
+        tool_call_id = self.get_tool_call_id()
+        if tool_call_id:
+            self.append_message({"role": ROLE_TOOL, "content": content, "tool_call_id": tool_call_id})
+        else:
+            self.append_message({"role": ROLE_ASSISTANT, "content": content})
+        return
+
+    def get_tool_call_id(self):
+        """ get id from the last message """
+        last_message = self.messages[-1]
+        tool_calls = last_message.get("tool_calls")
+        if tool_calls:
+            return tool_calls[0]["id"]
+        return None
 
     def dump_messages(self):
         """ dump messages to a file.
