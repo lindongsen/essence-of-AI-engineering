@@ -120,7 +120,7 @@ def format_dict_to_md(d:dict) -> str:
     s = ""
     for k, v in d.items():
         s += f"\n## {k}\n"
-        s += "\n```\n"
+        s += "```\n"
         if isinstance(v, str):
             s += v.strip()
         else:

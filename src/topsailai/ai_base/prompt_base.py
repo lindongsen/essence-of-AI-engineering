@@ -214,7 +214,7 @@ class PromptBase(object):
         if tool_call_id:
             self.append_message({"role": ROLE_TOOL, "content": content, "tool_call_id": tool_call_id})
         else:
-            self.append_message({"role": ROLE_TOOL, "content": content, "tool_call_id": None})
+            self.append_message({"role": ROLE_USER, "content": content, "tool_call_id": None})
         return
 
     def get_tool_call_id(self):

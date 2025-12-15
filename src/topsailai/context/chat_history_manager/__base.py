@@ -169,7 +169,11 @@ class ContextManager(MessageStorageBase):
         """ link a message to msg_id """
         for msg in messages[index_start:index_end]:
             if msg["role"] in self.ignored_roles:
-                continue
+                if msg["role"] == ROLE_USER and "tool_call_id" in msg:
+                    # need link
+                    pass
+                else:
+                    continue
             content = msg["content"]
             if content[0] not in ["{", "["]:
                 continue
