@@ -4,10 +4,12 @@ import time
 import random
 import simplejson
 import openai
+from openai.types.chat import ChatCompletionMessage
 
 from topsailai.logger.log_chat import logger
 from topsailai.utils.print_tool import (
     print_error,
+    print_debug,
 )
 from topsailai.utils.json_tool import to_json_str
 from topsailai.utils import env_tool
@@ -195,7 +197,48 @@ class LLMModel(object):
         )
         return params
 
+    def debug_response(self, response, content):
+        """ debug mode """
+        if not env_tool.is_debug_mode():
+            return
+
+        if content is None:
+            return
+        if response is None:
+            return
+
+        content = content.strip()
+
+        def _need_print() -> bool:
+            if not content:
+                return True
+            #if 'tool_call' in content:
+            #    return True
+            return False
+
+        if _need_print():
+            print_debug("[RESPONSE] \n" + simplejson.dumps(response.__dict__, indent=2, ensure_ascii=False, default=str))
+
+        return
+
+    def get_response_message(self, response) -> ChatCompletionMessage:
+        """
+        ChatCompletionMessage(
+            content='',
+            refusal=None,
+            role='assistant',
+            annotations=None,
+            audio=None,
+            function_call=None,
+            tool_calls=None),
+            refs=None,
+            service_tier=None
+        )
+        """
+        return response.choices[0].message
+
     def call_llm_model(self, messages):
+        """ return tuple (response:obj, content:str) """
         self.tokenStat.add_msgs(messages)
 
         response = self.chat_model.create(
@@ -205,14 +248,23 @@ class LLMModel(object):
         self.tokenStat.output_token_stat()
 
         full_content = response.choices[0].message.content
+        try:
+            self.debug_response(response, full_content)
+        except Exception as e:
+            print_error(f"[DEBUG] {e}")
+
         if full_content is None:
             raise TypeError("no response")
         full_content = full_content.strip()
+        if not full_content:
+            raise TypeError("null of response")
+
         self.send_content(full_content)
 
-        return full_content
+        return (response, full_content)
 
     def call_llm_model_by_stream(self, messages):
+        """ return tuple (response:obj, content:str) """
         self.tokenStat.add_msgs(messages)
 
         response = self.chat_model.create(
@@ -231,12 +283,26 @@ class LLMModel(object):
 
         self.tokenStat.output_token_stat()
 
-        return full_content.strip()
+        return (response, full_content.strip())
 
-    def chat(self, messages, for_raw=False, for_stream=False):
-        """ return list_dict """
+    def chat(
+            self, messages,
+            for_raw=False,
+            for_stream=False,
+            for_response=False,
+        ):
+        """
+        Args:
+            for_response: if True, return (response:obj, content:list[dict])
+
+        default return list_dict.
+        """
         retry_times = 10
         err_count_map = {}
+
+        rsp_content = None
+        rsp_obj = None
+
         for i in range(100):
             if i > retry_times:
                 break
@@ -252,12 +318,19 @@ class LLMModel(object):
 
             try:
                 if for_stream:
-                    rsp = self.call_llm_model_by_stream(messages)
+                    rsp_obj, rsp_content = self.call_llm_model_by_stream(messages)
                 else:
-                    rsp = self.call_llm_model(messages)
+                    rsp_obj, rsp_content = self.call_llm_model(messages)
+
                 if for_raw:
-                    return rsp
-                return _format_response(rsp)
+                    return rsp_content
+
+                result = _format_response(rsp_content)
+
+                if for_response:
+                    return (rsp_obj, result)
+
+                return result
             except JsonError as e:
                 print_error(f"!!! [{i}] JsonError, {e}")
                 continue

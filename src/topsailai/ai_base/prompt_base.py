@@ -196,13 +196,13 @@ class PromptBase(object):
         print_step(content)
         self.append_message({"role": ROLE_USER, "content": content})
 
-    def add_assistant_message(self, content):
+    def add_assistant_message(self, content, tool_calls=None):
         """ the message from LLM """
         if content is None:
             return
         content = self.hook_format_content(content)
         print_step(content)
-        self.append_message({"role": ROLE_ASSISTANT, "content": content})
+        self.append_message({"role": ROLE_ASSISTANT, "content": content, "tool_calls": tool_calls})
 
     def add_tool_message(self, content):
         """ the message from tool call """
@@ -214,7 +214,7 @@ class PromptBase(object):
         if tool_call_id:
             self.append_message({"role": ROLE_TOOL, "content": content, "tool_call_id": tool_call_id})
         else:
-            self.append_message({"role": ROLE_ASSISTANT, "content": content})
+            self.append_message({"role": ROLE_TOOL, "content": content, "tool_call_id": None})
         return
 
     def get_tool_call_id(self):

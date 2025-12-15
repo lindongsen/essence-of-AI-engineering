@@ -91,6 +91,10 @@ def print_step(msg):
         print_with_time(msg)
     return
 
+def print_debug(msg):
+    msg = f"[DEBUG] {msg}"
+    print_step(msg)
+
 def print_error(msg):
     """Print an error message to both logger and console.
 

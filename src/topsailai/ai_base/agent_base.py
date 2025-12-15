@@ -143,11 +143,12 @@ class AgentRun(AgentBase):
         logger.info("available tools: %s", all_tools)
 
         while True:
-            response = self.llm_model.chat(self.messages)
+            rsp_obj, response = self.llm_model.chat(self.messages, for_response=True)
             if not response:
                 print_error("No response from LLM.")
                 return None
-            self.add_assistant_message(response)
+            rsp_msg = self.llm_model.get_response_message(rsp_obj)
+            self.add_assistant_message(response, tool_calls=rsp_msg.tool_calls)
 
             ctx_count = len(self.messages)
 
