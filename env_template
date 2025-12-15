@@ -62,11 +62,14 @@ TEMPERATURE=0.3
 # System Prompt
 # =============================================================================
 
-# one file or content
+# one file or content. Extend system prompts.
 # SYSTEM_PROMPT=""
 
-# one file or content
+# one file or content. Describe the current environmental information.
 # ENV_PROMPT=""
+
+# System prompt will only have the working mode. 1 for enabled.
+PURE_SYSTEM_PROMPT=0
 
 # =============================================================================
 # Context Management

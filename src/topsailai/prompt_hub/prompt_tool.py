@@ -58,6 +58,10 @@ def read_prompt(relative_path):
 
     return ""
 
+def is_only_pure_system_prompt() -> bool:
+    """ only the working mode. """
+    return os.getenv("PURE_SYSTEM_PROMPT", "0") == "1"
+
 
 class PromptHubExtractor(object):
     """ a extractor to get prompt """
@@ -67,13 +71,13 @@ class PromptHubExtractor(object):
         read_prompt("security/file.md")
         + read_prompt("context/file.md")
         + read_prompt("search/text.md")
-    )
+    ) if not is_only_pure_system_prompt() else ""
 
     # task management
     prompt_task = (
         read_prompt("task/control.md")
         + read_prompt("task/tracking.md")
-    )
+    ) if not is_only_pure_system_prompt() else ""
 
     # interactive, json
     prompt_interactive_json = read_prompt("work_mode/format/json.md")
