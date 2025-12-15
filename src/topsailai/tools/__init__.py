@@ -11,22 +11,18 @@ import simplejson
 from topsailai.utils import (
     module_tool,
     format_tool,
+    print_tool,
 )
 
 # key is tool_name, value is function
 TOOLS = module_tool.get_function_map("topsailai.tools")
 
 TOOL_PROMPT = """
-----
-
-# tools
-The tool information is described in JSON below, key is tool name, value is tool document.
-Attention: You MUST use the tool name (completely), e.g. whole name is 'cmd_tool.exec_cmd', you cannot use 'exec_cmd'.
-```
+---
+# TOOLS
+Attention: You MUST use the tool name (completely), e.g. whole name is 'x_tool.y_func', you cannot use 'y_func'.
 {__TOOLS__}
-```
-
-----
+---
 """
 
 def get_tool_prompt(tools_name:list=None, tools_map:dict=None):
@@ -49,7 +45,7 @@ def get_tool_prompt(tools_name:list=None, tools_map:dict=None):
         return ""
 
     return TOOL_PROMPT.format(
-        __TOOLS__=simplejson.dumps(tools_doc, indent=2, ensure_ascii=False)
+        __TOOLS__=print_tool.format_dict_to_md(tools_doc)
     )
 
 def expand_plugin_tools():

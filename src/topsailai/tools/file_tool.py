@@ -27,19 +27,18 @@ WHITE_LIST_NO_TRUNCATE_EXT = [
 def write_file(file_path:str, content:str):
     """ write content to file.
 
-    # parameters
-    :file_path: string, the file path;
-    :content: string
+    Args:
+        file_path (str)
+        content (str)
 
-    # return, bool
-    True for ok, False for error.
+    Return (str): null for ok
     """
     try:
         with open(file_path, "w+") as fd:
             fd.write(content)
-    except Exception as _:
-        return False
-    return True
+    except Exception as e:
+        return str(e)
+    return ""
 
 def _do_step_read_bytes(fd, size:int):
     """ read in a certain block size order.
@@ -77,21 +76,19 @@ def _do_step_read_bytes(fd, size:int):
 def read_file(file_path:str, seek:int=0, size:int=-1):
     """ read a file and output file content.
 
-    # parameters
-    :file_path: string, the file path;
-    :seek: int, read from this offset, default is 0;
-    :size: int, -1 for all, default is -1;
+    Args:
+        file_path: string, the file path;
+        seek: int, read from this offset, default is 0;
+        size: int, -1 for all, default is -1;
 
-    # return
-    string for ok, None for failed.
+    Return:
+        string for ok, None for failed.
 
-    # attention
+    Attention:
     - When it is explicitly required to read the complete file, these parameters are not needed: seek, size.
     - When the file extension is not in white list, the file reading process may be (force to truncate).
       - white list: {WHITE_LIST_NO_TRUNCATE_EXT}
-    """.format(
-        WHITE_LIST_NO_TRUNCATE_EXT=WHITE_LIST_NO_TRUNCATE_EXT,
-    )
+    """
     file_path_lower = file_path.lower()
     file_ext = file_path_lower.rsplit('.', 1)[-1]
 
@@ -119,46 +116,48 @@ def read_file(file_path:str, seek:int=0, size:int=-1):
     except Exception:
         print_tool.print_error(traceback.format_exc())
         return None
+# finish doc
+read_file.__doc__ = read_file.__doc__.format(
+    WHITE_LIST_NO_TRUNCATE_EXT=WHITE_LIST_NO_TRUNCATE_EXT,
+)
 
-def append_file(file_path: str, content: str) -> bool:
+def append_file(file_path: str, content: str):
     """ append content to file.
 
-    # parameters
-    :file_path: string, the file path;
-    :content: string
+    Args:
+        file_path: string, the file path;
+        content: string
 
-    # return, bool
-    True for ok, False for error.
+    Return (str): null for ok
     """
     try:
         with open(file_path, "a+") as fd:
             fd.write(content)
-    except Exception as _:
-        return False
-    return True
+    except Exception as e:
+        return str(e)
+    return ""
 
 def exists_file(file_path:str):
     """ check the file or folder if exists.
 
-    # parameters
-    :file_path: string, one file or one folder.
+    Args:
+        file_path: string, one file or one folder.
 
-    # return
-    bool, True for existing.
+    Return: bool, True for existing.
     """
     return os.path.exists(file_path)
 
 def check_files_existing(**files):
     """ check multiple files or folders if exist.
 
-    # parameters
-    :**files: keyword arguments, each key is a name (string), value is the file or folder path (string) to check existence.
+    Args:
+        **files: keyword arguments, each key is a name (string), value is the file or folder path (string) to check existence.
 
-    # return
-    dict of str to bool, where keys are the provided names, values are True if the path exists, False otherwise.
+    Return:
+        dict of str to bool, where keys are the provided names, values are True if the path exists, False otherwise.
 
-    # Example
-        exist_files(
+    Example:
+        check_files_existing(
             file1="path1",
             file2="path2",
             ...
@@ -172,8 +171,8 @@ def check_files_existing(**files):
 def mkdirs(dirs):
     """make folders.
 
-    Parameters:
-    :dirs: list, multiple folders.
+    Args:
+        dirs: list, multiple folders.
 
     Returns:
         raise an Error if error, else return true.

@@ -38,6 +38,10 @@ def _format_response(response):
     if isinstance(response, (list, dict)):
         return _to_list(response)
 
+    if isinstance(response, str):
+        if not response.strip():
+            raise JsonError("null of response")
+
     for count in range(3):
         try:
             response = to_json_str(response)

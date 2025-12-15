@@ -31,16 +31,14 @@ def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace
     such as reading large files or fetching web content via cURL.
     The text will not be forcibly truncated.
 
-    # parameters
-    :msg_or_file: string, can be message or file path.
-        if user pass a file path, the content of the file will be read as message.
-        if the user does explicitly specify a file, should use it directly.
+    Args:
+        msg_or_file (str): it can be message or file path.
+            if user pass a file path, the content of the file will be read as message.
+            if the user does explicitly specify a file, should use it directly.
+        model_name (str): LLM name, If the user does not explicitly specify, this parameter is not needed.
+        workspace (str): a folder absolute path for workspace.
 
-    :model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
-    :workspace: a folder absolute path for workspace.
-
-    # return
-    return final answer.
+    Return final answer.
     """
     message = msg_or_file
     # read message from file if msg_or_file is a file path
@@ -75,17 +73,16 @@ def agent_programmer(
     ):
     """ A professional Assistant for programmer.
 
-    # parameters
-    :msg_or_file: string, it can be message or file path for a TASK.
-        if user pass a file path, the content of the file will be read as message.
-        if the user does explicitly specify a file, should use it directly.
+    Args:
+        msg_or_file (str): it can be message or file path for a TASK.
+            if user pass a file path, the content of the file will be read as message.
+            if the user does explicitly specify a file, should use it directly.
 
-    :model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
-    :workspace: a folder absolute path for workspace.
-    :system_prompt: string, it can be content or a filepath; If the user does not explicitly specify, this parameter is not needed.
+        model_name (str): LLM name, If the user does not explicitly specify, this parameter is not needed.
+        workspace (str): a folder absolute path for workspace.
+        system_prompt (str): it can be content or a filepath; If the user does not explicitly specify, this parameter is not needed.
 
-    # return
-    return final answer.
+    Return final answer.
     """
     message = msg_or_file
     # read message from file if msg_or_file is a file path
@@ -129,32 +126,31 @@ def async_multitasks_agent_writer(
     ):
     """ A professional writing assistant capable of executing tasks concurrently.
 
-    # Example:
-    WritingAssistantMultiTasks(
-        goal={GOAL OR PLAN},
-        goal_report_file={REPORT_FILE_PATH},
-        task_prompt_file={FILE_PATH},
-        model_name={LLM_NAME},
-        workspace={FOLDER},
-        task1={TASK1},
-        task2={TASK2},
-    )
+    Example:
+        WritingAssistantMultiTasks(
+            goal={GOAL OR PLAN},
+            goal_report_file={REPORT_FILE_PATH},
+            task_prompt_file={FILE_PATH},
+            model_name={LLM_NAME},
+            workspace={FOLDER},
+            task1={TASK1},
+            task2={TASK2},
+        )
 
-    # parameters
-    :goal: one goal, multiple tasks;
-        These tasks will be executed concurrently by WritingAssistant;
-        Finally, the goal will be called to summarize the execution results of these tasks.
-    :goal_report_file: the file path for saving the final report of this goal.
-    :task_prompt_file: a file path; This document is a supplementary explanation or task requirements.
-    :tasks: multiple args, format is 'key=value', value can be message or file path, key prefix name is 'task', example: task1=xxx, task2=yyy;
-        if user pass a file path, the content of the file will be read as message.
-        if the user does explicitly specify a file, should use it directly.
+    Args:
+        goal (str): one goal, multiple tasks;
+            These tasks will be executed concurrently by WritingAssistant;
+            Finally, the goal will be called to summarize the execution results of these tasks.
+        goal_report_file: the file path for saving the final report of this goal.
+        task_prompt_file: a file path; This document is a supplementary explanation or task requirements.
+        tasks: multiple args, format is 'key=value', value can be message or file path, key prefix name is 'task', example: task1=xxx, task2=yyy;
+            if user pass a file path, the content of the file will be read as message.
+            if the user does explicitly specify a file, should use it directly.
 
-    :model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
-    :workspace: a folder absolute path for workspace.
+        model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
+        workspace: a folder absolute path for workspace.
 
-    # return
-    return final answer.
+    Return final answer.
     """
     thrs = {}
     results = {}
@@ -230,28 +226,27 @@ def async_multitasks_agent_writer2(
         These tasks will be executed concurrently by WritingAssistant;
         Finally, the goal will be called to summarize the execution results of these tasks.
 
-    # Example:
-    WritingAssistantMultiTasks(
-        goal={GOAL OR PLAN},
-        goal_report_file={REPORT_FILE_PATH},
-        task_prompt_file={PROMPT_FILE_PATH},
-        tasks_file_or_json={TASKS_FILE_PATH} or {JSON_STRING},
-        model_name={LLM_NAME},
-        workspace={FOLDER}
-    )
+    Example:
+        WritingAssistantMultiTasks(
+            goal={GOAL OR PLAN},
+            goal_report_file={REPORT_FILE_PATH},
+            task_prompt_file={PROMPT_FILE_PATH},
+            tasks_file_or_json={TASKS_FILE_PATH} or {JSON_STRING},
+            model_name={LLM_NAME},
+            workspace={FOLDER}
+        )
 
-    # parameters
-    :goal: string, one goal.
-    :goal_report_file: the file path for saving the final report of this goal.
-    :task_prompt_file: a file path; This document is a supplementary explanation or task requirements.
-    :tasks_file_or_json: a file path or a json string, if file path, its content is json string;
-        The JSON string is a list, and this list is a collection of tasks.
+    Args:
+        goal (str): one goal.
+        goal_report_file: the file path for saving the final report of this goal.
+        task_prompt_file: a file path; This document is a supplementary explanation or task requirements.
+        tasks_file_or_json (str): a file path or a json string, if file path, its content is json string;
+            The JSON string is a list, and this list is a collection of tasks.
 
-    :model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
-    :workspace: a folder absolute path for workspace.
+        model_name: LLM name, If the user does not explicitly specify, this parameter is not needed.
+        workspace: a folder absolute path for workspace.
 
-    # return
-    return final answer.
+    Return final answer.
     """
     tasks_content = tasks_file_or_json
     if tasks_file_or_json[0] in ["/", "."]:

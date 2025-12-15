@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import simplejson
 
 from topsailai.logger.log_chat import logger
 
@@ -102,3 +103,23 @@ def print_error(msg):
     logger.error(msg)
     print_with_time(f"Error: {msg}")
     return
+
+def format_dict_to_md(d:dict) -> str:
+    """Make content easier to read
+
+    Args:
+        d (dict):
+
+    Returns:
+        str:
+    """
+    s = ""
+    for k, v in d.items():
+        s += f"\n## {k}\n"
+        s += "\n```\n"
+        if isinstance(v, str):
+            s += v.strip()
+        else:
+            s += simplejson.dumps(v, indent=2, ensure_ascii=False)
+        s += "\n```\n"
+    return s
