@@ -37,7 +37,7 @@ for _dir in "/root/ai/TopsailAI" "/林生的奇思妙想/TopsailAI"; do
   [ -e "${_dir}" ] && WORK_DIR=${_dir} && break
 done
 
-[ -n "${WORK_DIR}" ] || error_quit “no found work_dir”
+[ -n "${WORK_DIR}" ] || error_quit "no found work_dir"
 
 cd "${WORK_DIR}" || error_quit "enter work_dir failed: ${WORK_DIR}"
 
