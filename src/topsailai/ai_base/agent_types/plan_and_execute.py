@@ -21,7 +21,7 @@ AGENT_NAME = "AgentPlanAndExecute"
 
 class StepCall4PlanAndExecute(StepCallBase):
     """ running on Plan-And-Execute mode """
-    def _execute(self, step:dict, tools:dict, response:list, index:int):
+    def _execute(self, step:dict, tools:dict, response:list, index:int, **_):
         """ acting steps """
         step_name = step.get("step_name", "")
         raw_text = step.get("raw_text", "")

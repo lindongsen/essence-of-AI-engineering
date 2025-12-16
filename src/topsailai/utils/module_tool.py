@@ -9,6 +9,8 @@ import os
 import sys
 import pkgutil
 
+from topsailai.logger import logger
+
 
 def get_mod(path):
     """Dynamically import a module by its path.
@@ -41,7 +43,7 @@ def get_var(path:str, name):
     try:
         var = getattr(sub_mod, name)
     except Exception as e:
-        print(f"{sub_mod}, {name}, {e}")
+        logger.warning(f"{sub_mod}, {name}, {e}")
     return var
 
 def list_sub_mods_name(path):

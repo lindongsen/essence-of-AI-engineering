@@ -6,7 +6,6 @@
 '''
 
 import os
-import simplejson
 
 from topsailai.utils import (
     module_tool,
@@ -15,7 +14,34 @@ from topsailai.utils import (
 )
 
 # key is tool_name, value is function
-TOOLS = module_tool.get_function_map("topsailai.tools")
+TOOLS = module_tool.get_function_map("topsailai.tools", "TOOLS")
+
+# key is tool_name, value is dict
+# Value Example:
+# {
+#     "type": "function",
+#     "function": {
+#         "name": "get_current_weather",
+#         "description": "获取指定城市的当前天气",
+#         "parameters": {
+#             "type": "object",
+#             "properties": {
+#                 "location": {
+#                     "type": "string",
+#                     "description": "城市名称"
+#                 },
+#                 "unit": {
+#                     "type": "string",
+#                     "enum": ["celsius", "fahrenheit"],
+#                     "description": "温度单位"
+#                 }
+#             },
+#             "required": ["location"]
+#         }
+#     }
+# }
+TOOLS_INFO = module_tool.get_function_map("topsailai.tools", "TOOLS_INFO")
+
 
 TOOL_PROMPT = """
 ---
@@ -54,10 +80,41 @@ def expand_plugin_tools():
     if not env_plugin_tools:
         return
     for plugin_path in env_plugin_tools.split(';'):
-        _tools = module_tool.get_external_function_map(plugin_path)
+        _tools = module_tool.get_external_function_map(plugin_path, "TOOLS")
         if _tools:
             TOOLS.update(_tools)
+
+        _tools_info = module_tool.get_external_function_map(plugin_path, "TOOLS_INFO")
+        if _tools_info:
+            TOOLS_INFO.update(_tools_info)
+
     return
+
+def generate_tool_info(tool_name, tool_description):
+    result = {
+        "type": "function",
+        "function": {
+            "name": tool_name,
+            "description": tool_description,
+            "parameters": {
+                "type": "object",
+            }
+        }
+    }
+    return result
+
+def get_tools_for_chat(tools_name:list[str]) -> dict:
+    """ return tools info """
+    result = {}
+    for tool_name in tools_name:
+        if tool_name in TOOLS_INFO:
+            result[tool_name] = TOOLS_INFO[tool_name]
+            result[tool_name]["function"]["name"] = tool_name
+            continue
+        if tool_name in TOOLS:
+            result[tool_name] = generate_tool_info(tool_name, TOOLS[tool_name].__doc__)
+
+    return result
 
 
 # init

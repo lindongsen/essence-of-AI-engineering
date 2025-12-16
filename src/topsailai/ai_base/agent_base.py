@@ -1,10 +1,15 @@
 from topsailai.logger.log_chat import logger
 from topsailai.utils.print_tool import (
     print_error,
+    print_step,
 )
 from topsailai.utils.thread_local_tool import (
     ctxm_give_agent_name,
     ctxm_set_agent,
+)
+from topsailai.utils import (
+    json_tool,
+    env_tool,
 )
 
 from topsailai.ai_base.prompt_base import (
@@ -15,7 +20,17 @@ from topsailai.ai_base.llm_base import (
 )
 from topsailai.prompt_hub import prompt_tool
 
-from topsailai.tools import get_tool_prompt, TOOLS as INTERNAL_TOOLS
+from topsailai.tools import (
+    get_tool_prompt,
+    TOOLS as INTERNAL_TOOLS,
+    get_tools_for_chat,
+)
+
+
+class ToolCallInfo(object):
+    def __init__(self):
+        self.func_name = ""
+        self.func_args = {}
 
 
 class StepCallBase(object):
@@ -43,7 +58,55 @@ class StepCallBase(object):
         self._execute(*args, **kwds)
         return self
 
-    def _execute(self, step:dict, tools:dict, response:list, index:int):
+    def get_tool_call_info(self, step:dict, rsp_msg_obj) -> ToolCallInfo|None:
+        """Get tool call information.
+
+        Args:
+            step (dict): it is from message info
+            rsp_msg_obj: a instance for chatMessage
+
+        Returns:
+            dict|None:
+              func_name (str):
+              func_args (dict):
+        """
+        if rsp_msg_obj is not None:
+            # list_dict
+            tool_calls = rsp_msg_obj.tool_calls
+            if tool_calls:
+                tool_call = tool_calls[0]
+
+                func_name = tool_call.function.name
+                func_args = None
+                if tool_call.function.arguments:
+                    func_args = json_tool.json_load(tool_call.function.arguments)
+
+                if func_name:
+                    result = ToolCallInfo()
+                    result.func_name = func_name
+                    result.func_args = func_args or {}
+                    return result
+
+        if 'tool_call' in step:
+            func_name = step["tool_call"]
+            func_args = step.get('tool_args')
+
+            if func_name:
+                result = ToolCallInfo()
+                result.func_name = func_name
+                result.func_args = func_args or {}
+                return result
+
+        return None
+
+    def _execute(
+            self,
+            step:dict,
+            tools:dict,
+            response:list,
+            index:int,
+            rsp_msg_obj=None,
+        ):
         """ override this method """
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -67,12 +130,11 @@ class AgentBase(PromptBase):
         self.agent_name = agent_name
         assert self.system_prompt, "system_prompt is required"
 
-        if self.tools:
-            if not tool_prompt:
-                tool_prompt = get_tool_prompt(None, self.tools)
-
         self.llm_model = LLMModel()
 
+        ######################################################################
+        # tool_kits, internal tools
+        ######################################################################
         if not self.tools and not tool_kits:
             # using all of internal tools.
             tool_kits = list(INTERNAL_TOOLS.keys())
@@ -90,13 +152,40 @@ class AgentBase(PromptBase):
         if tool_kits:
             tool_kits = prompt_tool.get_tools_by_env(tool_kits)
 
+        ######################################################################
+        # all of available tools
+        ######################################################################
         self.available_tools = dict()
         for tool_name in tool_kits or []:
             self.available_tools[tool_name] = INTERNAL_TOOLS[tool_name]
         for tool_name in self.tools or {}:
             self.available_tools[tool_name] = self.tools[tool_name]
 
-        super(AgentBase, self).__init__(self.system_prompt, tool_prompt, tool_kits)
+        ######################################################################
+        # tool prompts
+        ######################################################################
+        if not tool_prompt:
+            tool_prompt = ""
+
+        if self.available_tools:
+            if not env_tool.is_use_tool_calls():
+                # get tool docs as prompt
+                tool_prompt += get_tool_prompt(None, self.available_tools)
+
+            # extend prompt with tool
+            tool_prompt += prompt_tool.get_prompt_by_tools(self.available_tools)
+
+            # extra tools
+            tool_prompt += prompt_tool.get_extra_tools()
+
+        # prepare tool_prompt ok
+        self.tool_prompt = tool_prompt
+
+        # debug
+        if self.tool_prompt:
+            print_step(f"[tool_prompt]:\n{self.tool_prompt}\n")
+
+        super(AgentBase, self).__init__(self.system_prompt, self.tool_prompt)
         return
 
     @property
@@ -136,14 +225,25 @@ class AgentRun(AgentBase):
     """ a common of running steps """
     def _run(self, step_call:StepCallBase, user_input:str):
         """ return final answer, or None if error """
+        # tools
+        all_tools = self.available_tools
+        print_step(f"[available_tools] [{len(all_tools)}] {list(all_tools.keys())}")
+
+        tools_for_chat = {}
+        if env_tool.is_use_tool_calls():
+            tools_for_chat = get_tools_for_chat(all_tools)
+        if tools_for_chat:
+            print_step(f"[effective_tools] [{len(tools_for_chat)}] {list(tools_for_chat.keys())}")
+
+        # new session
         if user_input:
             self.new_session({"step_name":"task","raw_text":user_input})
 
-        all_tools = self.available_tools
-        logger.info("available tools: %s", all_tools)
-
         while True:
-            rsp_obj, response = self.llm_model.chat(self.messages, for_response=True)
+            rsp_obj, response = self.llm_model.chat(
+                self.messages, for_response=True,
+                tools=list(tools_for_chat.values()),
+            )
             if not response:
                 print_error("No response from LLM.")
                 return None
@@ -153,7 +253,7 @@ class AgentRun(AgentBase):
             ctx_count = len(self.messages)
 
             for i, step in enumerate(response):
-                ret = step_call(step, tools=all_tools, response=response, index=i)
+                ret = step_call(step, tools=all_tools, response=response, index=i, rsp_msg_obj=rsp_msg)
                 assert isinstance(ret, StepCallBase), "step_call must return StepCallBase instance"
                 if ret.code == ret.CODE_TASK_FINAL:
                     logger.info(f"final: {ret.result}")

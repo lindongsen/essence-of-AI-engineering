@@ -9,7 +9,9 @@ import os
 import traceback
 
 from topsailai.logger.log_chat import logger
-from topsailai.tools import get_tool_prompt
+from topsailai.tools import (
+    get_tool_prompt,
+)
 from topsailai.ai_base.constants import (
     ROLE_USER, ROLE_ASSISTANT, ROLE_SYSTEM, ROLE_TOOL,
 )
@@ -22,7 +24,10 @@ from topsailai.utils.json_tool import (
     to_json_str,
     json_load,
 )
-from topsailai.utils import time_tool
+from topsailai.utils import (
+    time_tool,
+    env_tool,
+)
 from topsailai.utils.thread_local_tool import (
     get_agent_name,
 )
@@ -76,20 +81,18 @@ class PromptBase(object):
     # define flags
     flag_dump_messages = False
 
-    def __init__(self, system_prompt:str, tool_prompt:str="", tools_name:list=None):
+    def __init__(self, system_prompt:str, tool_prompt:str=""):
+        """
+        Args:
+            system_prompt (str):
+            tool_prompt (str, optional): User give it. Defaults to "".
+            tools_name (list, optional): Internal tools. Defaults to None (no need any tools).
+        """
         assert system_prompt, "missing system_prompt"
         self.system_prompt = system_prompt
+
+        # Only write it in AI Agent
         self.tool_prompt = tool_prompt or ""
-        if tools_name:
-            self.tool_prompt += get_tool_prompt(tools_name) + prompt_tool.get_prompt_by_tools(tools_name)
-
-        # extra tools
-        if self.tool_prompt:
-            self.tool_prompt += prompt_tool.get_extra_tools()
-
-        # debug
-        if self.tool_prompt:
-            print_step(f"[tool_prompt]:\n{self.tool_prompt}\n")
 
         # context history messages
         self.threshold_ctx_history = ThresholdContextHistory()
@@ -222,7 +225,7 @@ class PromptBase(object):
         last_message = self.messages[-1]
         tool_calls = last_message.get("tool_calls")
         if tool_calls:
-            return tool_calls[0]["id"]
+            return tool_calls[0].id
         return None
 
     def dump_messages(self):

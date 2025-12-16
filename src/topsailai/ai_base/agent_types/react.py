@@ -10,6 +10,9 @@ from topsailai.logger import logger
 from topsailai.utils.thread_tool import (
     is_main_thread,
 )
+from topsailai.utils import (
+    env_tool,
+)
 from topsailai.prompt_hub.prompt_tool import PromptHubExtractor
 from topsailai.ai_base.agent_base import (
     StepCallBase,
@@ -17,7 +20,9 @@ from topsailai.ai_base.agent_base import (
 
 
 # define prompt of ReAct framework
-SYSTEM_PROMPT = PromptHubExtractor.prompt_mode_ReAct
+SYSTEM_PROMPT = PromptHubExtractor.prompt_mode_ReAct_toolPrompt
+if env_tool.is_use_tool_calls():
+    SYSTEM_PROMPT = PromptHubExtractor.prompt_mode_ReAct_toolCall
 
 AGENT_NAME = "AgentReAct"
 
@@ -25,12 +30,12 @@ AGENT_NAME = "AgentReAct"
 class Step4ReAct(StepCallBase):
     """ running on ReAct mode """
 
-    def _execute(self, step:dict, tools:dict, response:list, index:int):
+    def _execute(self, step:dict, tools:dict, response:list, index:int, rsp_msg_obj=None, **_):
         """ acting steps """
         step_name = step["step_name"]
         if step_name == 'action':
-
-            if 'tool_call' not in step:
+            tool_call_info = self.get_tool_call_info(step, rsp_msg_obj)
+            if tool_call_info is None:
                 # LLM mistake, missing argv
                 obs_json = {
                     "step_name": "observation",
@@ -40,11 +45,20 @@ class Step4ReAct(StepCallBase):
                 self.code = self.CODE_STEP_FINAL
                 return
 
-            tool = step['tool_call']
-            args = step.get('tool_args') or {}
-            tool_func = tools.get(tool)
+            tool = tool_call_info.func_name
+            args = tool_call_info.func_args or {}
 
-            if tool_func is not None:
+            tool_func = tools.get(tool)
+            if tool_func is None:
+                # LLM mistake, no found this tool
+                obs_json = {
+                    "step_name": "observation",
+                    "raw_text": f"no found such as tool: {tool}"
+                }
+                self.tool_msg = obs_json
+                self.code = self.CODE_STEP_FINAL
+                return
+            else:
                 try:
                     obs = tool_func(**args)
                 except Exception as e:
@@ -53,15 +67,6 @@ class Step4ReAct(StepCallBase):
                 obs_json = {
                     "step_name": "observation",
                     "raw_text": obs
-                }
-                self.tool_msg = obs_json
-                self.code = self.CODE_STEP_FINAL
-                return
-            else:
-                # LLM mistake, no found this tool
-                obs_json = {
-                    "step_name": "observation",
-                    "raw_text": f"no found such as tool: {tool}"
                 }
                 self.tool_msg = obs_json
                 self.code = self.CODE_STEP_FINAL

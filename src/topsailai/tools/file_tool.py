@@ -189,3 +189,16 @@ TOOLS = dict(
     check_files_existing=check_files_existing,
     mkdirs=mkdirs,
 )
+
+TOOLS_INFO = dict(
+    check_files_existing={
+        "type": "function",
+        "function": {
+            "name": "",
+            "description": check_files_existing.__doc__,
+            "parameters": {
+                "type": "object",
+            }
+        }
+    },
+)

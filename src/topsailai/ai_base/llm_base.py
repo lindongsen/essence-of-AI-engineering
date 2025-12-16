@@ -183,7 +183,7 @@ class LLMModel(object):
             base_url=api_base or os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
         ).chat.completions
 
-    def build_parameters_for_chat(self, messages, stream=False):
+    def build_parameters_for_chat(self, messages, stream=False, tools=None, tool_choice="auto"):
         params = dict(
             model=self.openai_model_name,
             messages=messages,
@@ -195,6 +195,11 @@ class LLMModel(object):
             stop=None,
             stream=stream,
         )
+
+        if tools:
+            params["tools"] = tools
+            params["tool_choice"] = tool_choice
+
         return params
 
     def debug_response(self, response, content):
@@ -214,6 +219,8 @@ class LLMModel(object):
                 return True
             #if 'tool_call' in content:
             #    return True
+            if '"action"' in content and '"tool_call":' not in content:
+                return True
             return False
 
         if _need_print():
@@ -237,12 +244,15 @@ class LLMModel(object):
         """
         return response.choices[0].message
 
-    def call_llm_model(self, messages):
+    def call_llm_model(self, messages, tools=None, tool_choice="auto"):
         """ return tuple (response:obj, content:str) """
         self.tokenStat.add_msgs(messages)
 
         response = self.chat_model.create(
-            **self.build_parameters_for_chat(messages)
+            **self.build_parameters_for_chat(
+                messages,
+                tools=tools, tool_choice=tool_choice,
+            )
         )
 
         self.tokenStat.output_token_stat()
@@ -290,6 +300,8 @@ class LLMModel(object):
             for_raw=False,
             for_stream=False,
             for_response=False,
+            tools=None,
+            tool_choice="auto",
         ):
         """
         Args:
@@ -320,7 +332,10 @@ class LLMModel(object):
                 if for_stream:
                     rsp_obj, rsp_content = self.call_llm_model_by_stream(messages)
                 else:
-                    rsp_obj, rsp_content = self.call_llm_model(messages)
+                    rsp_obj, rsp_content = self.call_llm_model(
+                        messages,
+                        tools=tools, tool_choice=tool_choice,
+                    )
 
                 if for_raw:
                     return rsp_content
