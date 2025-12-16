@@ -50,6 +50,16 @@ def fix_llm_mistakes_on_json(content):
 
     # LLM can make mistakes
 
+    # case: "\n  }\n  }\n"
+    case_dup1 = "\n  }\n  }\n"
+    if case_dup1 in content:
+        try:
+            _new_content = content.replace(case_dup1, "\n  }\n", 1)
+            simplejson.loads(_new_content)
+            return _new_content
+        except Exception:
+            pass
+
     # case1: Missing closing bracket for array
     if content[0] == '[' and content[-1] != ']' and "]\n" not in content:
         print_error("!!! LLM makes a mistake, trying to fix it: no found ']'")
