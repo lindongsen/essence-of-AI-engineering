@@ -259,8 +259,8 @@ class LLMModel(object):
                 return True
             #if 'tool_call' in content:
             #    return True
-            if '"action"' in content and '"tool_call":' not in content:
-                return True
+            #if '"action"' in content and '"tool_call":' not in content:
+            #    return True
             return False
 
         if _need_print():
