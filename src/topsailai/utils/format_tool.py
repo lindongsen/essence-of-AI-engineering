@@ -110,6 +110,8 @@ def format_dict_to_list(d:dict, key_name:str, value_name:str) -> list[dict]:
 
 def to_topsailai_format(content:str|list|dict, key_name:str, value_name:str) -> str:
     if isinstance(content, str):
+        if key_name not in content:
+            return content
         content = simplejson.loads(content)
 
     result = ""
