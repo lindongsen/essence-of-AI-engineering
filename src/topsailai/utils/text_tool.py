@@ -7,9 +7,10 @@
 
 import chardet
 
+
 def safe_decode(data):
     """Safely decode bytes to string with automatic encoding detection.
-    
+
     This function attempts to decode bytes data to a string using automatic
     encoding detection. If the detected encoding fails, it falls back to
     UTF-8 with error replacement.

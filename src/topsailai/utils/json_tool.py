@@ -24,6 +24,12 @@ def convert_code_block_to_json_str(content:str):
         content = content.replace("```", ",")
         if content[-1] == ",":
             return f"[{content[:-1]}]"
+    if content.startswith("```"):
+        content = content.replace("```", "", 1)
+        if content.endswith("```"):
+            return content[:-3]
+    if content.endswith("```"):
+        return content[:-3]
     return None
 
 def fix_llm_mistakes_on_json(content):

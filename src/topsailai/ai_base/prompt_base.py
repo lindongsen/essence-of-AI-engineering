@@ -204,7 +204,7 @@ class PromptBase(object):
         if content is None:
             return
         content = self.hook_format_content(content)
-        print_step(content)
+        print_step(content + (f"\n{tool_calls}" if tool_calls else ""))
         self.append_message({"role": ROLE_ASSISTANT, "content": content, "tool_calls": tool_calls})
 
     def add_tool_message(self, content):

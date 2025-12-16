@@ -100,7 +100,11 @@ class Step4ReAct(StepCallBase):
             return
         elif len(response) == (index+1):
             # the last element, LLM has a mistake
-            logger.error("LLM has a mistake: agent can not handle it [%s]", step_name)
+            logger.error(
+                "LLM has a mistake: agent can not handle it [%s] [%s]",
+                step_name,
+                rsp_msg_obj.content if rsp_msg_obj else None,
+            )
             self.code = self.CODE_STEP_FINAL
             self.user_msg = "I can not handle it"
             return

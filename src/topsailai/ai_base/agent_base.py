@@ -97,6 +97,24 @@ class StepCallBase(object):
                 result.func_args = func_args or {}
                 return result
 
+        if 'raw_text' in step:
+            try:
+                raw_text = json_tool.convert_code_block_to_json_str(step["raw_text"]) or step["raw_text"]
+                raw_text = json_tool.to_json_str(raw_text)
+                raw_dict = None
+                if raw_text:
+                    raw_dict = json_tool.json_load(raw_text)
+                if raw_dict and 'tool_call' in raw_dict:
+                    func_name = raw_dict['tool_call']
+                    func_args = raw_dict.get('tool_args')
+                    if func_name:
+                        result = ToolCallInfo()
+                        result.func_name = func_name
+                        result.func_args = func_args or {}
+                        return result
+            except Exception:
+                pass
+
         return None
 
     def _execute(

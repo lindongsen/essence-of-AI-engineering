@@ -4,6 +4,7 @@ import simplejson
 
 from topsailai.logger.log_chat import logger
 
+
 g_flag_print_step = None
 
 def get_truncation_len() -> int|None:
@@ -15,7 +16,7 @@ def get_truncation_len() -> int|None:
         pass
     return None
 
-def truncate_msg(msg:str|list|dict) -> str:
+def truncate_msg(msg:str|list|dict, key_name="step_name", value_name="raw_text") -> str:
     from topsailai.utils import json_tool
     from .format_tool import to_list
 
@@ -26,10 +27,12 @@ def truncate_msg(msg:str|list|dict) -> str:
 
         if isinstance(msg, (dict, list)):
             for _msg_d in to_list(msg):
-                _raw_text = _msg_d.get("raw_text")
+                _raw_text = _msg_d.get(value_name)
                 if _raw_text and len(_raw_text) > truncation_len:
-                    _msg_d["raw_text"] = _msg_d["raw_text"][:truncation_len] + f" (truncated) ... total_len={len(_raw_text)} tail_content=[{_raw_text[-30:]}]"
+                    _msg_d[value_name] = _msg_d[value_name][:truncation_len] + f" (truncated) ... total_len={len(_raw_text)} tail_content=[{_raw_text[-30:]}]"
+
             msg = json_tool.json_dump(msg, indent=2)
+
     return msg
 
 def enable_flag_print_step():
@@ -60,10 +63,13 @@ def print_with_time(msg):
     - Optional agent name if set in thread-local storage
     - The message content
     """
-    from . import thread_local_tool
+    from . import thread_local_tool, format_tool
 
     try:
         msg = truncate_msg(msg)
+        msg = format_tool.to_topsailai_format(
+            msg, key_name="step_name", value_name="raw_text"
+        ).strip()
     except Exception:
         pass
 

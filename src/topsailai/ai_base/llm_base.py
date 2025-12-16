@@ -12,7 +12,10 @@ from topsailai.utils.print_tool import (
     print_debug,
 )
 from topsailai.utils.json_tool import to_json_str
-from topsailai.utils import env_tool
+from topsailai.utils import (
+    env_tool,
+    format_tool,
+)
 from topsailai.context.token import TokenStat
 
 
@@ -35,17 +38,53 @@ def _format_content(content):
     """ format content to json string if it is list/dict """
     return to_json_str(content)
 
+def _format_messages(messages, key_name, value_name):
+    """ format messages to specific format """
+    func_format = None # func(content, key_name, value_name)
+
+    if format_tool.TOPSAILAI_FORMAT_PREFIX in messages[0]["content"]:
+        func_format = format_tool.to_topsailai_format
+
+    if func_format is None:
+        return messages
+
+    for msg in messages[2:]:
+        if msg["content"][0] in ["[", "{"]:
+            new_content = func_format(
+                msg["content"],
+                key_name=key_name,
+                value_name=value_name,
+            )
+            if new_content:
+                msg["content"] = new_content.strip()
+
+    #logger.info(simplejson.dumps(messages, indent=2, default=str))
+
+    return messages
+
 def _format_response(response):
     """ format response to list if it is json string """
     if isinstance(response, (list, dict)):
         return _to_list(response)
 
     if isinstance(response, str):
-        if not response.strip():
+        response = response.strip()
+        if not response:
             raise JsonError("null of response")
 
     for count in range(3):
         try:
+            if response.startswith(format_tool.TOPSAILAI_FORMAT_PREFIX) or \
+                f"\n{format_tool.TOPSAILAI_FORMAT_PREFIX}" in response:
+                    if count:
+                        # no need retry
+                        break
+                    return format_tool.format_dict_to_list(
+                        format_tool.parse_topsailai_format(response),
+                        key_name="step_name",
+                        value_name="raw_text",
+                    )
+
             response = to_json_str(response)
             return _to_list(simplejson.loads(response))
         except Exception as e:
@@ -184,6 +223,7 @@ class LLMModel(object):
         ).chat.completions
 
     def build_parameters_for_chat(self, messages, stream=False, tools=None, tool_choice="auto"):
+        _format_messages(messages, key_name="step_name", value_name="raw_text")
         params = dict(
             model=self.openai_model_name,
             messages=messages,

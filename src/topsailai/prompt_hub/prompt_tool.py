@@ -82,6 +82,9 @@ class PromptHubExtractor(object):
     # interactive, json
     prompt_interactive_json = read_prompt("work_mode/format/json.md")
 
+    # interactive, topsailai
+    prompt_interactive_topsailai = read_prompt("work_mode/format/topsailai.md")
+
     # use tool calls
     prompt_use_tool_calls = read_prompt("tools/use_tool_calls.md")
 
@@ -90,19 +93,22 @@ class PromptHubExtractor(object):
         read_prompt("work_mode/ReAct.md")
         + prompt_common
         + prompt_task
-
-        # place them to tail
-        + prompt_interactive_json
     )
 
     prompt_mode_ReAct_toolCall = (
         prompt_mode_ReAct_base
         + prompt_use_tool_calls
+        + prompt_interactive_topsailai
     )
 
     prompt_mode_ReAct_toolPrompt = (
         prompt_mode_ReAct_base
-        + read_prompt("work_mode/format/json_ReAct.md")
+
+        # place them to tail
+        #+ prompt_interactive_json
+        #+ read_prompt("work_mode/format/json_ReAct.md")
+        + prompt_interactive_topsailai
+        + read_prompt("work_mode/format/topsailai_ReAct.md")
     )
 
     # work-mode PlanAndExecute
