@@ -129,7 +129,7 @@ def main():
     max_count = 100
     while True:
         max_count -= 1
-        answer = agent.run(react.Step4ReAct(), message)
+        answer = agent.run(react.Step4ReAct(True), message)
         if answer:
             add_session_message()
         print()
