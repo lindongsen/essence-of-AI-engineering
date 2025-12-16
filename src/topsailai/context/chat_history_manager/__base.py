@@ -47,6 +47,8 @@ class ChatHistoryMessageData(object):
 class MessageStorageBase(object):
     """ Base class for chat history messages manager. """
 
+    conn = None
+
     def add_session_message(self, last_message:dict):
         """ add message for session """
         raise NotImplementedError

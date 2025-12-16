@@ -104,6 +104,7 @@ class ChatHistorySQLAlchemy(ChatHistoryBase):
             conn (str): Database connection string.
         """
         super(ChatHistorySQLAlchemy, self).__init__()
+        self.conn = conn
         self.engine = create_engine(conn)
         Base.metadata.create_all(self.engine)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)

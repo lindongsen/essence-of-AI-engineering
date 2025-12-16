@@ -70,7 +70,8 @@ def get_session_manager(conn=None, default_conn=DEFAULT_CONN) -> SessionStorageB
 
     mgrs = get_managers_by_env(1)
     if mgrs:
-        return mgrs[0]
+        msg_mgr = mgrs[0]
+        return SessionSQLAlchemy(msg_mgr.conn)
 
     if default_conn:
         return SessionSQLAlchemy(default_conn)
