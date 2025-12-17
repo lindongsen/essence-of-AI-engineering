@@ -112,9 +112,12 @@ def main():
     answer = agent.run(react.Step4ReAct(), message)
     if answer:
         ctx_manager.add_session_message(session_id, agent.messages[-1])
-    print()
-    print(">>> answer:")
-    print(answer)
+
+    if not env_tool.is_debug_mode():
+        print()
+        print(">>> answer:")
+        print(answer)
+
     print()
 
 if __name__ == "__main__":

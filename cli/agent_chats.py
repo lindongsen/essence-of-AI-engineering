@@ -25,6 +25,8 @@ os.chdir(project_root)
 from topsailai.ai_base.agent_base import AgentRun
 from topsailai.ai_base.agent_types import react
 from topsailai.context import ctx_manager
+from topsailai.utils import env_tool
+
 
 def input_message() -> str:
     """ enter message """
@@ -132,9 +134,12 @@ def main():
         answer = agent.run(react.Step4ReAct(True), message)
         if answer:
             add_session_message()
-        print()
-        print(">>> answer:")
-        print(answer)
+
+        if not env_tool.is_debug_mode():
+            print()
+            print(">>> answer:")
+            print(answer)
+
         print()
         if max_count == 0:
             break
