@@ -108,7 +108,7 @@ def format_dict_to_list(d:dict, key_name:str, value_name:str) -> list[dict]:
         )
     return result
 
-def to_topsailai_format(content:str|list|dict, key_name:str, value_name:str) -> str:
+def to_topsailai_format(content:str|list|dict, key_name:str, value_name:str, for_print=False) -> str:
     if isinstance(content, str):
         if key_name not in content:
             return content
@@ -124,9 +124,16 @@ def to_topsailai_format(content:str|list|dict, key_name:str, value_name:str) -> 
         result += f"{TOPSAILAI_FORMAT_PREFIX}{d[key_name]}\n"
         del d[key_name]
         if value_name in d:
-            result += f"{d[value_name]}\n"
+            v = d[value_name]
+            if for_print:
+                if isinstance(v, [list, dict]):
+                    try:
+                        v = simplejson.dumps(v, indent=2, ensure_ascii=False, default=str)
+                    except Exception:
+                        pass
+            result += f"{v}\n"
             del d[value_name]
         if d:
-            result += simplejson.dumps(d) + "\n"
+            result += simplejson.dumps(d, ensure_ascii=False, default=str) + "\n"
         result += "\n"
     return result

@@ -68,7 +68,8 @@ def print_with_time(msg):
     try:
         msg = truncate_msg(msg)
         msg = format_tool.to_topsailai_format(
-            msg, key_name="step_name", value_name="raw_text"
+            msg, key_name="step_name", value_name="raw_text",
+            for_print=True,
         ).strip()
     except Exception:
         pass

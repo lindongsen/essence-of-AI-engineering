@@ -1,0 +1,17 @@
+#!/bin/sh
+
+case "$1" in
+    # called when:
+    #   debian: upgrade and remove
+    #   centos: remove only
+    remove|upgrade|0)
+        # shall clean temporary files
+        echo "clearing pyc files: lib_home is '${lib_home}', pwd is '${PWD}'"
+        if [ "x${lib_home}" != "x" ]; then
+            find ${lib_home} -name "*.pyc" | xargs rm -f
+        fi
+    ;;
+esac
+
+exit 0
+
