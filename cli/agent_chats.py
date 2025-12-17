@@ -30,6 +30,7 @@ from topsailai.utils import env_tool
 
 def input_message() -> str:
     """ enter message """
+    print("--------------------------------------------------------------------------------")
     message = ""
     while True:
         message = input(">>> Your Turn: ")
