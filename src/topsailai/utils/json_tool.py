@@ -183,3 +183,16 @@ def json_load(content):
     if not isinstance(content, str):
         return content
     return simplejson.loads(content)
+
+def safe_json_dump(obj, indent=2, ensure_ascii=False, default=None) -> str:
+    if isinstance(obj, str):
+        return obj
+
+    try:
+        return simplejson.dumps(
+            obj, indent=indent, ensure_ascii=ensure_ascii, default=default or str,
+        )
+    except Exception:
+        pass
+
+    return str(obj)

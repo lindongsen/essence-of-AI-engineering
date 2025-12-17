@@ -71,8 +71,8 @@ def print_with_time(msg):
             msg, key_name="step_name", value_name="raw_text",
             for_print=True,
         ).strip()
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("fail to format message: [%s], e=[%s]", msg, e)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     content = (f"[{now}] {msg}")

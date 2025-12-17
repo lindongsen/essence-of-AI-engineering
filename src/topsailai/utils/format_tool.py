@@ -9,6 +9,8 @@ import re
 import simplejson
 from collections import OrderedDict
 
+from .json_tool import safe_json_dump
+
 
 TOPSAILAI_FORMAT_PREFIX = "topsailai."
 
@@ -126,14 +128,11 @@ def to_topsailai_format(content:str|list|dict, key_name:str, value_name:str, for
         if value_name in d:
             v = d[value_name]
             if for_print:
-                if isinstance(v, [list, dict]):
-                    try:
-                        v = simplejson.dumps(v, indent=2, ensure_ascii=False, default=str)
-                    except Exception:
-                        pass
+                if isinstance(v, (list, dict)):
+                    v = safe_json_dump(v)
             result += f"{v}\n"
             del d[value_name]
         if d:
-            result += simplejson.dumps(d, ensure_ascii=False, default=str) + "\n"
+            result += safe_json_dump(d) + "\n"
         result += "\n"
     return result
