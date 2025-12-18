@@ -72,7 +72,9 @@ def print_with_time(msg):
             for_print=True,
         ).strip()
     except Exception as e:
-        logger.error("fail to format message: [%s], e=[%s]", msg, e)
+        # debug
+        # logger.error("fail to format message: [%s], e=[%s]", msg, e)
+        pass
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     content = (f"[{now}] {msg}")
