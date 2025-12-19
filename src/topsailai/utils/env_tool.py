@@ -25,3 +25,8 @@ def is_use_tool_calls() -> bool:
     if os.getenv("USE_TOOL_CALLS", "0") == "0":
         return False
     return True
+
+def is_chat_multi_line():
+    if os.getenv("CHAT_MULTI_LINE", "0") == "0":
+        return False
+    return True

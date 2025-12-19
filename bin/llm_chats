@@ -66,4 +66,5 @@ run_cli="uv run"
 [ "${UV_NO_DEV}" == "1" ] && run_cli="python"
 
 # start
-${run_cli} cli/llm_chats.py "${task} ${task_ex}"
+CHAT_MULTI_LINE=1 \
+  ${run_cli} cli/llm_chats.py "${task} ${task_ex}"

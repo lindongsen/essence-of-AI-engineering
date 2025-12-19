@@ -27,39 +27,10 @@ from topsailai.ai_base.llm_base import LLMModel, ContentStdout
 from topsailai.ai_base.prompt_base import PromptBase
 from topsailai.utils import env_tool
 from topsailai.utils.thread_local_tool import set_thread_var, KEY_SESSION_ID
+from topsailai.utils.input_tool import get_message, input_message
 
 from topsailai.context import ctx_manager
 
-
-def input_message() -> str:
-    """ enter message """
-    message = ""
-    while True:
-        message = input(">>> Your Turn: ")
-        message = message.strip()
-        if not message:
-            continue
-        if message in ["exit", "quit"]:
-            sys.exit(0)
-        break
-    return message
-
-def get_message():
-    """ return str for message """
-    message = ' '.join(sys.argv[1:])
-
-    # message from file
-    file_path = message
-    if sys.argv[1] == '-':
-        file_path = "/dev/stdin"
-    if file_path and os.path.exists(file_path):
-        with open(file_path) as fd:
-            message = fd.read()
-
-    message = message.strip()
-    if not message:
-        message = input_message()
-    return message
 
 def main():
     """ main entry """

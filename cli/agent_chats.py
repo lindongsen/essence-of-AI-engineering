@@ -26,38 +26,8 @@ from topsailai.ai_base.agent_base import AgentRun
 from topsailai.ai_base.agent_types import react
 from topsailai.context import ctx_manager
 from topsailai.utils import env_tool
+from topsailai.utils.input_tool import get_message, input_message
 
-
-def input_message() -> str:
-    """ enter message """
-    print("--------------------------------------------------------------------------------")
-    message = ""
-    while True:
-        message = input(">>> Your Turn: ")
-        message = message.strip()
-        if not message:
-            continue
-        if message in ["exit", "quit"]:
-            sys.exit(0)
-        break
-    return message
-
-def get_message():
-    """ return str for message """
-    message = ' '.join(sys.argv[1:])
-
-    # message from file
-    file_path = message
-    if sys.argv[1] == '-':
-        file_path = "/dev/stdin"
-    if file_path and os.path.exists(file_path):
-        with open(file_path) as fd:
-            message = fd.read()
-
-    message = message.strip()
-    if not message:
-        message = input_message()
-    return message
 
 def get_agent(system_prompt="", to_dump_messages=False):
     """ return a agent object. """
