@@ -86,7 +86,8 @@ def main():
         messages_from_session = []
 
     def add_session_message():
-        ctx_manager.add_session_message(session_id, agent.messages[-1])
+        if session_id:
+            ctx_manager.add_session_message(session_id, agent.messages[-1])
         messages_from_session.append(agent.messages[-1])
 
     def hook_after_init_prompt(self):
@@ -114,7 +115,21 @@ def main():
         print()
         if max_count == 0:
             break
-        message = input_message()
+
+        while True:
+            message = input_message()
+
+            message = message.strip()
+            if message == "/clear":
+                if session_id:
+                    print(f"{message}: Context cannot be clear due to exist session_id({session_id})")
+                else:
+                    # clear context messages
+                    messages_from_session = []
+                    print("/clear: Context already is clear")
+                continue
+
+            break
 
     return
 

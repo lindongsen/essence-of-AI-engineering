@@ -36,7 +36,7 @@ def input_multi_line(tips=""):
     if not tips:
         tips = INPUT_TIPS
 
-    print(tips + " Press 'CTRL D' or Enter 'EOF' for EOF")
+    print(tips + " Press 'CTRL D' or Enter 'EOF' for end")
     message = ""
     count = 0
     while True:
