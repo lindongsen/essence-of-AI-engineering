@@ -32,7 +32,13 @@ class Step4ReAct(StepCallBase):
 
     def _execute(self, step:dict, tools:dict, response:list, index:int, rsp_msg_obj=None, **_):
         """ acting steps """
-        step_name = step["step_name"]
+        try:
+            step_name = step["step_name"]
+        except Exception:
+            self.user_msg = "no found step_name"
+            self.code = self.CODE_STEP_FINAL
+            return
+
         if step_name == 'action':
             tool_call_info = self.get_tool_call_info(step, rsp_msg_obj)
             if tool_call_info is None:
