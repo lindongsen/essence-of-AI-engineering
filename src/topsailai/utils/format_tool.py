@@ -43,6 +43,25 @@ def to_list(v, to_ignore_none=False):
             return v
     return [v]
 
+def fix_llm_mistakes(text:str, step_keys=("thought", "action")):
+    for step_key in step_keys:
+        step_name = TOPSAILAI_FORMAT_PREFIX + step_key
+
+        if f"\n{step_name}\n" in text:
+            continue
+
+        # case: xxx{step_name}\n
+        if f"{step_name}\n" in text:
+            text = text.replace(step_name, f"\n{step_name}", 1)
+            continue
+
+        # case: \n{step_name}xxx
+        if f"\n{step_name}" in text:
+            text = text.replace(step_name, f"{step_name}\n", 1)
+            continue
+
+    return text
+
 def parse_topsailai_format(text: str) -> dict:
     """
     Parse text in the topsailai format.
@@ -53,6 +72,7 @@ def parse_topsailai_format(text: str) -> dict:
 
     Returns a dictionary where keys are step names and values are raw text content.
     """
+    text = fix_llm_mistakes(text)
     lines = text.strip().split('\n')
     if not lines:
         return {}

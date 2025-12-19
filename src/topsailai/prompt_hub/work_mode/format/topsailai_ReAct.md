@@ -7,7 +7,8 @@ If `step_name` is `action`, the following is the content of `raw_text` in JSON:
 Output Example:
 ```
 topsailai.thought
-I need to know the OS version
+I need to know the OS version.
+
 topsailai.action
 {
   "tool_args": {"cmd_string": "uname -a" },
