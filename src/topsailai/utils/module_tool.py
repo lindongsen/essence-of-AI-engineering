@@ -7,6 +7,7 @@
 
 import os
 import sys
+import re
 import pkgutil
 
 from topsailai.logger import logger
@@ -117,6 +118,69 @@ def get_function_map(path, key="TOOLS", prefix_name=""):
             modules_map[m_key] = v_func
     return modules_map
 
+def is_valid_module_name(name):
+    pattern = r'^[a-zA-Z_][a-zA-Z0-9_]*$'
+    return bool(re.match(pattern, name))
+
+def get_path_for_sys_and_package(path:str) -> tuple[str|None, str|None]:
+    """if syspath in path, return it.
+
+    Args:
+        path (str):
+
+    Returns:
+        (sys_path, pkg_path)
+    """
+    sys_path = None
+    pkg_path = path
+    if '/' in path:
+        for _curr_sys_path in sys.path:
+            if not _curr_sys_path:
+                continue
+            if _curr_sys_path[0] == ".":
+                continue
+            if not path.startswith(_curr_sys_path):
+                continue
+            if _curr_sys_path[-1] == "/":
+                _curr_sys_path = _curr_sys_path[:-1]
+
+            if len(path) != len(_curr_sys_path):
+                # path:           /tmp/m1/m2
+                # _curr_sys_path: /tmp/m
+                if path[len(_curr_sys_path)] != '/':
+                    continue
+
+            # matched
+            sys_path = _curr_sys_path
+            pkg_path = path.replace(sys_path, "").replace("/", ".")
+            if pkg_path[0] == ".":
+                pkg_path = pkg_path[1:]
+            return (sys_path, pkg_path)
+
+        # debug
+        # print(">>> no match with sys.path")
+
+        # path:     /libs/a/b/c
+        # sys_path: /libs/a/b
+        # pkg_path: c
+        sys_path = os.path.dirname(path)
+        pkg_path = os.path.basename(path)
+        for _ in range(100):
+            if not os.path.exists(f"{sys_path}/__init__.py") \
+                and not os.path.exists(f"{sys_path}/__init__.pyc"):
+                break
+            _base_name = os.path.basename(sys_path)
+            if not is_valid_module_name(_base_name):
+                break
+            pkg_path = _base_name + "." + pkg_path
+            sys_path = os.path.dirname(sys_path)
+        # end for
+        return (sys_path, pkg_path)
+    else:
+        # from xxx.topsailai.tools import TOOLS
+        pass
+    return (sys_path, pkg_path)
+
 def get_external_function_map(path:str, key:str="TOOLS", prefix_name:str=""):
     """Create a mapping of function names to functions from modules.
 
@@ -142,14 +206,15 @@ def get_external_function_map(path:str, key:str="TOOLS", prefix_name:str=""):
     path = path.strip()
     if not path:
         return
-    dirname = None
-    basename = path
-    if '/' in path:
-        dirname = os.path.dirname(path)
-        basename = os.path.basename(path)
 
-    if dirname and dirname not in sys.path:
-        sys.path.append(dirname)
+    sys_path, pkg_path = get_path_for_sys_and_package(path)
+    logger.info(
+        "loading external functions: path=[%s], pkg=[%s], key=[%s], prefix=[%s]",
+        path, pkg_path, key, prefix_name,
+    )
 
-    assert basename
-    return get_function_map(basename, key, prefix_name)
+    if sys_path and sys_path not in sys.path:
+        sys.path.append(sys_path)
+
+    assert pkg_path, f"no found pkg_path for this path: [{path}]"
+    return get_function_map(pkg_path, key, prefix_name)
