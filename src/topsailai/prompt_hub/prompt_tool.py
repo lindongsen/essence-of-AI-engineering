@@ -97,8 +97,8 @@ class PromptHubExtractor(object):
 
     prompt_mode_ReAct_toolCall = (
         prompt_mode_ReAct_base
+        + read_prompt("work_mode/format/topsailai2.md")
         + prompt_use_tool_calls
-        + prompt_interactive_topsailai
     )
 
     prompt_mode_ReAct_toolPrompt = (

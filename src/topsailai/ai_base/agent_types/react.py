@@ -100,7 +100,7 @@ class Step4ReAct(StepCallBase):
                 self.user_msg = user_input
                 self.code = self.CODE_STEP_FINAL
                 return
-        elif step_name == 'final_answer':
+        elif step_name.startswith('final'):
             self.result = step["raw_text"]
             self.code = self.CODE_TASK_FINAL
             return
