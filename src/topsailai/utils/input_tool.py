@@ -78,7 +78,7 @@ def input_multi_line(tips="", hook:HookInstruction=None):
     if message:
         if not hook_message(message, hook):
             return message
-    return input_multi_line(tips)
+    return input_multi_line(tips, hook)
 
 def input_message(tips="", hook:HookInstruction=None):
     """ enter message """
