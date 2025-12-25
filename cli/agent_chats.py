@@ -140,14 +140,10 @@ def main():
             break
 
         while True:
-            message = input_message()
-
+            message = input_message(hook=hook_instruction)
             message = message.strip()
-            if hook_instruction.exist_hook(message):
-                hook_instruction.call_hook(message)
-                continue
-
-            break
+            if message:
+                break
 
     return
 

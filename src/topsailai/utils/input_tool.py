@@ -12,12 +12,31 @@ import sys
 import readline
 
 from . import env_tool
+from topsailai.workspace.hook_instruction import HookInstruction
 
 SPLIT_LINE = "--------------------------------------------------------------------------------"
 INPUT_TIPS = ">>> Your Turn: "
 
+DESCRIPTION_EXIT_SET = ["exit", "quit", "/exit", "/quit"]
 
-def input_one_line(tips=""):
+def hook_message(message:str, hook:HookInstruction) -> bool:
+    """ if has call hook, return True. """
+    message = message.strip()
+    if not message:
+        return False
+
+    if message in DESCRIPTION_EXIT_SET:
+        sys.exit(0)
+
+    if hook is None:
+        return False
+
+    if hook.exist_hook(message):
+        hook.call_hook(message)
+        return True
+    return False
+
+def input_one_line(tips="", hook:HookInstruction=None):
     if not tips:
         tips = INPUT_TIPS
 
@@ -27,12 +46,12 @@ def input_one_line(tips=""):
         message = message.strip()
         if not message:
             continue
-        if message in ["exit", "quit"]:
-            sys.exit(0)
+        if hook_message(message, hook):
+            continue
         break
     return message
 
-def input_multi_line(tips=""):
+def input_multi_line(tips="", hook:HookInstruction=None):
     if not tips:
         tips = INPUT_TIPS
 
@@ -51,24 +70,24 @@ def input_multi_line(tips=""):
             break
 
         if count == 1:
-            if message.strip() in ["exit", "quit"]:
-                sys.exit(0)
+            if hook_message(message, hook):
+                message = ""
+                break
 
     message = message.strip()
     if message:
-        if message in ["exit", "quit", "/exit", "/quit"]:
-            sys.exit(0)
-        return message
+        if not hook_message(message, hook):
+            return message
     return input_multi_line(tips)
 
-def input_message(tips=""):
+def input_message(tips="", hook:HookInstruction=None):
     """ enter message """
     print(SPLIT_LINE)
     if env_tool.is_chat_multi_line():
-        return input_multi_line(tips)
-    return input_one_line(tips)
+        return input_multi_line(tips, hook)
+    return input_one_line(tips, hook)
 
-def get_message():
+def get_message(hook:HookInstruction=None):
     """ return str for message """
     message = ' '.join(sys.argv[1:])
 
@@ -82,5 +101,5 @@ def get_message():
 
     message = message.strip()
     if not message:
-        message = input_message()
+        message = input_message(hook=hook)
     return message
