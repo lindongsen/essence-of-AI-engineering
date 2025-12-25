@@ -3,6 +3,7 @@ from datetime import datetime
 import simplejson
 
 from topsailai.logger.log_chat import logger
+from topsailai.utils import thread_local_tool
 
 
 g_flag_print_step = None
@@ -94,6 +95,10 @@ def print_step(msg):
     Args:
         msg: Step message to print
     """
+    if thread_local_tool.get_thread_var(
+        thread_local_tool.KEY_FLAG_DEBUG
+    ) == 0:
+        return
     if g_flag_print_step is False:
         return
     if os.getenv("DEBUG", "0") == "1" or g_flag_print_step:

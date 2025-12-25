@@ -56,6 +56,8 @@ def input_multi_line(tips=""):
 
     message = message.strip()
     if message:
+        if message in ["exit", "quit", "/exit", "/quit"]:
+            sys.exit(0)
         return message
     return input_multi_line(tips)
 

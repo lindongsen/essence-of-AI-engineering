@@ -11,8 +11,11 @@ import threading
 from topsailai.logger import logger
 from topsailai.utils.json_tool import json_dump, json_load
 from topsailai.utils.format_tool import to_list
+from topsailai.utils import thread_local_tool
 from topsailai.prompt_hub import prompt_tool
+from topsailai.workspace.folder_constants import FOLDER_WORKSPACE
 
+DEFAULT_WORKSPACE = FOLDER_WORKSPACE
 
 def get_all_agent_tools():
     """ return dict, key is tool_name, value is tool_func. """
@@ -24,7 +27,14 @@ def get_all_agent_tools():
             agent_tools[tool_name] = tool_func
     return agent_tools
 
-def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace"):
+
+def _agent_writer(
+        msg_or_file:str,
+        model_name:str=None,
+        workspace:str=DEFAULT_WORKSPACE,
+        tools:list=None,
+        more_prompt:str="\nYou are a professional writer.\n",
+    ):
     """ A professional Assistant for writer.
     The writing assistant can read a large amount of text content.
     There are no restrictions for scenarios that may generate substantial text,
@@ -56,19 +66,41 @@ def agent_writer(msg_or_file:str, model_name:str=None, workspace:str="/workspace
     from topsailai.ai_base.agent_types.react import SYSTEM_PROMPT, Step4ReAct
 
     agent = AgentRun(
-        system_prompt=SYSTEM_PROMPT + "\nYou are a professional writer.\n",
-        tools=None,
+        system_prompt=SYSTEM_PROMPT + more_prompt,
+        tools=tools,
         agent_name="AgentWriter",
         excluded_tool_kits=["agent_tool"],
     )
     agent.llm_model.max_tokens = max(1600, agent.llm_model.max_tokens)
     agent.llm_model.temperature = max(0.97, agent.llm_model.temperature)
     if model_name:
-        agent.llm_model.openai_model_name = model_name
+        agent.llm_model.model_name = model_name
     return agent.run(Step4ReAct(), message)
 
+def agent_writer(msg_or_file:str, model_name:str=None, workspace:str=DEFAULT_WORKSPACE):
+    """ A professional Assistant for writer.
+    The writing assistant can read a large amount of text content.
+    There are no restrictions for scenarios that may generate substantial text,
+    such as reading large files or fetching web content via cURL.
+    The text will not be forcibly truncated.
+
+    Args:
+        msg_or_file (str): it can be message or file path.
+            if user pass a file path, the content of the file will be read as message.
+            if the user does explicitly specify a file, should use it directly.
+        model_name (str): LLM name, If the user does not explicitly specify, this parameter is not needed.
+        workspace (str): a folder absolute path for workspace.
+
+    Return final answer.
+    """
+    return _agent_writer(
+        msg_or_file=msg_or_file,
+        model_name=model_name,
+        workspace=workspace,
+    )
+
 def agent_programmer(
-        msg_or_file:str, model_name:str=None, workspace:str="/workspace",
+        msg_or_file:str, model_name:str=None, workspace:str=DEFAULT_WORKSPACE,
         system_prompt:str="",
     ):
     """ A professional Assistant for programmer.
@@ -116,13 +148,13 @@ def agent_programmer(
         excluded_tool_kits=["agent_tool"],
     )
     if model_name:
-        agent.llm_model.openai_model_name = model_name
+        agent.llm_model.model_name = model_name
     return agent.run(Step4ReAct(), message)
 
 def async_multitasks_agent_writer(
         goal:str,
         goal_report_file:str=None,
-        task_prompt_file:str=None, model_name:str=None, workspace:str="/workspace", **tasks
+        task_prompt_file:str=None, model_name:str=None, workspace:str=DEFAULT_WORKSPACE, **tasks
     ):
     """ A professional writing assistant capable of executing tasks concurrently.
 
@@ -218,7 +250,7 @@ def async_multitasks_agent_writer2(
         task_prompt_file:str,
         tasks_file_or_json:str,
         model_name:str=None,
-        workspace:str="/workspace"
+        workspace:str=DEFAULT_WORKSPACE,
     ):
     """ A professional writing assistant capable of executing tasks concurrently.
 
@@ -266,6 +298,62 @@ def async_multitasks_agent_writer2(
         workspace=workspace,
         **tasks_kv
     )
+
+def agent_memory_as_story(
+        msg_or_file:str,
+        model_name:str=None,
+        workspace:str=DEFAULT_WORKSPACE,
+    ):
+    """ A professional Assistant for writer.
+    Core Goal: Summarize the messages and generate appropriate a title and content.
+
+    Args:
+        msg_or_file (str): it can be message or file path.
+            if pass a file path, the content of the file will be read as message.
+            if the user does explicitly specify a file, should use it directly.
+        model_name (str): LLM name, If the user does not explicitly specify, this parameter is not needed.
+        workspace (str): a folder absolute path for workspace.
+
+    Return final answer.
+    """
+    from . import story_tool
+
+    prompt = (
+        "\n"
+        "You are a professional writer.\n"
+        "Your Core Goal: Summarize the messages and generate appropriate a title and content.\n"
+        "Use story_tool to save content.\n"
+        "[Attention] story_id is title, also is filename, max length is 250\n"
+    )
+
+    return _agent_writer(
+        msg_or_file=msg_or_file,
+        model_name=model_name,
+        workspace=workspace,
+        tools=story_tool.TOOLS,
+        more_prompt=prompt,
+    )
+
+def async_agent_memory_as_story(
+        msg_or_file,
+        model_name:str=None,
+        workspace:str=DEFAULT_WORKSPACE,
+    ):
+    if isinstance(msg_or_file, (list, dict, set)):
+        msg_or_file = json_dump(msg_or_file)
+
+    def func_call():
+        # disabled debug in this thread
+        thread_local_tool.set_thread_var(
+            thread_local_tool.KEY_FLAG_DEBUG, 0
+        )
+        agent_memory_as_story(
+            msg_or_file=msg_or_file,
+            model_name=model_name,
+            workspace=workspace,
+        )
+    threading.Thread(target=func_call, name="async_agent_memory_as_story", daemon=False).start()
+    return
 
 
 TOOLS = dict(

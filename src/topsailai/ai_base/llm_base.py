@@ -152,15 +152,14 @@ class LLMModel(object):
             temperature=0.3,
             top_p=0.97,
             frequency_penalty=0.0,
+            model_name=None,
         ):
         self.max_tokens = int(os.getenv("MAX_TOKENS", max_tokens))
         self.temperature = float(os.getenv("TEMPERATURE", temperature))
         self.top_p = float(os.getenv("TOP_P", top_p))
         self.frequency_penalty = float(os.getenv("FREQUENCY_PENALTY", frequency_penalty))
 
-        self.openai_model_name = os.getenv("OPENAI_MODEL", "DeepSeek-V3.1-Terminus")
-
-        self.model_name = self.openai_model_name
+        self.model_name = model_name or os.getenv("OPENAI_MODEL", "DeepSeek-V3.1-Terminus")
         self.model_config = {"api_key": "", "api_base": ""} # in using
         self.model = self.get_llm_model() # in using
 
@@ -168,7 +167,7 @@ class LLMModel(object):
         self.models = [] # supported
         self.get_llm_models()
 
-        logger.info(f"model={self.openai_model_name}, max_tokens={max_tokens}")
+        logger.info(f"model={self.model_name}, max_tokens={max_tokens}")
 
         self.tokenStat = TokenStat(id(self))
 
@@ -225,7 +224,7 @@ class LLMModel(object):
     def build_parameters_for_chat(self, messages, stream=False, tools=None, tool_choice="auto"):
         _format_messages(messages, key_name="step_name", value_name="raw_text")
         params = dict(
-            model=self.openai_model_name,
+            model=self.model_name,
             messages=messages,
             temperature=self.temperature,
             max_tokens=self.max_tokens,

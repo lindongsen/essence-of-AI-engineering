@@ -13,6 +13,9 @@ g_thr_local = threading.local()
 MAX_AGENT_DEEP = 3
 KEY_AGENT_DEEP = "agent_deep" # value is number for count
 
+# Flag debug
+KEY_FLAG_DEBUG = "flag_debug" # 0 is disabled
+
 
 def set_thread_var(name, value):
     """Set a variable in thread-local storage.

@@ -69,6 +69,23 @@ def read_story_from_file(workspace:str, story_id:str):
         return fd.read()
     return None
 
+def list_stories(workspace:str) -> list[str]|None:
+    """List all of stories from workspace, read story with filename(story_id).
+
+    Args:
+        workspace (str): folder path.
+
+    Returns:
+        list[str]:
+        None: no found
+    """
+    if workspace == '/' or workspace[0] != '/':
+        raise Exception(f"illegal workspace: {workspace}")
+
+    # find all of them
+    results = file_tool.list_files(workspace)
+    return results
+
 
 TOOLS = dict(
     write_story_to_file=write_story_to_file,

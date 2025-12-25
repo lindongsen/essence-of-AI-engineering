@@ -25,8 +25,12 @@ os.chdir(project_root)
 from topsailai.ai_base.agent_base import AgentRun
 from topsailai.ai_base.agent_types import react
 from topsailai.context import ctx_manager
-from topsailai.utils import env_tool
+from topsailai.utils import (
+    env_tool,
+)
 from topsailai.utils.input_tool import get_message, input_message
+from topsailai.workspace.hook_instruction import HookInstruction
+from topsailai.tools.agent_tool import async_agent_memory_as_story
 
 
 def get_agent(system_prompt="", to_dump_messages=False):
@@ -43,6 +47,7 @@ def get_agent(system_prompt="", to_dump_messages=False):
         agent.flag_dump_messages = True
 
     return agent
+
 
 def main():
     """ main entry """
@@ -100,6 +105,24 @@ def main():
     agent.hooks_after_init_prompt.append(hook_after_init_prompt)
     agent.hooks_after_new_session.append(hook_after_new_session)
 
+    hook_instruction = HookInstruction()
+    def _clear():
+        if session_id:
+            print(f"{message}: Context cannot be clear due to exist session_id({session_id})")
+        else:
+            # clear context messages
+            messages_from_session = []
+            print("/clear: Context already is clear")
+        return
+    def _story():
+        if not messages_from_session:
+            return
+        async_agent_memory_as_story(messages_from_session)
+        print("/story: The history messages will be save to a new story")
+        return
+    hook_instruction.add_hook("/clear", _clear)
+    hook_instruction.add_hook("/story", _story)
+
     max_count = 100
     while True:
         max_count -= 1
@@ -120,13 +143,8 @@ def main():
             message = input_message()
 
             message = message.strip()
-            if message == "/clear":
-                if session_id:
-                    print(f"{message}: Context cannot be clear due to exist session_id({session_id})")
-                else:
-                    # clear context messages
-                    messages_from_session = []
-                    print("/clear: Context already is clear")
+            if hook_instruction.exist_hook(message):
+                hook_instruction.call_hook(message)
                 continue
 
             break
