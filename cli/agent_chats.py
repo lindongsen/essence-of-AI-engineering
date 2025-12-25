@@ -27,6 +27,7 @@ from topsailai.ai_base.agent_types import react
 from topsailai.context import ctx_manager
 from topsailai.utils import (
     env_tool,
+    json_tool,
 )
 from topsailai.utils.input_tool import get_message, input_message
 from topsailai.workspace.hook_instruction import HookInstruction
@@ -120,8 +121,14 @@ def main():
         async_agent_memory_as_story(messages_from_session)
         print("/story: The history messages will be save to a new story")
         return
-    hook_instruction.add_hook("/clear", _clear)
-    hook_instruction.add_hook("/story", _story)
+    def _history():
+        print("/history: Show history messages")
+        if messages_from_session:
+            print(json_tool.json_dump(messages_from_session, indent=2))
+        return
+    hook_instruction.add_hook("/clear", _clear, "clear context messages")
+    hook_instruction.add_hook("/story", _story, "save context messages to a story")
+    hook_instruction.add_hook("/history", _history, "show context messages")
 
     max_count = 100
     while True:

@@ -7,6 +7,21 @@
 
 TRIGGER_CHARS = "/@"
 
+
+class HookFunc(object):
+    def __init__(self, description, func, args=None, kwargs=None):
+        self.description = description
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self, *args, **kwargs):
+        if not args:
+            args = self.args or tuple()
+        if not kwargs:
+            kwargs = self.kwargs or dict()
+        return self.func(*args, **kwargs)
+
 class HookInstruction(object):
     """
     Example:
@@ -22,17 +37,38 @@ class HookInstruction(object):
             hook_instruction.call_hook(message)
     """
     def __init__(self):
-        # key is hook_name, value is list[func()]
-        self.hook_map = {}
+        # key is hook_name, value is list[dict]
+        # value.dict:
+        #    func: func()
+        #    description: ""
+        self.hook_map = {
+            "/help": [HookFunc("show help info", self.show_help)]
+        }
 
-    def add_hook(self, hook_name, hook_func):
+    def show_help(self):
+        print("Instructions:")
+        for hook_name, hook_set in self.hook_map.items():
+            print(f"\n  {hook_name}")
+            for hook_func in hook_set:
+                print(f"    - {hook_func.func.__name__}, {hook_func.description}")
+        print()
+        return
+
+    def add_hook(self, hook_name, hook_func:HookFunc, description=""):
         assert callable(hook_func)
         if hook_name not in self.hook_map:
             self.hook_map[hook_name] = []
+
+        if not isinstance(hook_func, HookFunc):
+            hook_func = HookFunc(
+                description=description,
+                func=hook_func,
+            )
+
         self.hook_map[hook_name].append(hook_func)
         return
 
-    def del_hook(self, hook_name, hook_func):
+    def del_hook(self, hook_name, hook_func:HookFunc):
         if hook_name in self.hook_map:
             if hook_func in self.hook_map[hook_name]:
                 self.hook_map[hook_name].remove(hook_func)
