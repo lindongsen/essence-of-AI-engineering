@@ -185,6 +185,20 @@ def json_load(content):
     return simplejson.loads(content)
 
 def safe_json_dump(obj, indent=2, ensure_ascii=False, default=None) -> str:
+    """Safely serialize Python object to JSON string with fallback to string representation.
+
+    This function attempts to convert a Python object to a JSON string. If the input is already a string, it is returned unchanged. If JSON serialization fails, the function falls back to converting the object to a string using str().
+
+    Args:
+        obj: Python object to serialize
+        indent: Number of spaces for indentation (default: 2)
+        ensure_ascii: If True, output is ASCII-only (default: False)
+        default: Function to handle non-serializable objects; defaults to str
+
+    Returns:
+        str: JSON string representation of the object, or its string representation
+            if serialization fails
+    """
     if isinstance(obj, str):
         return obj
 
@@ -196,3 +210,10 @@ def safe_json_dump(obj, indent=2, ensure_ascii=False, default=None) -> str:
         pass
 
     return str(obj)
+
+def safe_json_load(s) -> str|None:
+    try:
+        return json_load(s)
+    except Exception:
+        pass
+    return None

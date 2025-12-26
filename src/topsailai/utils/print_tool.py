@@ -9,6 +9,12 @@ from topsailai.utils import thread_local_tool
 g_flag_print_step = None
 
 def get_truncation_len() -> int|None:
+    """Get the truncation length for debug printing from environment.
+
+    Returns:
+        int|None: Truncation length as integer if DEBUG_PRINT_TRUNCATE_LENGTH is set,
+                 otherwise None.
+    """
     truncation_len = os.getenv("DEBUG_PRINT_TRUNCATE_LENGTH")
     try:
         if truncation_len:
@@ -18,6 +24,17 @@ def get_truncation_len() -> int|None:
     return None
 
 def truncate_msg(msg:str|list|dict, key_name="step_name", value_name="raw_text") -> str:
+    """Truncate message content if it exceeds configured length.
+
+    Args:
+        msg (str|list|dict): Message to truncate. If string length exceeds limit,
+                              it may be parsed as JSON for structured truncation.
+        key_name (str): Key name for structured messages (default: "step_name").
+        value_name (str): Value name for structured messages (default: "raw_text").
+
+    Returns:
+        str: Truncated message as string (possibly JSON).
+    """
     from topsailai.utils import json_tool
     from .format_tool import to_list
 
@@ -106,6 +123,11 @@ def print_step(msg):
     return
 
 def print_debug(msg):
+    """Print a debug message with step printing enabled.
+
+    Args:
+        msg: Debug message to print.
+    """
     msg = f"[DEBUG] {msg}"
     print_step(msg)
 

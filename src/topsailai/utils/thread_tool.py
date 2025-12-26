@@ -19,6 +19,15 @@ def wait_thrs(thrs: list):
     return
 
 def is_main_thread():
+    """Check if the current thread is the main thread.
+
+    Returns:
+        bool: True if the current thread is the main thread, False otherwise.
+
+    Example:
+        >>> threading.Thread(target=lambda : print(is_main_thread())).start()
+        False
+    """
     """ return bool.
 
     Example:

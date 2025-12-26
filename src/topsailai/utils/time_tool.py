@@ -27,9 +27,10 @@ def get_current_date(with_t=False, include_ms=False):
     return dt.strftime(f"%Y-%m-%d{c}{time_format}")
 
 def get_current_day():
-    """
-    Get the current date of day.
-    e.g. 2025-11-24
+    """Get the current date in YYYY-MM-DD format.
+
+    Returns:
+        str: Current date formatted as 'YYYY-MM-DD'.
     """
     dt = datetime.now()
     return dt.strftime("%Y-%m-%d")

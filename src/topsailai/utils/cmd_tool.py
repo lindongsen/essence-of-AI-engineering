@@ -13,7 +13,19 @@ from .text_tool import safe_decode
 
 
 def build_env(d:dict=None):
-    """ build environs, return dict. """
+    """Build environment dictionary with essential system variables.
+
+    This function creates a dictionary containing commonly used environment
+    variables (PYTHONPATH, PATH, HOSTNAME, SHELL) from the current process
+    environment, and optionally updates it with additional variables.
+
+    Args:
+        d (dict, optional): Additional environment variables to merge.
+
+    Returns:
+        dict: Environment dictionary containing system variables and any
+              provided additional variables.
+    """
     env = {}
     for k in ["PYTHONPATH", "PATH", "HOSTNAME", "SHELL"]:
         v = os.getenv(k)
@@ -23,11 +35,11 @@ def build_env(d:dict=None):
         env.update(d)
     return env
 
-def exec_cmd(cmd_string:str, no_need_stderr:bool=False, timeout:int=None):
+def exec_cmd(cmd:str|list, no_need_stderr:bool=False, timeout:int=None):
     """ execute command line
 
     Args:
-        cmd_string (str): command line string
+        cmd (str|list): command line string
         no_need_stderr (bool): if True, set stderr to "". Defaults to False.
 
     Returns:
@@ -35,9 +47,9 @@ def exec_cmd(cmd_string:str, no_need_stderr:bool=False, timeout:int=None):
     """
     env = build_env()
     result = subprocess.run(
-        cmd_string,
+        cmd,
         env=env,
-        shell=True,
+        shell=isinstance(cmd, str),
         check=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

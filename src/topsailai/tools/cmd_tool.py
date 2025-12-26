@@ -1,5 +1,6 @@
 from topsailai.utils.text_tool import safe_decode
 from topsailai.utils.cmd_tool import exec_cmd as exec_command
+from topsailai.utils.json_tool import safe_json_load
 from topsailai.context import ctx_safe
 
 def format_text(s, need_truncate=True):
@@ -48,20 +49,31 @@ def format_return(cmd_string:str, t:tuple):
 
     return _format_return(cmd_string, t)
 
-def exec_cmd(cmd_string:str, no_need_stderr:bool=False):
+def exec_cmd(cmd:str|list, no_need_stderr:bool=False):
     """ execute command
 
     Args:
-        cmd_string (str):
+        cmd (str|list): str for shell, example "echo hello" or ["echo", "hello"]
         no_need_stderr (bool, optional): if True, stderr still be null. Defaults to False.
 
     Returns:
         tuple: (code, stdout, stderr)
     """
+    if isinstance(cmd, str):
+        if cmd[0] == '[' and cmd[-1] == ']':
+            fixed_cmd = safe_json_load(cmd)
+            if fixed_cmd:
+                cmd = fixed_cmd
+
+    if not isinstance(cmd, str) and not isinstance(cmd, list):
+        return "illegal cmd"
+
     result = exec_command(
-        cmd_string,
+        cmd,
         no_need_stderr=no_need_stderr,
     )
+
+    cmd_string = " ".join(cmd) if isinstance(cmd, list) else cmd
 
     return format_return(cmd_string, result)
 

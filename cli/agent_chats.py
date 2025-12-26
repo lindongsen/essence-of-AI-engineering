@@ -29,7 +29,11 @@ from topsailai.utils import (
     env_tool,
     json_tool,
 )
-from topsailai.workspace.input_tool import get_message, input_message
+from topsailai.workspace.input_tool import (
+    get_message,
+    input_message,
+    input_yes,
+)
 from topsailai.workspace.hook_instruction import HookInstruction
 from topsailai.tools.agent_tool import subprocess_agent_memory_as_story
 
@@ -132,8 +136,15 @@ def main():
 
     max_count = 100
     while True:
+        answer = ""
         max_count -= 1
-        answer = agent.run(react.Step4ReAct(True), message)
+
+        try:
+            answer = agent.run(react.Step4ReAct(True), message)
+        except KeyboardInterrupt:
+            if not input_yes():
+                break
+
         if answer:
             add_session_message()
 

@@ -103,3 +103,7 @@ def get_message(hook:HookInstruction=None):
     if not message:
         message = input_message(hook=hook)
     return message
+
+def input_yes(tips="Continue [yes/no] ") -> bool:
+    yn = input(tips)
+    return yn.strip().lower() == "yes"
