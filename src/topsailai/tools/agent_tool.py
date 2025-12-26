@@ -19,6 +19,18 @@ from topsailai.workspace.folder_constants import FOLDER_WORKSPACE
 
 DEFAULT_WORKSPACE = FOLDER_WORKSPACE
 
+
+def is_code_file(file_path:str) -> bool:
+    if not file_path:
+        return False
+
+    file_path = file_path.lower()
+    for suffix in [".md", ".manifest", ".json", ".readme"]:
+        if file_path.endswith(suffix):
+            return False
+
+    return True
+
 def get_all_agent_tools():
     """ return dict, key is tool_name, value is tool_func. """
     from . import TOOLS as INTERNAL_TOOLS
@@ -121,9 +133,12 @@ def agent_programmer(
     message = msg_or_file
     # read message from file if msg_or_file is a file path
     if msg_or_file[0] in ["/", "."]:
-        if os.path.isfile(msg_or_file):
+        if os.path.isfile(msg_or_file) and not is_code_file(msg_or_file):
             with open(msg_or_file, "r", encoding="utf-8") as f:
                 message = f.read()
+
+    if not message.strip():
+        return "null of message content"
 
     workspace = workspace.strip()
     if workspace:
