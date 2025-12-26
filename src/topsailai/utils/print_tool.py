@@ -41,7 +41,9 @@ def truncate_msg(msg:str|list|dict, key_name="step_name", value_name="raw_text")
     truncation_len = get_truncation_len()
     if truncation_len and truncation_len > 0:
         if isinstance(msg, str) and len(msg) > (truncation_len + 100):
-            msg = json_tool.json_load(msg)
+            msg_d = json_tool.safe_json_load(msg)
+            if msg_d:
+                msg = msg_d
 
         if isinstance(msg, (dict, list)):
             for _msg_d in to_list(msg):
