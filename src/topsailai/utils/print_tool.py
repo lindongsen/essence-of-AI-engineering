@@ -70,7 +70,7 @@ def disable_flag_print_step():
     global g_flag_print_step
     g_flag_print_step = False
 
-def print_with_time(msg):
+def print_with_time(msg, need_format=True):
     """Print a message with a timestamp and optional agent name prefix.
 
     Args:
@@ -85,10 +85,11 @@ def print_with_time(msg):
 
     try:
         msg = truncate_msg(msg)
-        msg = format_tool.to_topsailai_format(
-            msg, key_name="step_name", value_name="raw_text",
-            for_print=True,
-        ).strip()
+        if need_format:
+            msg = format_tool.to_topsailai_format(
+                msg, key_name="step_name", value_name="raw_text",
+                for_print=True,
+            ).strip()
     except Exception as e:
         # debug
         logger.exception("fail to format message: [>>>%s<<<], e=[%s]", msg, e)
@@ -102,7 +103,7 @@ def print_with_time(msg):
 
     print(content)
 
-def print_step(msg):
+def print_step(msg, need_format=True):
     """Print a step message if step printing is enabled.
 
     This function only prints messages when:
@@ -119,7 +120,7 @@ def print_step(msg):
     if g_flag_print_step is False:
         return
     if os.getenv("DEBUG", "0") == "1" or g_flag_print_step:
-        print_with_time(msg)
+        print_with_time(msg, need_format=need_format)
     return
 
 def print_debug(msg):
@@ -145,13 +146,21 @@ def print_error(msg):
     return
 
 def format_dict_to_md(d:dict) -> str:
-    """Make content easier to read
+    """Format a dictionary as a markdown document for readability.
+
+    This function converts a dictionary into a markdown string where each key
+    becomes a level‑2 heading and its value is placed inside a code block.
+    String values are printed as‑is; other types are serialized as JSON.
 
     Args:
-        d (dict):
+        d (dict): The dictionary to format.
 
     Returns:
-        str:
+        str: A markdown string representing the dictionary.
+
+    Example:
+        >>> format_dict_to_md({"name": "Alice", "age": 30})
+        '\n## name\n```\nAlice\n```\n\n## age\n```\n30\n```\n'
     """
     s = ""
     for k, v in d.items():
@@ -162,4 +171,5 @@ def format_dict_to_md(d:dict) -> str:
         else:
             s += simplejson.dumps(v, indent=2, ensure_ascii=False)
         s += "\n```\n"
+
     return s

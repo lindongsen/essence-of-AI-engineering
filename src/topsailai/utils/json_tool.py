@@ -212,6 +212,23 @@ def safe_json_dump(obj, indent=2, ensure_ascii=False, default=None) -> str:
     return str(obj)
 
 def safe_json_load(s) -> str|None:
+    """Safely deserialize JSON string with error handling.
+
+    This function attempts to parse a JSON string. If parsing fails due to
+    invalid JSON syntax or other exceptions, it returns None instead of raising.
+
+    Args:
+        s: JSON string to parse
+
+    Returns:
+        str|None: Parsed Python object if successful, None otherwise
+
+    Example:
+        >>> safe_json_load('{"key": "value"}')
+        {'key': 'value'}
+        >>> safe_json_load('invalid')
+        None
+    """
     try:
         return json_load(s)
     except Exception:

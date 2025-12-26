@@ -28,10 +28,4 @@ def is_main_thread():
         >>> threading.Thread(target=lambda : print(is_main_thread())).start()
         False
     """
-    """ return bool.
-
-    Example:
-        >>> threading.Thread(target=lambda : print(is_main_thread())).start()
-        False
-    """
     return threading.current_thread() is threading.main_thread()

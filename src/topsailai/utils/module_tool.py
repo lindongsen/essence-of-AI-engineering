@@ -119,17 +119,37 @@ def get_function_map(path, key="TOOLS", prefix_name=""):
     return modules_map
 
 def is_valid_module_name(name):
+    """Check if a string is a valid Python module name.
+
+    Valid module names follow Python identifier rules: start with a letter or
+    underscore, followed by letters, digits, or underscores.
+
+    Args:
+        name (str): The string to validate.
+
+    Returns:
+        bool: True if the string is a valid module name, False otherwise.
+    """
     pattern = r'^[a-zA-Z_][a-zA-Z0-9_]*$'
     return bool(re.match(pattern, name))
 
 def get_path_for_sys_and_package(path:str) -> tuple[str|None, str|None]:
-    """if syspath in path, return it.
+    """Split a filesystem path into a sys.path entry and a Python package path.
+
+    This function attempts to match the given path against entries in sys.path.
+    If a match is found, returns the matched sys.path entry and the remainder
+    as a dot‑separated package path. If no match is found, it walks up the
+    directory tree to find the outermost directory that is a Python package.
 
     Args:
-        path (str):
+        path (str): A filesystem path that may be inside a Python package.
 
     Returns:
-        (sys_path, pkg_path)
+        tuple[str|None, str|None]:
+            - sys_path: The matched sys.path entry (or directory containing the
+              outermost package). None if not applicable.
+            - pkg_path: The dot‑separated Python package path relative to
+              sys_path. If sys_path is None, pkg_path is the original path.
     """
     sys_path = None
     pkg_path = path

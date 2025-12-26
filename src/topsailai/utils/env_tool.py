@@ -54,10 +54,18 @@ class EnvironmentReader(object):
 
     @staticmethod
     def try_read_file(file_path:str) -> str:
-        """try to read
+        """Attempt to read content from a file path.
+
+        This method checks if the given path is a valid file and reads its content.
+        It handles cases where the path might not be a file (e.g., environment variable
+        containing direct content). Only reads files if path starts with '.' or '/' or
+        length <= 255 and the file exists.
 
         Args:
-            file_path (str): it may be not a file.
+            file_path (str): Path to a file, or possibly not a file.
+
+        Returns:
+            str: File content stripped of whitespace, or empty string if not a file.
         """
         if not file_path:
             return ""
@@ -69,7 +77,15 @@ class EnvironmentReader(object):
 
     @property
     def story_prompt_content(self):
-        """ get content. the env_var may be a file or content. """
+        """Retrieve story prompt content from environment variable.
+
+        The environment variable STORY_PROMPT may contain either a file path
+        or the actual content. If it's a file path, the file is read; otherwise
+        the variable's value is returned directly.
+
+        Returns:
+            str: Story prompt content, or empty string if not set.
+        """
         env_var = os.getenv("STORY_PROMPT")
         if not env_var:
             return ""
@@ -77,8 +93,16 @@ class EnvironmentReader(object):
         return content or env_var
 
     def get(self, name, default=None):
-        return os.getenv(name, default=default)
+        """Get environment variable value with default.
 
+        Args:
+            name (str): Environment variable name.
+            default: Default value if variable is not set.
+
+        Returns:
+            The environment variable value or default.
+        """
+        return os.getenv(name, default=default)
 
 # init
 EnvReaderInstance = EnvironmentReader()

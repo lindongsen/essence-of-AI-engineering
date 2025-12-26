@@ -60,14 +60,29 @@ def unset_thread_var(name):
     return
 
 def incr_agent_deep():
-    """ increase deep +1 """
+    """Increment the agent recursion depth counter.
+
+    This function increases the thread-local agent depth by one.
+    It is used to track nested agent calls and enforce MAX_AGENT_DEEP.
+
+    Returns:
+        None
+    """
     v = get_thread_var(KEY_AGENT_DEEP, 0) or 0
     v += 1
     set_thread_var(KEY_AGENT_DEEP, v)
     return
 
 def decr_agent_deep():
-    """ decrease deep -1 """
+    """Decrement the agent recursion depth counter.
+
+    This function decreases the thread-local agent depth by one,
+    but only if the current depth is greater than zero.
+    It is used in conjunction with incr_agent_deep.
+
+    Returns:
+        None
+    """
     v = get_thread_var(KEY_AGENT_DEEP, 0) or 0
     if v > 0:
         v -= 1

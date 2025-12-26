@@ -35,15 +35,31 @@ def build_env(d:dict=None):
         env.update(d)
     return env
 
+
 def exec_cmd(cmd:str|list, no_need_stderr:bool=False, timeout:int=None):
-    """ execute command line
+    """Execute a shell command and return the result.
+
+    This function runs a command using subprocess.run, capturing stdout and stderr.
+    It automatically handles encoding of output and allows suppressing stderr output.
 
     Args:
-        cmd (str|list): command line string
-        no_need_stderr (bool): if True, set stderr to "". Defaults to False.
+        cmd (str|list): Command to execute. If string, runs with shell=True.
+        no_need_stderr (bool): If True, stderr will be returned as empty string.
+                               Defaults to False.
+        timeout (int, optional): Timeout in seconds. If the command does not finish
+                                 within this time, a subprocess.TimeoutExpired
+                                 exception will be raised. Defaults to None.
 
     Returns:
-        tuple: (code, stdout, stderr)
+        tuple: (return_code, stdout, stderr) where stdout and stderr are strings.
+               If no_need_stderr is True, stderr will be empty string.
+
+    Example:
+        >>> exec_cmd(["echo", "hello"])
+        (0, "hello\n", "")
+
+        >>> exec_cmd("ls /nonexistent", no_need_stderr=True)
+        (2, "", "")
     """
     env = build_env()
     result = subprocess.run(
@@ -63,15 +79,25 @@ def exec_cmd(cmd:str|list, no_need_stderr:bool=False, timeout:int=None):
     )
 
 def exec_cmd_in_remote(cmd:str, remote:str, port=22, timeout:int=None):
-    """execute command in remote host
+    """Execute a command on a remote host via SSH.
+
+    This function runs a command on a remote host using SSH. If the remote host
+    is localhost or similar, it executes locally. It sets up SSH options to skip
+    host key checking and uses a timeout for connection.
 
     Args:
-        cmd (str): command line
-        remote (str): remote host
-        timeout (int, optional): timeout seconds. Defaults to None(no timeout).
+        cmd (str): Command line to execute on remote host.
+        remote (str): Remote hostname or IP address.
+        port (int, optional): SSH port number. Defaults to 22.
+        timeout (int, optional): Timeout in seconds for command execution.
+                                 Defaults to None (no timeout).
 
     Returns:
-        tuple: (code, stdout, stderr)
+        tuple: (return_code, stdout, stderr) as strings.
+
+    Note:
+        The SSH command uses root user; ensure SSH key authentication is set up.
+        The remote command is executed via bash -s.
     """
     assert cmd
     if not remote \
@@ -91,14 +117,23 @@ def exec_cmd_in_remote(cmd:str, remote:str, port=22, timeout:int=None):
     return exec_cmd(cmd_ssh, timeout=timeout)
 
 def exec_cmd_in_new_process(cmd:str|list, env:dict=None) -> int:
-    """create a new process to execute the command.
+    """Launch a command in a new detached process.
+
+    This function starts a new process using subprocess.Popen with a new session.
+    The process runs independently and its PID is returned.
 
     Args:
-        cmd (str|list): command line
-        env (dict, optional): envrionment. Defaults to None.
+        cmd (str|list): Command to execute. If string, runs with shell=True.
+        env (dict, optional): Additional environment variables to merge with
+                              the base environment. Defaults to None.
 
     Returns:
-        int: pid
+        int: Process ID (PID) of the newly created process.
+
+    Note:
+        The process is started with start_new_session=True, which detaches it
+        from the current process group. The caller is responsible for managing
+        the process lifecycle.
     """
     env = build_env(env)
     p = subprocess.Popen(

@@ -201,7 +201,7 @@ class AgentBase(PromptBase):
 
         # debug
         if self.tool_prompt:
-            print_step(f"[tool_prompt]:\n{self.tool_prompt}\n")
+            print_step(f"[tool_prompt]:\n{self.tool_prompt}\n", need_format=False)
 
         super(AgentBase, self).__init__(self.system_prompt, self.tool_prompt)
         return
@@ -245,13 +245,13 @@ class AgentRun(AgentBase):
         """ return final answer, or None if error """
         # tools
         all_tools = self.available_tools
-        print_step(f"[available_tools] [{len(all_tools)}] {list(all_tools.keys())}")
+        print_step(f"[available_tools] [{len(all_tools)}] {list(all_tools.keys())}", need_format=False)
 
         tools_for_chat = {}
         if env_tool.is_use_tool_calls():
             tools_for_chat = get_tools_for_chat(all_tools)
         if tools_for_chat:
-            print_step(f"[effective_tools] [{len(tools_for_chat)}] {list(tools_for_chat.keys())}")
+            print_step(f"[effective_tools] [{len(tools_for_chat)}] {list(tools_for_chat.keys())}", need_format=False)
 
         # new session
         if user_input:
