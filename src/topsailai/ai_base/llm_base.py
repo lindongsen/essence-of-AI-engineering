@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 import time
 import random
 import simplejson
@@ -222,6 +223,7 @@ class LLMModel(object):
         ).chat.completions
 
     def build_parameters_for_chat(self, messages, stream=False, tools=None, tool_choice="auto"):
+        messages = copy.deepcopy(messages)
         _format_messages(messages, key_name="step_name", value_name="raw_text")
         params = dict(
             model=self.model_name,

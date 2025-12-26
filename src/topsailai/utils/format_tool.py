@@ -139,6 +139,7 @@ def parse_topsailai_format_regex(text: str) -> dict:
         result[step_name] = content.strip()
 
     return result
+
 def format_dict_to_list(d:dict, key_name:str, value_name:str) -> list[dict]:
     """Convert a dictionary to a list of dictionaries with specified key-value structure.
 
