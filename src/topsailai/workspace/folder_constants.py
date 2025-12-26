@@ -11,6 +11,7 @@ FOLDER_ROOT = "/topsailai"
 # layer 2
 FOLDER_WORKSPACE = FOLDER_ROOT + "/workspace"
 FOLDER_MEMORY = FOLDER_ROOT + "/memory"
+FOLDER_LOCK = FOLDER_ROOT + "/lock"
 
 # layer 3
 FOLDER_MEMORY_STORY = FOLDER_MEMORY + "/story"

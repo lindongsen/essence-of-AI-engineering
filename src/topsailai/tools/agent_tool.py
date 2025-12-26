@@ -12,6 +12,7 @@ from topsailai.logger import logger
 from topsailai.utils.json_tool import json_dump, json_load
 from topsailai.utils.format_tool import to_list
 from topsailai.utils import thread_local_tool
+from topsailai.utils.env_tool import EnvReaderInstance
 from topsailai.prompt_hub import prompt_tool
 from topsailai.workspace.folder_constants import FOLDER_WORKSPACE
 
@@ -323,8 +324,9 @@ def agent_memory_as_story(
         "You are a professional writer.\n"
         "Your Core Goal: Summarize the messages and generate appropriate a title and content.\n"
         "Use story_tool to save content.\n"
-        "[Attention] story_id is title, also is filename, max length is 250\n"
+        "[Attention] story_id is title, also is filename, max length is 250, Cannot contain any special characters other than '_-'\n"
     )
+    prompt += EnvReaderInstance.story_prompt_content
 
     return _agent_writer(
         msg_or_file=msg_or_file,

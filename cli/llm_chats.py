@@ -27,7 +27,7 @@ from topsailai.ai_base.llm_base import LLMModel, ContentStdout
 from topsailai.ai_base.prompt_base import PromptBase
 from topsailai.utils import env_tool
 from topsailai.utils.thread_local_tool import set_thread_var, KEY_SESSION_ID
-from topsailai.utils.input_tool import get_message, input_message
+from topsailai.workspace.input_tool import get_message, input_message
 
 from topsailai.context import ctx_manager
 

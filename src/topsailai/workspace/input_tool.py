@@ -11,7 +11,7 @@ import sys
 # DONOT DELETE THIS FOR FUNCTION 'input'
 import readline
 
-from . import env_tool
+from topsailai.utils import env_tool
 from topsailai.workspace.hook_instruction import HookInstruction
 
 SPLIT_LINE = "--------------------------------------------------------------------------------"

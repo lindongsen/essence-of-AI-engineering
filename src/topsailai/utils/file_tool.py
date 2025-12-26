@@ -6,8 +6,11 @@
 '''
 
 import os
+import fcntl
 from pathlib import Path
+from contextlib import contextmanager
 
+from topsailai.logger import logger
 
 ##########################################################
 # Core
@@ -38,6 +41,8 @@ def match_file(
         file_path:str,
         to_exclude_dot_start:bool,
         excluded_starts:tuple,
+        included_filename_keywords:list[str]=None,
+        keyword_min_len=3,
     ) -> bool:
     if to_exclude_dot_start:
         if "/." in file_path:
@@ -53,6 +58,17 @@ def match_file(
             return False
         if file_path.startswith(excluded_str_start):
             return False
+
+    if included_filename_keywords:
+        for key in included_filename_keywords:
+            key = key.strip()
+            if not key:
+                continue
+            if len(key) < keyword_min_len:
+                continue
+            if key in file_path:
+                return True
+        return False
 
     return True
 
@@ -80,6 +96,7 @@ def list_files(
         folder_path:str,
         to_exclude_dot_start:bool=True,
         excluded_starts:tuple=None,
+        included_filename_keywords:list[str]=None,
     ) -> list[str]:
     results = []
     if not excluded_starts:
@@ -97,8 +114,30 @@ def list_files(
                 file,
                 to_exclude_dot_start=to_exclude_dot_start,
                 excluded_starts=excluded_starts,
+                included_filename_keywords=included_filename_keywords,
             ):
                 continue
             file_path = os.path.join(root, file)
             results.append(file_path)
     return results
+
+def delete_file(file_path:str):
+    if file_path and os.path.exists(file_path):
+        logger.info("delete file: [%s]", file_path)
+        os.unlink(file_path)
+    return
+
+
+##########################################################
+# Lock Shell
+##########################################################
+@contextmanager
+def ctxm_file_lock(file_path, mode="w"):
+    """ yield fd """
+    with open(file_path, mode) as file:
+        try:
+            fcntl.flock(file.fileno(), fcntl.LOCK_EX)
+            yield file
+        finally:
+            fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+    return

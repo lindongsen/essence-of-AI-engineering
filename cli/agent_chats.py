@@ -29,7 +29,7 @@ from topsailai.utils import (
     env_tool,
     json_tool,
 )
-from topsailai.utils.input_tool import get_message, input_message
+from topsailai.workspace.input_tool import get_message, input_message
 from topsailai.workspace.hook_instruction import HookInstruction
 from topsailai.tools.agent_tool import async_agent_memory_as_story
 

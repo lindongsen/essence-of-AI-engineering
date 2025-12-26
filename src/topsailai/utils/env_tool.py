@@ -30,3 +30,40 @@ def is_chat_multi_line():
     if os.getenv("CHAT_MULTI_LINE", "0") == "0":
         return False
     return True
+
+
+class EnvironmentReader(object):
+
+    @staticmethod
+    def try_read_file(file_path:str) -> str:
+        """try to read
+
+        Args:
+            file_path (str): it may be not a file.
+        """
+        if not file_path:
+            return ""
+        if file_path[0] in "./" or len(file_path) <= 255:
+            if os.path.exists(file_path):
+                with open(file_path, encoding="utf-8") as fd:
+                    return fd.read().strip()
+        return ""
+
+    @property
+    def story_prompt_content(self):
+        """ get content. the env_var may be a file or content. """
+        env_var = os.getenv("STORY_PROMPT")
+        if not env_var:
+            return ""
+        content = self.try_read_file(env_var)
+        return content or env_var
+
+    def __getattribute__(self, name):
+        return os.getenv(name)
+
+    def get(self, name, default=None):
+        return os.getenv(name, default=default)
+
+
+# init
+EnvReaderInstance = EnvironmentReader()

@@ -71,7 +71,14 @@ TEMPERATURE=0.3
 # one file or content. Describe the current environmental information.
 # ENV_PROMPT=""
 
-# System prompt will only have the working mode. 1 for enabled.
+# Story prompt will be used when generating stories based on historical messages.
+# STORY_PROMPT=""
+
+# =============================================================================
+# System Prompt Control
+# =============================================================================
+
+# Pure system prompt will only have the working mode. 1 for enabled.
 PURE_SYSTEM_PROMPT=0
 
 # =============================================================================
