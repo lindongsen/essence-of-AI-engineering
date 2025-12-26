@@ -15,7 +15,7 @@ Output Example:
   },
   {
     "step_name": "action",
-    "tool_args": {"cmd_string": "uname -a" },
+    "tool_args": {"cmd": "uname -a" },
     "tool_call": "cmd_tool.exec_cmd",
   }
 ]
