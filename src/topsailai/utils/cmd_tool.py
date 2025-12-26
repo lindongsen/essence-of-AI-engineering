@@ -77,3 +77,22 @@ def exec_cmd_in_remote(cmd:str, remote:str, port=22, timeout:int=None):
 
     cmd_ssh = f"cat << EOF | ssh {options} root@{remote} bash -s\n{cmd}\nEOF"
     return exec_cmd(cmd_ssh, timeout=timeout)
+
+def exec_cmd_in_new_process(cmd:str|list, env:dict=None) -> int:
+    """create a new process to execute the command.
+
+    Args:
+        cmd (str|list): command line
+        env (dict, optional): envrionment. Defaults to None.
+
+    Returns:
+        int: pid
+    """
+    env = build_env(env)
+    p = subprocess.Popen(
+        cmd,
+        shell=isinstance(cmd, str),
+        env=env,
+        start_new_session=True,
+    )
+    return p.pid

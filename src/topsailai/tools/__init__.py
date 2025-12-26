@@ -116,6 +116,26 @@ def get_tools_for_chat(tools_name:list[str]) -> dict:
 
     return result
 
+def format_tools_map(tools_map:dict, prefix_name:str) -> dict:
+    """format tool name.
+
+    Args:
+        tools_map (dict): key is toolname
+        prefix_name (str): toolname starts with this.
+
+    Return new tools_map.
+    """
+    if prefix_name[-1] != ".":
+        prefix_name += "."
+
+    new_tools_map = {}
+    for key in tools_map:
+        raw_key = key
+        if not key.startswith(prefix_name):
+            key = prefix_name + key
+        new_tools_map[key] = tools_map[raw_key]
+    return new_tools_map
+
 
 # init
 expand_plugin_tools()

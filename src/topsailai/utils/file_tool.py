@@ -44,6 +44,31 @@ def match_file(
         included_filename_keywords:list[str]=None,
         keyword_min_len=3,
     ) -> bool:
+    """Check if a file path matches the specified filtering criteria.
+
+    This function applies multiple filtering rules to determine if a file path
+    should be included or excluded based on various criteria.
+
+    Args:
+        file_path: The file path to check
+        to_exclude_dot_start: If True, exclude files starting with '.' or containing '/.'
+        excluded_starts: Tuple of strings that should be excluded from the path
+        included_filename_keywords: List of keywords that must be present in the filename
+        keyword_min_len: Minimum length for keywords to be considered (default: 3)
+
+    Returns:
+        bool: True if the file matches all criteria, False otherwise
+
+    Examples:
+        >>> match_file("/tmp/.hidden/file.txt", True, (), None)
+        False  # Excluded because of dot-start
+
+        >>> match_file("/tmp/important_doc.txt", False, ("exclude",), ["important"])
+        True   # Contains "important" keyword
+
+        >>> match_file("/tmp/excluded/file.txt", False, ("excluded",), None)
+        False  # Excluded because path contains "excluded"
+    """
     if to_exclude_dot_start:
         if "/." in file_path:
             return False
@@ -78,11 +103,24 @@ def match_file(
 ##########################################################
 
 def find_files_by_name(folder_path:str, file_name:str) -> list[str]:
-    """get files from folder path.
+    """Find all files with a specific name within a directory tree.
+
+    This function recursively searches through a directory and all its
+    subdirectories to find files with the specified name.
 
     Args:
-        folder_path (str): folder path
-        file_name (str): file name
+        folder_path: Root directory path to search in
+        file_name: Exact filename to search for
+
+    Returns:
+        list[str]: List of full paths to matching files
+
+    Examples:
+        >>> find_files_by_name("/tmp", "config.txt")
+        ["/tmp/config.txt", "/tmp/subdir/config.txt"]
+
+        >>> find_files_by_name("/tmp", "nonexistent.txt")
+        []  # Empty list if no files found
     """
     results = []
     for root, dirs, files in os.walk(folder_path):
@@ -98,6 +136,25 @@ def list_files(
         excluded_starts:tuple=None,
         included_filename_keywords:list[str]=None,
     ) -> list[str]:
+    """List files in a directory tree with filtering options.
+
+    This function recursively lists files from a directory, applying various
+    filtering criteria to include or exclude specific files based on their paths.
+
+    Args:
+        folder_path: Root directory to search
+        to_exclude_dot_start: If True, exclude files starting with '.' (default: True)
+        excluded_starts: Tuple of strings that should be excluded from file paths
+        included_filename_keywords: List of keywords that must be present in filenames
+
+    Returns:
+        list[str]: List of full paths to matching files
+
+    Note:
+        - Both directory paths and filenames are filtered using match_file()
+        - If included_filename_keywords is provided, only files containing
+          at least one keyword will be included
+    """
     results = []
     if not excluded_starts:
         excluded_starts = tuple()
@@ -122,6 +179,17 @@ def list_files(
     return results
 
 def delete_file(file_path:str):
+    """Safely delete a file if it exists.
+
+    This function checks if a file exists before attempting to delete it,
+    and logs the deletion operation for tracking purposes.
+
+    Args:
+        file_path: Path to the file to delete
+
+    Returns:
+        None: The function returns nothing, but logs the operation
+    """
     if file_path and os.path.exists(file_path):
         logger.info("delete file: [%s]", file_path)
         os.unlink(file_path)
@@ -133,7 +201,22 @@ def delete_file(file_path:str):
 ##########################################################
 @contextmanager
 def ctxm_file_lock(file_path, mode="w"):
-    """ yield fd """
+    """Context manager for file locking using advisory locks.
+
+    This context manager provides exclusive file locking using fcntl.flock.
+    It ensures that only one process can write to the file at a time.
+
+    Args:
+        file_path: Path to the file to lock
+        mode: File open mode (default: "w" for write)
+
+    Yields:
+        file: The locked file object
+
+    Example:
+        with ctxm_file_lock("/tmp/data.txt") as f:
+            f.write("important data")
+    """
     with open(file_path, mode) as file:
         try:
             fcntl.flock(file.fileno(), fcntl.LOCK_EX)

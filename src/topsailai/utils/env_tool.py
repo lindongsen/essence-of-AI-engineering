@@ -22,11 +22,29 @@ def is_debug_mode():
     return True
 
 def is_use_tool_calls() -> bool:
+    """Check if tool calls functionality is enabled.
+
+    Tool calls functionality is determined by the USE_TOOL_CALLS environment variable:
+    - USE_TOOL_CALLS="0" or not set: Tool calls disabled (returns False)
+    - USE_TOOL_CALLS="1" or any other value: Tool calls enabled (returns True)
+
+    Returns:
+        bool: True if tool calls are enabled, False otherwise
+    """
     if os.getenv("USE_TOOL_CALLS", "0") == "0":
         return False
     return True
 
-def is_chat_multi_line():
+def is_chat_multi_line() -> bool:
+    """Check if multi-line chat mode is enabled.
+
+    Multi-line chat mode is determined by the CHAT_MULTI_LINE environment variable:
+    - CHAT_MULTI_LINE="0" or not set: Single-line mode (returns False)
+    - CHAT_MULTI_LINE="1" or any other value: Multi-line mode (returns True)
+
+    Returns:
+        bool: True if multi-line chat mode is enabled, False otherwise
+    """
     if os.getenv("CHAT_MULTI_LINE", "0") == "0":
         return False
     return True
@@ -57,9 +75,6 @@ class EnvironmentReader(object):
             return ""
         content = self.try_read_file(env_var)
         return content or env_var
-
-    def __getattribute__(self, name):
-        return os.getenv(name)
 
     def get(self, name, default=None):
         return os.getenv(name, default=default)

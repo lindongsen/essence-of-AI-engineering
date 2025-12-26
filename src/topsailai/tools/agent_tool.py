@@ -12,6 +12,7 @@ from topsailai.logger import logger
 from topsailai.utils.json_tool import json_dump, json_load
 from topsailai.utils.format_tool import to_list
 from topsailai.utils import thread_local_tool
+from topsailai.utils.cmd_tool import exec_cmd_in_new_process
 from topsailai.utils.env_tool import EnvReaderInstance
 from topsailai.prompt_hub import prompt_tool
 from topsailai.workspace.folder_constants import FOLDER_WORKSPACE
@@ -317,7 +318,7 @@ def agent_memory_as_story(
 
     Return final answer.
     """
-    from . import story_tool
+    from . import story_tool, format_tools_map
 
     prompt = (
         "\n"
@@ -332,8 +333,38 @@ def agent_memory_as_story(
         msg_or_file=msg_or_file,
         model_name=model_name,
         workspace=workspace,
-        tools=story_tool.TOOLS,
+        tools=format_tools_map(story_tool.TOOLS, "story_tool"),
         more_prompt=prompt,
+    )
+
+def subprocess_agent_memory_as_story(
+        msg_or_file,
+        model_name:str=None,
+        workspace:str=DEFAULT_WORKSPACE,
+    ) -> int | None:
+    """ return pid """
+    if not msg_or_file:
+        return None
+
+    if isinstance(msg_or_file, (list, dict, set)):
+        msg_or_file = json_dump(msg_or_file)
+
+    args = ["agent_story", "-m", msg_or_file]
+    if model_name:
+        args += ["-M", model_name]
+    if workspace:
+        args += ["-w", workspace]
+
+    return exec_cmd_in_new_process(
+        args,
+        env=dict(
+            PURE_SYSTEM_PROMPT="1",
+            STORY_PROMPT=EnvReaderInstance.get("STORY_PROMPT", ""),
+            ENABLED_TOOLS="story_tool",
+            EXTRA_TOOLS="",
+            PLUGIN_TOOLS="",
+            DEBUG="0",
+        )
     )
 
 def async_agent_memory_as_story(

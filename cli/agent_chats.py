@@ -31,7 +31,7 @@ from topsailai.utils import (
 )
 from topsailai.workspace.input_tool import get_message, input_message
 from topsailai.workspace.hook_instruction import HookInstruction
-from topsailai.tools.agent_tool import async_agent_memory_as_story
+from topsailai.tools.agent_tool import subprocess_agent_memory_as_story
 
 
 def get_agent(system_prompt="", to_dump_messages=False):
@@ -118,8 +118,8 @@ def main():
     def _story():
         if not messages_from_session:
             return
-        async_agent_memory_as_story(messages_from_session)
-        print("/story: The history messages will be save to a new story")
+        pid = subprocess_agent_memory_as_story(messages_from_session)
+        print(f"/story: The history messages will be save to a new story, pid=[{pid}]")
         return
     def _history():
         print("/history: Show history messages")
